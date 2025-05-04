@@ -1,0 +1,38 @@
+[project]
+name = "pyx3270"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+description = "Uma interface comum utilizada para automações de terminais 3270 da IBM."
+authors = [{name = "MatheusLPolidoro", email = "mattpolidoro4@gmail.com"}]
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.scripts]
+pyx3270 = "pyx3270.__main__:app"
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.taskipy.tasks]
+lint = "ruff check . --diff"
+format = "ruff check . --fix && ruff format ."
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.dynamic.optional-dependencies]
+dev = { file = ["requirements-dev.txt"] }
+
+[build-system]
+requires = ["setuptools>=61.0,<70"]
+build-backend = "setuptools.build_meta"
