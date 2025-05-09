@@ -173,3 +173,20 @@ Uma interface comum utilizada para manipulação com terminais 3270 da IBM.
 - SysReq()
     - Tradução: Requisição de sistema
     - Descrição: Envia a tecla System Request (SysReq), usada para alternar sessões LU ou invocar menus no host.
+
+
+# Tipos de campos MAINFRAME
+
+| **SF**        | **Hex equivalente** | **Significado** |
+|--------------|----------------|----------------|
+| SF(c0=e8)   | `1D E8`         | Campo protegido, editável, MDT ativo |
+| SF(c0=e0)   | `1D E0`         | Campo protegido, MDT desativado |
+| SF(c0=f0)   | `1D F0`         | Campo editável, MDT ativo |
+| SF(c0=40)   | `1D 40`         | Intensificado (brilhante) |
+| SF(c0=80)   | `1D 80`         | Campo protegido (não editável) |
+| SF(c0=20)   | `1D 20`         | Sublinhado |
+| SF(c0=10)   | `1D 10`         | MDT ativo (Modified Data Tag) |
+| SF(c0=08)   | `1D 08`         | Campo gráfico |
+
+Obs.: Algumas telas são construidas enviando comandos que não são capturados utilizando o readbuffer do x3270, logo elas são reproduzidas com diferenças.
+

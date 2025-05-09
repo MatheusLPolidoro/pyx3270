@@ -1,10 +1,24 @@
 [project]
 name = "pyx3270"
-dynamic = ["version", "dependencies", "optional-dependencies"]
+version = "0.1.0"
 description = "Uma interface comum utilizada para automações de terminais 3270 da IBM."
 authors = [{name = "MatheusLPolidoro", email = "mattpolidoro4@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.8"
+
+dependencies = [
+    "typer",
+    "pynput",
+    "click",
+    "colorama",
+    "markdown-it-py",
+    "mdurl",
+    "Pygments",
+    "rich",
+    "shellingham",
+    "typing_extensions"
+]
+
 
 [project.scripts]
 pyx3270 = "pyx3270.__main__:app"
@@ -27,11 +41,8 @@ format = "ruff check . --fix && ruff format ."
 [tool.setuptools.packages.find]
 where = ["."]
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-
-[tool.setuptools.dynamic.optional-dependencies]
-dev = { file = ["requirements-dev.txt"] }
+[tool.setuptools.package-data]
+"pyx3270" = ["binary/*"]
 
 [build-system]
 requires = ["setuptools>=61.0,<70"]

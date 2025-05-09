@@ -3,9 +3,16 @@ import sys
 import threading
 
 import typer
-from emulator import BINARY_FOLDER, X3270
 from pynput import keyboard
+
+import sys
+import pathlib
+
+sys.path.append(str(pathlib.Path(__file__).parent))
+
 from server import load_screens, record_handler, replay_handler
+from emulator import BINARY_FOLDER, X3270
+
 
 app = typer.Typer()
 
@@ -34,10 +41,10 @@ def start_new_amulator(th: threading.Thread, emu: X3270) -> None:
 @app.command()
 def replay(
     directory: str = typer.Option(default='./screens'),
-    port: int = typer.Option(default=3270),
-    tsl: bool = typer.Option(default=False),
+    port: int = typer.Option(default=992),
+    tls: bool = typer.Option(default=False),
     model: str = typer.Option(default='2'),
-    emulator: bool = typer.Option(default=False),
+    emulator: bool = typer.Option(default=True),
 ):
     screens = load_screens(BINARY_FOLDER) + load_screens(directory)
 
@@ -47,7 +54,7 @@ def replay(
     print(f'[+] Escutando localhost, porta {port}')
     if emulator:
         emu = X3270(visible=True, model=model)
-        emu.connect_host('localhost', port, tsl)
+        emu.connect_host('localhost', port, tls)
 
     while True:
         clientsock, addr = tnsock.accept()
@@ -66,9 +73,9 @@ def replay(
 def record(
     address: str = typer.Option(),
     directory: str = typer.Option(default='./screens'),
-    tsl: bool = typer.Option(default=False),
+    tls: bool = typer.Option(default=True),
     model: str = typer.Option(default='2'),
-    emulator: bool = typer.Option(default=False),
+    emulator: bool = typer.Option(default=True),
 ):
     host, *port = address.split(':', 2)
     port = int(*port) if port else 3270
@@ -79,14 +86,14 @@ def record(
     print(f'[+] Escutando localhost, porta {port}')
     if emulator:
         emu = X3270(visible=True, model=model)
-        emu.connect_host('localhost', port, tsl)
+        emu.connect_host('localhost', port, tls)
 
     while True:
         clientsock, addr = tnsock.accept()
         print('[+] Conexão recebida de:', addr)
 
         th = threading.Thread(
-            target=record_handler, args=(clientsock, host, port, directory)
+            target=record_handler, args=(emu, clientsock, address, directory)
         )
         th.start()
 

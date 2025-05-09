@@ -10,6 +10,11 @@ from random import randint
 from time import sleep, time
 from typing import Literal
 
+import sys
+import pathlib
+
+sys.path.append(str(pathlib.Path(__file__).parent))
+
 from command_config import command_map
 from exceptions import (
     CommandError,
@@ -327,7 +332,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         tosend = re.sub(r"[()\"']", '', tosend)
         self.string(tosend)
 
-    def senf_enter(self) -> None:
+    def send_enter(self) -> None:
         self.enter()
         self.wait(5, 'unlock')
 
@@ -417,7 +422,7 @@ class X3270(AbstractEmulator, X3270Cmd):
         self.is_terminated = False
         self.host = None
         self.port = None
-        self.tsl = None
+        self.tls = None
 
     def __getattr__(self, name):
         # Mapeamento de comandos com parâmetros e descrições
@@ -493,12 +498,12 @@ class X3270(AbstractEmulator, X3270Cmd):
         except Exception:
             return False
 
-    def connect_host(self, host: str, port: str, tsl: bool = True) -> None:
+    def connect_host(self, host: str, port: str, tls: bool = True) -> None:
         self.host = host
         self.port = port
-        self.tsl = tsl
-        tsl = 'L:Y:' if tsl else ''
-        strint_conn = f'{tsl}{host}:{port}'
+        self.tls = tls
+        tls = 'L:Y:' if tls else ''
+        strint_conn = f'{tls}{host}:{port}'
         try:
             if not self.app.connect(strint_conn):
                 self.connect(strint_conn)
@@ -517,7 +522,7 @@ class X3270(AbstractEmulator, X3270Cmd):
         except NotConnectedException:
             pass
         finally:
-            args = self.host, self.port, self.tsl
+            args = self.host, self.port, self.tls
             new_instance = X3270(self.visible, self.model)
             new_instance.connect_host(*args)
             return new_instance

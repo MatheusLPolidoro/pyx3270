@@ -1,0 +1,24 @@
+# CAPTURA DE FILAS ONEB2K
+
+- TASKS
+    - SQW
+- HISTORICO
+    - SV
+    - SV F5
+- CADASTRO
+    - I (1, 2, 4, 6)
+-FATURA
+    - S (PLASTICO CICLOS)
+    - S (CONTA CICLOS)
+    - S (CONTA ALTERNATIVA)
+    - DETALHE DA TRANSAÇÃO (E + F6 + F8)
+- AUTORIZAÇÕES (APROVADAS OU NEGADAS) 
+    - BCID
+    - BCIH
+    - BISO
+    - BAUD
+- INTERCAMBIO
+    - BEIS
+- PARCELAS
+    - PPQ5
+    - PPQV

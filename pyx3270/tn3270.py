@@ -1,4 +1,8 @@
 CLEAR_SCREEN_BUFFER = b'\xf5\xc3\x11\x5d\x7f\x1d\xc0\x11\x40\x40\x13\xff\xef'
+START_SCREEN = (
+    b'\xFF\xFD\x18\xFF\xFA\x18\x01\xFF\xF0\xFF\xFD\x19\xFF\xFB'
+    + b'\x19\xFF\xFD\x00\xFF\xFB\x00\xF5\x42\x11\x40\x40'
+)
 
 # Telnet protocol commands as bytes
 SE = b'\xf0'  # 240, End of subnegotiation parameters
@@ -65,6 +69,7 @@ SNA_WSF = b'\xf3'
 SNA_EW = b'\xf5'
 SNA_NOP = b'\x03'
 SNA_RM = b'\xf6'
+
 
 # TN3270 Stream Orders
 SF = b'\x1d'

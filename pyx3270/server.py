@@ -1,9 +1,15 @@
-from datetime import datetime
 import os
+import re
 import select
 import socket
 
-import tn3270
+import sys
+import pathlib
+
+sys.path.append(str(pathlib.Path(__file__).parent))
+
+from tn3270 import *
+from emulator import X3270
 
 
 def ensure_dir(path):
@@ -24,15 +30,38 @@ def load_screens(record_dir):
         with open(os.path.join(record_dir, f), 'rb') as fd:
             data = fd.read()
             # Garante que termina com IAC EOR
-            if not data.endswith(tn3270.IAC + tn3270.TN_EOR):
-                data += tn3270.IAC + tn3270.TN_EOR
+            if not data.endswith(IAC + TN_EOR):
+                data += IAC + TN_EOR
             screens.append(data)
     return screens
 
 
-def record_handler(clientsock, target, port, record_dir=None, delay=0.01):
+def convert_sf(hex_string: str):
+    pattern = r'SF\((.*?)\)'
+
+    def replace_match(match):
+        parameters = match.group(1).split(',')
+        converted_values = [
+            f'1D{param.split('=')[1]}' for param in parameters if '=' in param
+        ]
+        return ''.join(converted_values)
+
+    converted_string = re.sub(pattern, replace_match, hex_string)
+    converted_string = converted_string.replace(' ', '')
+    return converted_string
+
+
+def record_handler(
+    emu: X3270,
+    clientsock: socket.socket,
+    address: str,
+    record_dir=None,
+    delay=0.01
+):
+    host, *port = address.split(':', 2)
+    port = int(*port) if port else 3270
     try:
-        serversock = socket.create_connection((target, port), timeout=5)
+        serversock = socket.create_connection((host, port), timeout=5)
     except Exception as e:
         print(f'[!] Proxy -> MF Falha de conexão: {e}')
         clientsock.close()
@@ -42,7 +71,7 @@ def record_handler(clientsock, target, port, record_dir=None, delay=0.01):
     counter = 0
     channel = {clientsock: serversock, serversock: clientsock}
     socks = [clientsock, serversock]
-    buffers = {clientsock: b'', serversock: b''}
+    screens = list()
 
     def record_data(data_block):
         nonlocal counter
@@ -58,22 +87,26 @@ def record_handler(clientsock, target, port, record_dir=None, delay=0.01):
         while True:
             ready_socks, _, _ = select.select(socks, [], [], delay)
             for s in ready_socks:
+                save = True
                 data = s.recv(2048)
                 if not data:
                     raise ConnectionResetError
 
-                buffers[s] += data
-
-                if s == serversock and record_dir:
-                    while tn3270.IAC + tn3270.TN_EOR in buffers[s]:
-                        block, _, rest = buffers[s].partition(
-                            tn3270.IAC + tn3270.TN_EOR
-                        )
-                        full_block = block + tn3270.IAC + tn3270.TN_EOR
-                        record_data(full_block)
-                        buffers[s] = rest
-
                 channel[s].sendall(data)
+
+            buffer = emu.readbuffer('ebcdic')
+            if (
+                not buffer.replace(' ', '').replace('0', '')
+                or not save or buffer in screens
+            ):
+                continue
+            buffer_hex = convert_sf(buffer)
+            hex_bytes = bytes.fromhex(buffer_hex)
+            full_block = START_SCREEN + hex_bytes + IAC + TN_EOR
+            record_data(full_block)
+            save = False
+            screens.append(buffer)
+
     except (ConnectionResetError, OSError):
         for sock in socks:
             sock.close()
@@ -83,7 +116,7 @@ def backend_3270(
     clientsock: socket.socket, screens: list[bytes], current_screen: int
 ) -> int | None:
     aid = None
-    while aid not in tn3270.AIDS:
+    while aid not in AIDS:
         try:
             aid = clientsock.recv(1)
             if not aid:
@@ -91,14 +124,17 @@ def backend_3270(
         except socket.timeout:
             continue
     
-    if aid == tn3270.PF3:
+    press = clientsock.recv(3)
+    key_press = press in {b'@@' + IAC, b'@@' + WSF, IAC + TN_EOR}
+
+    if aid == PF3 and key_press:
         current_screen = max(0, current_screen - 1)
-    elif aid in {tn3270.PF4, tn3270.ENTER}:
+    elif aid in {PF4, ENTER} and key_press:
         current_screen = min(len(screens) - 1, current_screen + 1)
-    elif aid == tn3270.CLEAR:
-        clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
+    elif aid == CLEAR and key_press:
+        clientsock.sendall(CLEAR_SCREEN_BUFFER)
         current_screen = None
-    
+
     return current_screen
 
 
