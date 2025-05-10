@@ -1,6 +1,6 @@
 [project]
 name = "pyx3270"
-version = "0.1.0"
+version = "0.2.0"
 description = "Uma interface comum utilizada para automações de terminais 3270 da IBM."
 authors = [{name = "MatheusLPolidoro", email = "mattpolidoro4@gmail.com"}]
 readme = "README.md"
@@ -47,3 +47,62 @@ where = ["."]
 [build-system]
 requires = ["setuptools>=61.0,<70"]
 build-backend = "setuptools.build_meta"
+
+[tool.towncrier]
+package = "pyx3270"
+package_dir = "."
+filename = "CHANGELOG.md"
+directory = "chanlogs.d"
+underlines = ["=", "-", "~"]
+title_format = "Versão {version} ({project_date})"
+issue_format = "[#{issue}](https://github.com/seu_usuario/seu_repo/issues/{issue})"
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = ":warning: MUDANÇAS QUEBRADAS"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = ":zap: NOVAS FUNCIONALIDADES"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "enhancement"
+name = ":rocket: OTIMIZAÇÕES"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = ":hammer_and_wrench: fix"
+name = ":bug: CORREÇÕES"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "deprecation"
+name = ":wastebasket: OBSOLETOS"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "security"
+name = ":shield: SEGURANÇA"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "docs"
+name = ":open_file_folder: DOCUMENTAÇÃO"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "tests"
+name = ":test_tube: TESTES"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "infra"
+name = ":classical_building: INFRAESTRUTURA"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "chore"
+name = ":broom: LIMPEZA"
+showcontent = true

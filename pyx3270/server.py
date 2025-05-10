@@ -1,14 +1,13 @@
 import os
+import pathlib
 import re
 import select
 import socket
-
 import sys
-import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 
-from tn3270 import *
+import tn3270
 from emulator import X3270
 
 
@@ -29,9 +28,9 @@ def load_screens(record_dir):
     for f in files:
         with open(os.path.join(record_dir, f), 'rb') as fd:
             data = fd.read()
-            # Garante que termina com IAC EOR
-            if not data.endswith(IAC + TN_EOR):
-                data += IAC + TN_EOR
+            # Garante que termina com tn3270.IAC EOR
+            if not data.endswith(tn3270.IAC + tn3270.EOR):
+                data += tn3270.IAC + tn3270.EOR
             screens.append(data)
     return screens
 
@@ -42,7 +41,7 @@ def convert_sf(hex_string: str):
     def replace_match(match):
         parameters = match.group(1).split(',')
         converted_values = [
-            f'1D{param.split('=')[1]}' for param in parameters if '=' in param
+            f'1D{param.split("=")[1]}' for param in parameters if '=' in param
         ]
         return ''.join(converted_values)
 
@@ -56,7 +55,7 @@ def record_handler(
     clientsock: socket.socket,
     address: str,
     record_dir=None,
-    delay=0.01
+    delay=0.01,
 ):
     host, *port = address.split(':', 2)
     port = int(*port) if port else 3270
@@ -97,12 +96,15 @@ def record_handler(
             buffer = emu.readbuffer('ebcdic')
             if (
                 not buffer.replace(' ', '').replace('0', '')
-                or not save or buffer in screens
+                or not save
+                or buffer in screens
             ):
                 continue
             buffer_hex = convert_sf(buffer)
             hex_bytes = bytes.fromhex(buffer_hex)
-            full_block = START_SCREEN + hex_bytes + IAC + TN_EOR
+            full_block = (
+                tn3270.START_SCREEN + hex_bytes + tn3270.IAC + tn3270.EOR
+            )
             record_data(full_block)
             save = False
             screens.append(buffer)
@@ -116,23 +118,32 @@ def backend_3270(
     clientsock: socket.socket, screens: list[bytes], current_screen: int
 ) -> int | None:
     aid = None
-    while aid not in AIDS:
+    while aid not in tn3270.AIDS:
         try:
             aid = clientsock.recv(1)
             if not aid:
                 raise Exception('Terminal fechado.')
         except socket.timeout:
             continue
-    
-    press = clientsock.recv(3)
-    key_press = press in {b'@@' + IAC, b'@@' + WSF, IAC + TN_EOR}
 
-    if aid == PF3 and key_press:
+    press = clientsock.recv(3)
+    key_press = (
+        press
+        in {
+            b'@@' + tn3270.IAC,
+            b'@@' + tn3270.WSF,
+            tn3270.IAC + tn3270.EOR,
+            b'K\xe9\xff',
+        }
+        or b'\xff' in press
+    )
+
+    if aid == tn3270.PF3 and key_press:
         current_screen = max(0, current_screen - 1)
-    elif aid in {PF4, ENTER} and key_press:
+    elif aid in {tn3270.PF4, tn3270.ENTER} and key_press:
         current_screen = min(len(screens) - 1, current_screen + 1)
-    elif aid == CLEAR and key_press:
-        clientsock.sendall(CLEAR_SCREEN_BUFFER)
+    elif aid == tn3270.CLEAR and key_press:
+        clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
         current_screen = None
 
     return current_screen

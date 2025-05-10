@@ -8,8 +8,8 @@
             "module": "pyx3270",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["record", "--address", "10.111.139.2:992"]
-            // "args": ["replay"]
+            // "args": ["record", "--address", "10.111.139.2:992"]
+            "args": ["replay"]
         }
     ]
 }

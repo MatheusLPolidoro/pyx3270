@@ -1,0 +1,176 @@
+# Pyx3270
+
+Automatiza seu mainframe.
+
+## Comandos
+
+* `pyx3270 record [address] [directory] [tls] [model] [emulator]` - Inicia a gravação das telas do terminal e salva os bytes no diretorio.
+* `pyx3270 replay [directory] [port] [tls] [model] [emulator]` - Inicia a reprodução das telas gravadas e armazanadas anteriormente em modo offline.
+
+## Changelogs
+
+:: towncrier-draft Unreleased changes
+
+--8<-- "CHANGELOG.md"
+
+
+## Diagrama UML
+``` mermaid
+classDiagram
+    %% Interfaces
+    class AbstractExecutableApp {
+        <<interface>>
+        -_spawn_app()
+        -_get_executable_app_args(model)
+        +connect(*args)
+        +close()
+        +write(data)
+        +readline()
+    }
+
+    class AbstractCommand {
+        <<interface>>
+        +execute()
+        +handle_result(result)
+    }
+
+    class AbstractEmulatorCmd {
+        <<interface>>
+        +clear_screen()
+        +wait_for_field(timeout)
+        +wait_string_found(ypos, xpos, string, equal, timeout)
+        +string_found(ypos, xpos, string)
+        +move_to(ypos, xpos)
+        +send_string(tosend, ypos, xpos)
+        +send_enter(times)
+        +send_home()
+        +send_pf()
+        +get_string()
+        +get_string_area(yposi, xposi, ypose, xpose)
+        +get_full_screen(header)
+        +save_screen(file_path, file_name)
+        +search_string(string, ignore_case)
+        +get_string_positions(string, ignore_case)
+        -_get_ypos_and_xpos_from_index(index)
+    }
+
+    class AbstractEmulator {
+        <<interface>>
+        -_create_app()
+        -_exec_command(cmdstr)
+        +terminate()
+        +is_connected()
+        +connect_host(host, port, tls)
+        +reconnect_host()
+    }
+
+    %% Implementações
+    class ExecutableApp {
+        +shell: bool
+        +subprocess
+        +args
+        -_spawn_app()
+        -_get_executable_app_args(model)
+        +connect(*args)
+        +close()
+        +write(data)
+        +readline()
+    }
+
+    class Wc3270App {
+        +script_port
+        +socket
+        +socket_fh
+        +connect(host)
+        +close()
+        +write(data)
+        +readline()
+        -_make_socket()
+        -_get_free_port()
+    }
+
+    class Ws3270App {
+        +args
+    }
+
+    class X3270App {
+        +args
+    }
+    
+    class S3270App{
+        +args
+    }
+
+    class Command {
+        +app: ExecutableApp
+        +cmdstr: bytes
+        +status_line
+        +data
+        +execute()
+        +handle_result(result)
+    }
+
+    class X3270Cmd {
+        +clear_screen()
+        +wait_for_field(timeout)
+        +wait_string_found(ypos, xpos, string, equal, timeout)
+        +string_found(ypos, xpos, string)
+        +move_to(ypos, xpos)
+        +send_string(tosend, ypos, xpos)
+        +send_enter(times)
+        +send_home()
+        +send_pf(value)
+        +get_string()
+        +get_string_area(yposi, xposi, ypose, xpose)
+        +get_full_screen(header)
+        +save_screen(file_path, file_name)
+        +search_string(string, ignore_case)
+        +get_string_positions(string, ignore_case)
+        -_get_ypos_and_xpos_from_index(index)
+    }
+
+    class X3270 {
+        +model: str 
+        +model_dimensions: dict
+        +visible: bool
+        +app: ExecutableApp
+        +is_terminated: bool
+        +host: str
+        +port: int
+        +tls: bool
+        -_create_app()
+        -_exec_command(cmdstr)
+        +terminate()
+        +is_connected()
+        +connect_host(host, port, tls)
+        +reconnect_host()
+    }
+
+    %% Relações
+    X3270 --|> AbstractEmulator
+    X3270 --|> X3270Cmd
+    ExecutableApp ..|> AbstractExecutableApp
+    Wc3270App --|> ExecutableApp
+    Ws3270App --|> ExecutableApp
+    X3270App --|> ExecutableApp
+    S3270App --|> ExecutableApp
+    Command ..|> AbstractCommand
+    X3270Cmd ..|> AbstractEmulatorCmd
+
+```
+
+## Layout do Projeto
+
+```
+├───pyx3270
+│   │   command_config.py
+│   │   emulator.py
+│   │   exceptions.py
+│   │   iemulator.py
+│   │   server.py
+│   │   tn3270.py
+│   │   __init__.py
+│   └───__main__.py
+│
+└───screens
+```

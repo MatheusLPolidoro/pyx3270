@@ -1,17 +1,16 @@
 import errno
 import math
 import os
+import pathlib
 import re
 import socket
 import subprocess
+import sys
 from contextlib import closing
 from functools import cache
 from random import randint
 from time import sleep, time
 from typing import Literal
-
-import sys
-import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 
@@ -187,6 +186,7 @@ class Status:
             status_line = (' ' * 12).encode('utf-8')
         self.status_line = status_line
         parts = status_line.split(' '.encode('utf-8'))
+
         self.keyboard = parts[0] or None
         self.screen_format = parts[1] or None
         self.field_protection = parts[2] or None
@@ -212,6 +212,7 @@ class Wc3270App(ExecutableApp):
         self.shell = True
         self.script_port = Wc3270App._get_free_port()
 
+    @staticmethod
     def _get_free_port() -> str:
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
             s.bind(('127.0.0.1', 0))
@@ -415,9 +416,9 @@ class X3270Cmd(AbstractEmulatorCmd):
 
 class X3270(AbstractEmulator, X3270Cmd):
     def __init__(self, visible: bool = False, model: MODEL_TYPE = '2') -> None:
+        self.model = model
         self.model_dimensions = MODEL_DIMENSIONS[model]
         self.visible = visible
-        self.model = model
         self.app: ExecutableApp = self._create_app()
         self.is_terminated = False
         self.host = None
@@ -507,11 +508,9 @@ class X3270(AbstractEmulator, X3270Cmd):
         try:
             if not self.app.connect(strint_conn):
                 self.connect(strint_conn)
-            self.wait(5, '3270mode')
+            self.wait(2, '3270mode')
         except CommandError:
             pass
-        finally:
-            sleep(1)
 
     def reconnect_host(self) -> object:
         try:

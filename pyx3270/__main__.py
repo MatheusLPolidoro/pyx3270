@@ -1,3 +1,4 @@
+import pathlib
 import socket
 import sys
 import threading
@@ -5,14 +6,10 @@ import threading
 import typer
 from pynput import keyboard
 
-import sys
-import pathlib
-
 sys.path.append(str(pathlib.Path(__file__).parent))
 
-from server import load_screens, record_handler, replay_handler
 from emulator import BINARY_FOLDER, X3270
-
+from server import load_screens, record_handler, replay_handler
 
 app = typer.Typer()
 
