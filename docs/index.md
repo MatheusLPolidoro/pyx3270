@@ -2,30 +2,30 @@
 
 Automatiza seu mainframe.
 
-## Comandos
+## :bookmark_tabs: Comandos
 
 * `pyx3270 record [address] [directory] [tls] [model] [emulator]` - Inicia a gravação das telas do terminal e salva os bytes no diretorio.
 * `pyx3270 replay [directory] [port] [tls] [model] [emulator]` - Inicia a reprodução das telas gravadas e armazanadas anteriormente em modo offline.
 
-## Changelogs
+## :clock2: Changelogs
 
 :: towncrier-draft Unreleased changes
 
 --8<-- "CHANGELOG.md"
 
 
-## Diagrama UML
+## :jigsaw: Diagrama de Classes
 ``` mermaid
 classDiagram
     %% Interfaces
     class AbstractExecutableApp {
         <<interface>>
-        -_spawn_app()
-        -_get_executable_app_args(model)
         +connect(*args)
         +close()
         +write(data)
         +readline()
+        -_spawn_app()
+        -_get_executable_app_args(model)
     }
 
     class AbstractCommand {
@@ -40,11 +40,12 @@ classDiagram
         +wait_for_field(timeout)
         +wait_string_found(ypos, xpos, string, equal, timeout)
         +string_found(ypos, xpos, string)
+        +delete_field()
         +move_to(ypos, xpos)
+        +send_pf(value)
         +send_string(tosend, ypos, xpos)
         +send_enter(times)
         +send_home()
-        +send_pf()
         +get_string()
         +get_string_area(yposi, xposi, ypose, xpose)
         +get_full_screen(header)
@@ -56,12 +57,12 @@ classDiagram
 
     class AbstractEmulator {
         <<interface>>
-        -_create_app()
-        -_exec_command(cmdstr)
         +terminate()
         +is_connected()
         +connect_host(host, port, tls)
         +reconnect_host()
+        -_create_app()
+        -_exec_command(cmdstr)
     }
 
     %% Implementações
@@ -69,12 +70,12 @@ classDiagram
         +shell: bool
         +subprocess
         +args
-        -_spawn_app()
-        -_get_executable_app_args(model)
         +connect(*args)
         +close()
         +write(data)
         +readline()
+        -_spawn_app()
+        -_get_executable_app_args(model)
     }
 
     class Wc3270App {
@@ -115,11 +116,12 @@ classDiagram
         +wait_for_field(timeout)
         +wait_string_found(ypos, xpos, string, equal, timeout)
         +string_found(ypos, xpos, string)
+        +delete_field()
         +move_to(ypos, xpos)
+        +send_pf(value)
         +send_string(tosend, ypos, xpos)
         +send_enter(times)
         +send_home()
-        +send_pf(value)
         +get_string()
         +get_string_area(yposi, xposi, ypose, xpose)
         +get_full_screen(header)
@@ -138,12 +140,12 @@ classDiagram
         +host: str
         +port: int
         +tls: bool
-        -_create_app()
-        -_exec_command(cmdstr)
         +terminate()
         +is_connected()
         +connect_host(host, port, tls)
         +reconnect_host()
+        -_create_app()
+        -_exec_command(cmdstr)
     }
 
     %% Relações
@@ -159,7 +161,7 @@ classDiagram
 
 ```
 
-## Layout do Projeto
+## :open_file_folder: Layout do Projeto
 
 ```
 ├───pyx3270

@@ -3,6 +3,7 @@ import socket
 import sys
 import threading
 
+import rich
 import typer
 from pynput import keyboard
 
@@ -12,7 +13,6 @@ from emulator import BINARY_FOLDER, X3270
 from server import load_screens, record_handler, replay_handler
 
 app = typer.Typer()
-
 
 def start_sock(port: int) -> socket.socket:
     tnsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,14 +24,14 @@ def start_sock(port: int) -> socket.socket:
 
 def start_new_amulator(th: threading.Thread, emu: X3270) -> None:
     th.join()
-    print('[?] Digite "ESC" para sair ou "ENTER" para continuar: ')
+    rich.print('[?] Digite "ESC" para sair ou "ENTER" para continuar: ')
     with keyboard.Events() as events:
         for event in events:
             if event.key == keyboard.Key.esc:
                 sys.exit(0)
             elif event.key == keyboard.Key.enter:
                 break
-    print('[+] Escutando localhost...')
+    rich.print('[+] Escutando localhost...')
     emu.reconnect_host()
 
 
@@ -45,17 +45,17 @@ def replay(
 ):
     screens = load_screens(BINARY_FOLDER) + load_screens(directory)
 
-    print(f'[+] REPLAY do caminho: {directory}')
+    rich.print(f'[+] REPLAY do caminho: {directory}')
     tnsock = start_sock(port)
 
-    print(f'[+] Escutando localhost, porta {port}')
+    rich.print(f'[+] Escutando localhost, porta {port}')
     if emulator:
         emu = X3270(visible=True, model=model)
         emu.connect_host('localhost', port, tls)
 
     while True:
         clientsock, addr = tnsock.accept()
-        print(f'[+] Replay de conexões de {addr}')
+        rich.print(f'[+] Replay de conexões de {addr}')
 
         th = threading.Thread(
             target=replay_handler, args=(clientsock, screens)
@@ -77,17 +77,17 @@ def record(
     host, *port = address.split(':', 2)
     port = int(*port) if port else 3270
 
-    print(f'[+] RECORD na porta {port}')
+    rich.print(f'[+] RECORD na porta {port}')
     tnsock = start_sock(port)
 
-    print(f'[+] Escutando localhost, porta {port}')
+    rich.print(f'[+] Escutando localhost, porta {port}')
     if emulator:
         emu = X3270(visible=True, model=model)
         emu.connect_host('localhost', port, tls)
 
     while True:
         clientsock, addr = tnsock.accept()
-        print('[+] Conexão recebida de:', addr)
+        rich.print('[+] Conexão recebida de:', addr)
 
         th = threading.Thread(
             target=record_handler, args=(emu, clientsock, address, directory)

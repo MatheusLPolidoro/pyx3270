@@ -1,0 +1,10 @@
+[run]
+omit =
+    pyx3270/__init__.py
+    pyx3270/__main__.py
+    pyx3270/command_config.py
+    pyx3270/tn3270.py
+
+[report]
+exclude_lines =w
+    if __name__ == .__main__.:

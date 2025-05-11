@@ -59,8 +59,7 @@ def run_timeout(func):
         **kwargs,
     ):
         # Parâmetros de controle
-        check_instance = not recursive  # checar tipo se não for recursivo
-
+        check_instance = not recursive
         end_time = time() + timeout
         result = None
 
@@ -289,10 +288,6 @@ class X3270Cmd(AbstractEmulatorCmd):
                 break
             count += 1
 
-    def send_pf(self, value: int) -> None:
-        self.PF(value)
-        self.wait(5, 'unlock')
-
     def wait_for_field(self, timeout: int = 30) -> None:
         self.wait(timeout, 'InputField')
 
@@ -324,6 +319,10 @@ class X3270Cmd(AbstractEmulatorCmd):
 
     def move_to(self, ypos: int, xpos: int) -> None:
         self.movecursor1(ypos, xpos)
+
+    def send_pf(self, value: int) -> None:
+        self.PF(value)
+        self.wait(5, 'unlock')
 
     def send_string(
         self, tosend: str, ypos: int | None = None, xpos: int | None = None

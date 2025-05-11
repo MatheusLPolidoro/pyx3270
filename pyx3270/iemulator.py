@@ -4,12 +4,6 @@ from abc import ABC, abstractmethod
 class AbstractExecutableApp(ABC):
     """Representa uma aplicação responsavel por emular um terminal tn3270."""
 
-    @abstractmethod
-    def _spawn_app(self) -> None: ...
-
-    @abstractmethod
-    def _get_executable_app_args(self, model: str) -> None: ...
-
     @classmethod
     @abstractmethod
     def connect(*args) -> bool: ...
@@ -22,6 +16,12 @@ class AbstractExecutableApp(ABC):
 
     @abstractmethod
     def readline(self) -> bytes: ...
+
+    @abstractmethod
+    def _spawn_app(self) -> None: ...
+
+    @abstractmethod
+    def _get_executable_app_args(self, model: str) -> None: ...
 
 
 class AbstractCommand(ABC):
@@ -50,7 +50,13 @@ class AbstractEmulatorCmd(ABC):
     def string_found(self, ypos: int, xpos: int, string: str) -> bool: ...
 
     @abstractmethod
+    def delete_field(self) -> None: ...
+
+    @abstractmethod
     def move_to(self, ypos: int, xpos: int) -> None: ...
+
+    @abstractmethod
+    def send_pf(self, value: str) -> None: ...
 
     @abstractmethod
     def send_string(self, tosend: str, ypos: int, xpos: int) -> None: ...
@@ -60,9 +66,6 @@ class AbstractEmulatorCmd(ABC):
 
     @abstractmethod
     def send_home(self) -> None: ...
-
-    @abstractmethod
-    def send_pf(self) -> None: ...
 
     @abstractmethod
     def get_string(self) -> str: ...
@@ -99,12 +102,6 @@ class AbstractEmulator(ABC):
     """
 
     @abstractmethod
-    def _create_app(self) -> None: ...
-
-    @abstractmethod
-    def _exec_command(self, cmdstr: str) -> str: ...
-
-    @abstractmethod
     def terminate(self) -> None: ...
 
     @abstractmethod
@@ -115,3 +112,9 @@ class AbstractEmulator(ABC):
 
     @abstractmethod
     def reconnect_host(self) -> None: ...
+
+    @abstractmethod
+    def _create_app(self) -> None: ...
+
+    @abstractmethod
+    def _exec_command(self, cmdstr: str) -> str: ...

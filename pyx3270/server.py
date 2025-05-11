@@ -4,11 +4,15 @@ import re
 import select
 import socket
 import sys
+from logging import DEBUG, getLogger
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 
 import tn3270
 from emulator import X3270
+
+logger = getLogger()
+logger.setLevel(DEBUG)
 
 
 def ensure_dir(path):
@@ -28,14 +32,14 @@ def load_screens(record_dir):
     for f in files:
         with open(os.path.join(record_dir, f), 'rb') as fd:
             data = fd.read()
-            # Garante que termina com tn3270.IAC EOR
-            if not data.endswith(tn3270.IAC + tn3270.EOR):
-                data += tn3270.IAC + tn3270.EOR
+            # Garante que termina com tn3270.IAC TN_EOR
+            if not data.endswith(tn3270.IAC + tn3270.TN_EOR):
+                data += tn3270.IAC + tn3270.TN_EOR
             screens.append(data)
     return screens
 
 
-def convert_sf(hex_string: str):
+def convert_s(hex_string: str):
     pattern = r'SF\((.*?)\)'
 
     def replace_match(match):
@@ -50,6 +54,20 @@ def convert_sf(hex_string: str):
     return converted_string
 
 
+def connect_serversock(
+    clientsock: socket.socket, address: str
+) -> socket.socket:
+    host, *port = address.split(':', 2)
+    port = int(*port) if port else 3270
+    try:
+        serversock = socket.create_connection((host, port), timeout=5)
+    except Exception as e:
+        logger.error(f'[!] Proxy -> MF Falha de conexão: {e}')
+        clientsock.close()
+        return
+    return serversock
+
+
 def record_handler(
     emu: X3270,
     clientsock: socket.socket,
@@ -57,20 +75,14 @@ def record_handler(
     record_dir=None,
     delay=0.01,
 ):
-    host, *port = address.split(':', 2)
-    port = int(*port) if port else 3270
-    try:
-        serversock = socket.create_connection((host, port), timeout=5)
-    except Exception as e:
-        print(f'[!] Proxy -> MF Falha de conexão: {e}')
-        clientsock.close()
+    serversock = connect_serversock(clientsock, address)
+
+    if not serversock:
         return
 
     ensure_dir(record_dir)
+
     counter = 0
-    channel = {clientsock: serversock, serversock: clientsock}
-    socks = [clientsock, serversock]
-    screens = list()
 
     def record_data(data_block):
         nonlocal counter
@@ -82,6 +94,11 @@ def record_handler(
             f.write(data_block)
         counter += 1
 
+    socks = [clientsock, serversock]
+    channel = {clientsock: serversock, serversock: clientsock}
+    buffers = {clientsock: b'', serversock: b''}
+    screens = []
+
     try:
         while True:
             ready_socks, _, _ = select.select(socks, [], [], delay)
@@ -91,23 +108,40 @@ def record_handler(
                 if not data:
                     raise ConnectionResetError
 
+                if emu.tls:
+                    continue
+
+                buffers[s] += data
+
+                if s == serversock and record_dir:
+                    while tn3270.IAC + tn3270.TN_EOR in buffers[s]:
+                        block, _, rest = buffers[s].partition(
+                            tn3270.IAC + tn3270.TN_EOR
+                        )
+                        full_block = block + tn3270.IAC + tn3270.TN_EOR
+                        record_data(full_block)
+                        buffers[s] = rest
                 channel[s].sendall(data)
 
-            buffer = emu.readbuffer('ebcdic')
-            if (
-                not buffer.replace(' ', '').replace('0', '')
-                or not save
-                or buffer in screens
-            ):
-                continue
-            buffer_hex = convert_sf(buffer)
-            hex_bytes = bytes.fromhex(buffer_hex)
-            full_block = (
-                tn3270.START_SCREEN + hex_bytes + tn3270.IAC + tn3270.EOR
-            )
-            record_data(full_block)
-            save = False
-            screens.append(buffer)
+            if emu.tls:
+                buffer = emu.readbuffer('ebcdic')
+                if (
+                    not buffer.replace(' ', '').replace('0', '')
+                    or not save
+                    or buffer in screens
+                ):
+                    continue
+                buffer_hex = convert_s(buffer)
+                buffer_hex = bytes.fromhex(buffer_hex)
+                full_block = (
+                    tn3270.START_SCREEN
+                    + buffer_hex
+                    + tn3270.IAC
+                    + tn3270.TN_EOR
+                )
+                save = False
+                screens.append(buffer)
+                record_data(full_block)
 
     except (ConnectionResetError, OSError):
         for sock in socks:
@@ -132,10 +166,11 @@ def backend_3270(
         in {
             b'@@' + tn3270.IAC,
             b'@@' + tn3270.WSF,
-            tn3270.IAC + tn3270.EOR,
+            tn3270.IAC + tn3270.TN_EOR,
             b'K\xe9\xff',
         }
         or b'\xff' in press
+        or '@@' in press
     )
 
     if aid == tn3270.PF3 and key_press:
@@ -164,6 +199,6 @@ def replay_handler(clientsock: socket.socket, screens):
             current_screen = backend_3270(clientsock, screens, current_screen)
 
     except Exception as e:
-        print(f'[ERRO] {str(e)}')
+        logger.error(f'[!] Erro fora do esperado: {str(e)}')
     finally:
         clientsock.close()

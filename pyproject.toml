@@ -37,6 +37,8 @@ quote-style = 'single'
 [tool.taskipy.tasks]
 lint = "ruff check . --diff"
 format = "ruff check . --fix && ruff format ."
+test = "pytest . -s -x --cov=pyx3270 -vv"
+post_test = "coverage html"
 
 [tool.setuptools.packages.find]
 where = ["."]
