@@ -43,7 +43,8 @@ def replay(
     model: str = typer.Option(default='2'),
     emulator: bool = typer.Option(default=True),
 ):
-    screens = load_screens(BINARY_FOLDER) + load_screens(directory)
+    screens = load_screens(directory)
+    screens = load_screens(BINARY_FOLDER) if not screens else screens
 
     rich.print(f'[+] REPLAY do caminho: {directory}')
     tnsock = start_sock(port)
@@ -58,7 +59,7 @@ def replay(
         rich.print(f'[+] Replay de conexões de {addr}')
 
         th = threading.Thread(
-            target=replay_handler, args=(clientsock, screens)
+            target=replay_handler, args=(clientsock, screens, emulator)
         )
         th.start()
 

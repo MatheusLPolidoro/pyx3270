@@ -1,0 +1,3 @@
+package_data={
+    'pyx3270': ['py.typed'],
+},

@@ -15,6 +15,7 @@ Automatiza seu mainframe.
 
 
 ## :jigsaw: Diagrama de Classes
+
 ``` mermaid
 classDiagram
     %% Interfaces

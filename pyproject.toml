@@ -1,6 +1,6 @@
 [project]
 name = "pyx3270"
-version = "0.2.0"
+version = "0.1.0"
 description = "Uma interface comum utilizada para automações de terminais 3270 da IBM."
 authors = [{name = "MatheusLPolidoro", email = "mattpolidoro4@gmail.com"}]
 readme = "README.md"
@@ -44,7 +44,7 @@ post_test = "coverage html"
 where = ["."]
 
 [tool.setuptools.package-data]
-"pyx3270" = ["binary/*"]
+pyx3270 = ["binary/*", "py.typed"]
 
 [build-system]
 requires = ["setuptools>=61.0,<70"]

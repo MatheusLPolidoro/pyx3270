@@ -109,6 +109,7 @@ def record_handler(
                     raise ConnectionResetError
 
                 if emu.tls:
+                    channel[s].sendall(data)
                     continue
 
                 buffers[s] += data
@@ -149,7 +150,10 @@ def record_handler(
 
 
 def backend_3270(
-    clientsock: socket.socket, screens: list[bytes], current_screen: int
+    clientsock: socket.socket,
+    screens: list[bytes],
+    current_screen: int,
+    emulator: bool
 ) -> int | None:
     aid = None
     while aid not in tn3270.AIDS:
@@ -170,33 +174,35 @@ def backend_3270(
             b'K\xe9\xff',
         }
         or b'\xff' in press
-        or '@@' in press
+        or b'@@' in press
+        or tn3270.SBA in press
     )
-
-    if aid == tn3270.PF3 and key_press:
+    clear = False
+    if aid == tn3270.PF3 and key_press and emulator:
         current_screen = max(0, current_screen - 1)
     elif aid in {tn3270.PF4, tn3270.ENTER} and key_press:
         current_screen = min(len(screens) - 1, current_screen + 1)
     elif aid == tn3270.CLEAR and key_press:
         clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
-        current_screen = None
+        clear = True
 
-    return current_screen
+    return dict(current_screen=current_screen, clear=clear)
 
 
-def replay_handler(clientsock: socket.socket, screens):
+def replay_handler(clientsock: socket.socket, screens: list, emulator: bool):
     current_screen = 0
+    clear = False
     try:
         clientsock.sendall(b'\xff\xfd\x18\xff\xfb\x18')
 
         while True:
-            if current_screen is not None:
+            if not clear:
                 buf = screens[current_screen]
                 clientsock.sendall(buf)
-            else:
-                current_screen = 0
 
-            current_screen = backend_3270(clientsock, screens, current_screen)
+            result: dict = backend_3270(clientsock, screens, current_screen, emulator)
+            current_screen = result.get('current_screen')
+            clear = result.get('clear')
 
     except Exception as e:
         logger.error(f'[!] Erro fora do esperado: {str(e)}')

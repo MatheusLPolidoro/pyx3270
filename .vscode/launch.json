@@ -9,8 +9,9 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             // "args": ["record", "--address", "10.111.139.2:992"]
+            "args": ["record", "--address", "172.16.51.52:992"]
             // "args": ["record", "--address", "177.139.188.25:3270", "--no-tls"]
-            "args": ["replay"]
+            // "args": ["replay", "--directory", "./screens"]
         }
     ]
 }

@@ -190,3 +190,9 @@ Uma interface comum utilizada para manipulação com terminais 3270 da IBM.
 
 Obs.: Algumas telas são construidas enviando comandos que não são capturados utilizando o readbuffer do x3270, logo elas são reproduzidas com diferenças.
 
+
+# Build do modulo
+
+```shell
+python -m build --no-isolation --skip-dependency-check
+```
