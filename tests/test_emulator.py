@@ -13,12 +13,15 @@ from pyx3270.emulator import (
     AbstractExecutableApp,
 )
 
+
 def test_x3270_implements_abstract():
     assert issubclass(X3270, AbstractEmulator)
     assert issubclass(X3270Cmd, AbstractEmulatorCmd)
 
+
 def test_executable_app_implements_abstract():
     assert issubclass(ExecutableApp, AbstractExecutableApp)
+
 
 def test_app_implements_executable_app():
     assert issubclass(Wc3270App, ExecutableApp)

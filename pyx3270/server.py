@@ -153,7 +153,7 @@ def backend_3270(
     clientsock: socket.socket,
     screens: list[bytes],
     current_screen: int,
-    emulator: bool
+    emulator: bool,
 ) -> int | None:
     aid = None
     while aid not in tn3270.AIDS:
@@ -200,7 +200,9 @@ def replay_handler(clientsock: socket.socket, screens: list, emulator: bool):
                 buf = screens[current_screen]
                 clientsock.sendall(buf)
 
-            result: dict = backend_3270(clientsock, screens, current_screen, emulator)
+            result: dict = backend_3270(
+                clientsock, screens, current_screen, emulator
+            )
             current_screen = result.get('current_screen')
             clear = result.get('clear')
 

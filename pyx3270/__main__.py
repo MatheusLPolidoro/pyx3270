@@ -14,6 +14,7 @@ from server import load_screens, record_handler, replay_handler
 
 app = typer.Typer()
 
+
 def start_sock(port: int) -> socket.socket:
     tnsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tnsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
