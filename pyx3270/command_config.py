@@ -93,7 +93,7 @@ command_map = {
     'script': ([('path', str)], 'Executa script filho.'),
     'scroll': ([('direction', str)], 'Rola a tela.'),
     'set': (
-        [('setting', str), ('value', str)],
+        [],
         'Altera ou exibe configurações.',
     ),
     'show': ([('item', str)], 'Exibe status e configurações.'),

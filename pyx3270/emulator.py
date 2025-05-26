@@ -8,9 +8,10 @@ import socket
 import subprocess
 import sys
 from contextlib import closing
-from functools import cache
+from functools import cache, lru_cache
 from time import sleep, time
 from typing import Literal
+from logging.handlers import TimedRotatingFileHandler
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 
@@ -28,18 +29,29 @@ from iemulator import (
     AbstractExecutableApp,
 )
 
-# Configuração do logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('x3270_emulator.log'),
-    ],
-)
-
-# Cria um logger específico para o módulo
 logger = logging.getLogger('x3270_emulator')
+logger.setLevel(logging.INFO)
+
+# Evita duplicação de handlers
+if not logger.handlers:
+    handler = TimedRotatingFileHandler(
+        filename='x3270_emulator.log',
+        when='midnight',  # Roda diariamente
+        interval=1,       # Intervalo de 1 dia
+        backupCount=7,    # Mantém arquivos dos últimos 7 dias
+        encoding='utf-8', # Mantém acentos
+    )
+
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+
+# Se quiser evitar que os logs sejam propagados para o logger raiz
+logger.propagate = False
+
 
 BINARY_FOLDER = f'{os.path.dirname(__file__)}/binary'
 MODEL_TYPE = Literal['2', '3', '4', '5']
@@ -64,6 +76,8 @@ MODEL_DIMENSIONS = {
 
 
 class ExecutableApp(AbstractExecutableApp):
+    args = list()
+
     def __init__(self, shell: bool = False, model: MODEL_TYPE = '2') -> None:
         logger.info(
             f'Inicializando ExecutableApp (shell={shell}, model={model})'
@@ -73,8 +87,8 @@ class ExecutableApp(AbstractExecutableApp):
         self.args = self._get_executable_app_args(model)
         self._spawn_app()
 
-    @cache
-    def _spawn_app(self) -> None:
+    @lru_cache
+    def _spawn_app(self, args=None) -> None:
         logger.debug('Iniciando processo do aplicativo')
         kwargs = {
             'shell': self.shell,
@@ -82,6 +96,9 @@ class ExecutableApp(AbstractExecutableApp):
             'stdout': subprocess.PIPE,
             'stderr': subprocess.PIPE,
         }
+
+        if args:
+            self.args = args
 
         if os.name == 'nt':
             logger.debug(
@@ -222,22 +239,24 @@ class Status:
         self.status_line = status_line
         parts = status_line.split(' '.encode('utf-8'))
 
-        self.keyboard = parts[0] or None
-        self.screen_format = parts[1] or None
-        self.field_protection = parts[2] or None
-        self.connection_state = parts[3] or None
-        self.emulator_mode = parts[4] or None
-        self.model_number = parts[5] or None
-        self.row_number = parts[6] or None
-        self.col_number = parts[7] or None
-        self.cursor_row = parts[8] or None
-        self.cursor_col = parts[9] or None
-        self.window_id = parts[10] or None
-        self.exec_time = parts[11] or None
-
-        logger.debug(
-            f'Status inicializado: connection_state={self.connection_state}, emulator_mode={self.emulator_mode}'
-        )
+        try:
+            self.keyboard = parts[0] or None
+            self.screen_format = parts[1] or None
+            self.field_protection = parts[2] or None
+            self.connection_state = parts[3] or None
+            self.emulator_mode = parts[4] or None
+            self.model_number = parts[5] or None
+            self.row_number = parts[6] or None
+            self.col_number = parts[7] or None
+            self.cursor_row = parts[8] or None
+            self.cursor_col = parts[9] or None
+            self.window_id = parts[10] or None
+            self.exec_time = parts[11] or None
+            logger.debug(
+                f'Status inicializado: connection_state={self.connection_state}, emulator_mode={self.emulator_mode}'
+            )
+        except IndexError:
+            logger.error(f'Status não tem items suficientes.')
 
     def __str__(self) -> str:
         return f'Status: {self.status_line}'
@@ -276,7 +295,7 @@ class Wc3270App(ExecutableApp):
         self.socket = sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         count = 0
-        max_loop = 15
+        max_loop = 5
         while count < max_loop:
             try:
                 logger.debug(
@@ -315,7 +334,7 @@ class Wc3270App(ExecutableApp):
         logger.debug(f'Argumentos completos: {self.args}')
 
         try:
-            self._spawn_app()
+            self._spawn_app(tuple(self.args))
             self._make_socket()
             logger.info('Conexão estabelecida com sucesso')
             return True
@@ -699,8 +718,12 @@ class X3270(AbstractEmulator, X3270Cmd):
                     cmd = self._exec_command(
                         f'{name}({all_args})'.encode('utf8')
                     )
-                    text = [text.decode('utf8') for text in cmd.data[0:]]
-                    result = ''.join(text)
+                    try:
+                        text = [text.decode('utf8') for text in cmd.data[0:]]
+                        result = ''.join(text)
+                    except AttributeError:
+                        result = [val for val in cmd.data[0:]]
+
                     logger.debug(
                         f'Comando executado, resultado: {result[:100]}...'
                     )
@@ -813,39 +836,46 @@ class X3270(AbstractEmulator, X3270Cmd):
         logger.debug(f'String de conexão: {strint_conn}')
 
         try:
-            if not self.app.connect(strint_conn):
-                logger.debug(
-                    'Método connect do app retornou False, tentando método connect direto'
-                )
-                self.connect(strint_conn)
-            logger.debug('Aguardando modo 3270')
-            self.wait(2, '3270mode')
-            logger.info('Conexão estabelecida com sucesso')
+            if self.app:
+                if not self.app.connect(strint_conn):
+                    logger.debug(
+                        'Método connect do app retornou False, tentando método connect direto'
+                    )
+                    self.connect(strint_conn)
+                logger.debug('Aguardando modo 3270')
+                self.wait(2, '3270mode')
+                logger.info('Conexão estabelecida com sucesso')
         except CommandError as e:
             logger.warning(f'CommandError durante conexão: {e}')
         except Exception as e:
             logger.error(f'Erro ao conectar: {e}', exc_info=True)
             raise
 
-    def reconnect_host(self) -> object:
+    def reconnect_host(self) -> 'X3270':
         logger.info('Tentando reconectar ao host')
         try:
             logger.debug('Executando comando reconnect')
             self.reconnect()
             logger.info('Reconexão bem-sucedida')
             return self
-        except CommandError as e:
-            logger.warning(f'CommandError durante reconexão: {e}')
+        except Exception as e:
+            logger.warning(f'Erro durante reconexão: {e}', exc_info=True)
             logger.debug('Terminando instância atual')
             self.terminate()
-        except NotConnectedException as e:
-            logger.warning(f'NotConnectedException durante reconexão: {e}')
-        except Exception as e:
-            logger.error(f'Erro durante reconexão: {e}', exc_info=True)
         finally:
             logger.info('Criando nova instância para reconexão')
             args = self.host, self.port, self.tls
             new_instance = X3270(self.visible, self.model)
             new_instance.connect_host(*args)
-            logger.info('Nova instância conectada com sucesso')
-            return new_instance
+
+            # Atualiza todos os atributos de self com os do novo objeto
+            self.__dict__.update(new_instance.__dict__)
+
+            logger.info('Atributos de self atualizados com sucesso')
+            return self
+
+
+if __name__ == '__main__':
+    emu = X3270(True)
+    emu.connect_host('177.139.188.25', 3270, False)
+    pass

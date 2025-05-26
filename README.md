@@ -1,5 +1,5 @@
 # Emulador x3270
-Uma interface comum utilizada para manipulação com terminais 3270 da IBM.
+Uma interface comum utilizada para manipulação de terminais 3270 da IBM.
 
 
 ## Comandos de Entrada e Controle:

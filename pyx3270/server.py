@@ -165,22 +165,16 @@ def backend_3270(
             continue
 
     press = clientsock.recv(3)
-    key_press = (
-        press
-        in {
-            b'@@' + tn3270.IAC,
-            b'@@' + tn3270.WSF,
-            tn3270.IAC + tn3270.TN_EOR,
-            b'K\xe9\xff',
-        }
-        or b'\xff' in press
-        or b'@@' in press
-        or tn3270.SBA in press
-    )
+    key_press = press in {
+        b'@@' + tn3270.IAC,
+        b'@@' + tn3270.WSF,
+        tn3270.IAC + tn3270.TN_EOR,
+        b'K\xe9\xff',
+    }
     clear = False
-    if aid == tn3270.PF3 and key_press and emulator:
+    if aid in {tn3270.PF3, tn3270.PF7} and key_press and emulator:
         current_screen = max(0, current_screen - 1)
-    elif aid in {tn3270.PF4, tn3270.ENTER} and key_press:
+    elif aid in {tn3270.PF4, tn3270.PF8, tn3270.ENTER} and key_press:
         current_screen = min(len(screens) - 1, current_screen + 1)
     elif aid == tn3270.CLEAR and key_press:
         clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)

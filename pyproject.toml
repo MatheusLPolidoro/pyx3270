@@ -23,6 +23,11 @@ dependencies = [
 [project.scripts]
 pyx3270 = "pyx3270.__main__:app"
 
+[project.urls]
+"Documentation" = "https://matheuslpolidoro.github.io/pyx3270/"
+"Source Code" = "https://github.com/MatheusLPolidoro/pyx3270"
+"Bug Tracker" = "https://github.com/MatheusLPolidoro/pyx3270/issues"
+
 [tool.ruff]
 line-length = 79
 
@@ -75,7 +80,7 @@ name = ":rocket: OTIMIZAÇÕES"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = ":hammer_and_wrench: fix"
+directory = "fix"
 name = ":bug: CORREÇÕES"
 showcontent = true
 
