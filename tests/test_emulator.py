@@ -385,7 +385,7 @@ def test_wc3270app_connect_fails(
                 f'Wc3270App.connect levantou uma exceção inesperada: {e}'
             )
 
-        # Verifica se tentou conectar múltiplas vezes (15 vezes no código)
+        # Verifica se tentou conectar múltiplas vezes (5 vezes no código)
         assert mock_sock_instance.connect.call_count == 5
 
 
@@ -993,7 +993,7 @@ def test_x3270_connect_host(x3270_emulator_instance):
     )
     x3270_emulator_instance.connect_host('myhost', '1234', tls=False)
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(5, 3270mode)'
+        b'wait(2, 3270mode)'
     )
 
 
@@ -1006,7 +1006,7 @@ def test_x3270_connect_host_tls(x3270_emulator_instance):
     x3270_emulator_instance.connect_host('securehost', '992', tls=True)
     # Verifica se o prefixo L: foi adicionado para TLS
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(5, 3270mode)'
+        b'wait(2, 3270mode)'
     )
 
 

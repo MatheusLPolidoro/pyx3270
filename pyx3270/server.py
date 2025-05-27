@@ -162,7 +162,6 @@ def backend_3270(
     current_screen: int,
     emulator: bool,
 ) -> int | None:
-
     aid = None
 
     while aid not in tn3270.AIDS:
@@ -194,7 +193,7 @@ def backend_3270(
 
 def listen_for_commands():
     while True:
-        command = input("Digite um comando: ")
+        command = input('Digite um comando: ')
         command_queue.put(command)
 
 
@@ -207,7 +206,7 @@ def replay_handler(clientsock: socket.socket, screens: dict, emulator: bool):
 
     try:
         peer_name = clientsock.getpeername()
-        logger.info(f"Iniciando replay para {peer_name}")        
+        logger.info(f'Iniciando replay para {peer_name}')
         clientsock.sendall(b'\xff\xfd\x18\xff\xfb\x18')
 
         while True:
@@ -218,27 +217,33 @@ def replay_handler(clientsock: socket.socket, screens: dict, emulator: bool):
             # Verifica se há comandos na fila
             try:
                 command = command_queue.get_nowait()
-                if command.startswith("set "):
-                    screen_name = command.split(" ", 1)[1].upper()
+                if command.startswith('set '):
+                    screen_name = command.split(' ', 1)[1].upper()
                     screen_index = next(
                         (
-                            i for i, screen in enumerate(screens.keys())
+                            i
+                            for i, screen in enumerate(screens.keys())
                             if screen_name in screen
                         ),
-                        None
+                        None,
                     )
                     if screen_index is not None:
                         current_screen = screen_index
-                        print(f"[+] Mudando para a tela: {screen_name}")
+                        print(f'[+] Mudando para a tela: {screen_name}')
                         continue
-                if command.startswith("add "):
-                    screen_name, screen_data = command.split(" ", 2)[1:]
+                if command.startswith('add '):
+                    screen_name, screen_data = command.split(' ', 2)[1:]
                     screen_name = screen_name.upper()
 
                     # Converte a string recebida para bytes sem alterar os valores hexadecimais
                     screen_data_bytes = bytes.fromhex(screen_data)
 
-                    final_bytes = tn3270.START_SCREEN + screen_data_bytes + tn3270.IAC + tn3270.TN_EOR
+                    final_bytes = (
+                        tn3270.START_SCREEN
+                        + screen_data_bytes
+                        + tn3270.IAC
+                        + tn3270.TN_EOR
+                    )
 
                     # Adicionar tela
                     screens[screen_name] = final_bytes
@@ -246,7 +251,9 @@ def replay_handler(clientsock: socket.socket, screens: dict, emulator: bool):
             except queue.Empty:
                 pass
 
-            result = backend_3270(clientsock, screens_list, current_screen, emulator)
+            result = backend_3270(
+                clientsock, screens_list, current_screen, emulator
+            )
             current_screen = result.get('current_screen')
             clear = result.get('clear')
 

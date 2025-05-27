@@ -178,12 +178,7 @@ def test_backend_3270_navigation(mock_socket_constructor):
         b'K\xe9\xff',  # PF4 pressionado
         b'\x00',  # Simula fechamento do terminal para sair do loop
     ]
-    screens = {
-        's0': b's0',
-        's1': b's1',
-        's2': b's2',
-        's3': b's3'
-     }
+    screens = {'s0': b's0', 's1': b's1', 's2': b's2', 's3': b's3'}
 
     # Teste 1: ENTER
     result = server.backend_3270(mock_clientsock, screens, 0, emulator=True)
@@ -224,10 +219,7 @@ def test_backend_3270_timeout(mock_socket_constructor):
         tn3270.ENTER,
         b'K\xe9\xff',
     ]
-    screens = {
-        's0': b's0',
-        's1': b's1'
-     }
+    screens = {'s0': b's0', 's1': b's1'}
 
     result = server.backend_3270(mock_clientsock, screens, 0, emulator=False)
     assert result == {'current_screen': 1, 'clear': False}
@@ -243,7 +235,7 @@ def test_replay_handler(mock_backend, monkeypatch):
         'screen1': b'screen1',
         'screen2': b'screen2',
     }
-    screens_list = list(screens.values()) 
+    screens_list = list(screens.values())
     # Simula a sequência de interações retornada por backend_3270
     mock_backend.side_effect = [
         {'current_screen': 0, 'clear': False},  # Inicial
