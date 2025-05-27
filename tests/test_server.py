@@ -69,7 +69,7 @@ def test_load_screens_empty_dir(tmp_path, monkeypatch):
     screens = server.load_screens(str(record_dir))
 
     mock_ensure_dir.assert_called_once_with(str(record_dir))
-    assert screens == []
+    assert screens == dict()
 
 
 def test_load_screens_with_files(tmp_path, monkeypatch):
@@ -90,13 +90,14 @@ def test_load_screens_with_files(tmp_path, monkeypatch):
     monkeypatch.setattr(server, 'ensure_dir', mock_ensure_dir)
 
     screens = server.load_screens(str(record_dir))
+    screens_list = list(screens.values())
 
     mock_ensure_dir.assert_called_once_with(str(record_dir))
-    assert len(screens) == 3
+    assert len(screens_list) == 3
     # Verifica a ordem e o conteúdo (com EOR adicionado se necessário)
-    assert screens[0] == b'screen0_data' + tn3270.IAC + tn3270.TN_EOR
-    assert screens[1] == b'screen1_data' + tn3270.IAC + tn3270.TN_EOR
-    assert screens[2] == b'screen2_data' + tn3270.IAC + tn3270.TN_EOR
+    assert screens_list[0] == b'screen0_data' + tn3270.IAC + tn3270.TN_EOR
+    assert screens_list[1] == b'screen1_data' + tn3270.IAC + tn3270.TN_EOR
+    assert screens_list[2] == b'screen2_data' + tn3270.IAC + tn3270.TN_EOR
 
 
 def test_convert_s():
@@ -177,7 +178,12 @@ def test_backend_3270_navigation(mock_socket_constructor):
         b'K\xe9\xff',  # PF4 pressionado
         b'\x00',  # Simula fechamento do terminal para sair do loop
     ]
-    screens = [b's0', b's1', b's2', b's3']
+    screens = {
+        's0': b's0',
+        's1': b's1',
+        's2': b's2',
+        's3': b's3'
+     }
 
     # Teste 1: ENTER
     result = server.backend_3270(mock_clientsock, screens, 0, emulator=True)
@@ -218,7 +224,10 @@ def test_backend_3270_timeout(mock_socket_constructor):
         tn3270.ENTER,
         b'K\xe9\xff',
     ]
-    screens = [b's0', b's1']
+    screens = {
+        's0': b's0',
+        's1': b's1'
+     }
 
     result = server.backend_3270(mock_clientsock, screens, 0, emulator=False)
     assert result == {'current_screen': 1, 'clear': False}
@@ -229,7 +238,12 @@ def test_backend_3270_timeout(mock_socket_constructor):
 def test_replay_handler(mock_backend, monkeypatch):
     """Testa o fluxo básico de replay_handler."""
     mock_clientsock = MagicMock(spec=_real_socket_class)
-    screens = [b'screen0', b'screen1', b'screen2']
+    screens = {
+        'screen0': b'screen0',
+        'screen1': b'screen1',
+        'screen2': b'screen2',
+    }
+    screens_list = list(screens.values()) 
     # Simula a sequência de interações retornada por backend_3270
     mock_backend.side_effect = [
         {'current_screen': 0, 'clear': False},  # Inicial
@@ -244,10 +258,10 @@ def test_replay_handler(mock_backend, monkeypatch):
     # Verifica chamadas
     mock_clientsock.sendall.assert_has_calls([
         call(b'\xff\xfd\x18\xff\xfb\x18'),  # handshake inicial
-        call(screens[0]),  # inicial
-        call(screens[0]),  # chamada extra repetida
-        call(screens[1]),
-        call(screens[2]),
+        call(screens_list[0]),  # inicial
+        call(screens_list[0]),  # chamada extra repetida
+        call(screens_list[1]),
+        call(screens_list[2]),
     ])
     assert mock_backend.call_count == 5  # Chamado até a exceção
     mock_clientsock.close.assert_called_once()  # Garante que fechou no finally

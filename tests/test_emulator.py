@@ -6,7 +6,6 @@ import subprocess
 import os
 from unittest.mock import MagicMock, call, patch
 
-from pyx3270 import exceptions
 from pyx3270.emulator import (
     ExecutableApp,
     Command,
@@ -20,7 +19,6 @@ from pyx3270.emulator import (
     AbstractEmulator,
     AbstractEmulatorCmd,
     AbstractExecutableApp,
-    NotConnectedException,
     CommandError,
 )
 
@@ -995,7 +993,7 @@ def test_x3270_connect_host(x3270_emulator_instance):
     )
     x3270_emulator_instance.connect_host('myhost', '1234', tls=False)
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(2, 3270mode)'
+        b'wait(5, 3270mode)'
     )
 
 
@@ -1008,7 +1006,7 @@ def test_x3270_connect_host_tls(x3270_emulator_instance):
     x3270_emulator_instance.connect_host('securehost', '992', tls=True)
     # Verifica se o prefixo L: foi adicionado para TLS
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(2, 3270mode)'
+        b'wait(5, 3270mode)'
     )
 
 

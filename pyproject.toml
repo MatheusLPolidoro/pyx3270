@@ -42,7 +42,7 @@ quote-style = 'single'
 [tool.taskipy.tasks]
 lint = "ruff check . --diff"
 format = "ruff format ."
-test = "pytest . -s -x --cov=pyx3270 -vv"
+test = "python -m pytest . -s -x --cov=pyx3270 -vv"
 post_test = "coverage html"
 
 [tool.setuptools.packages.find]

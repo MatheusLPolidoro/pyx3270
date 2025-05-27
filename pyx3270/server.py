@@ -1,3 +1,4 @@
+import codecs
 import os
 import pathlib
 import re
@@ -5,11 +6,15 @@ import select
 import socket
 import sys
 from logging import DEBUG, getLogger
+import queue
+import threading
+
+command_queue = queue.Queue()
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 
-import tn3270
-from emulator import X3270
+import pyx3270.tn3270 as tn3270
+from pyx3270.emulator import X3270
 
 logger = getLogger()
 logger.setLevel(DEBUG)
@@ -28,14 +33,16 @@ def is_screen_tn3270(data):
 def load_screens(record_dir):
     ensure_dir(record_dir)
     files = sorted(f for f in os.listdir(record_dir) if f.endswith('.bin'))
-    screens = []
+    screens = {}
+
     for f in files:
         with open(os.path.join(record_dir, f), 'rb') as fd:
             data = fd.read()
             # Garante que termina com tn3270.IAC TN_EOR
             if not data.endswith(tn3270.IAC + tn3270.TN_EOR):
                 data += tn3270.IAC + tn3270.TN_EOR
-            screens.append(data)
+            screens[str(f).upper().replace('.BIN', '')] = data
+
     return screens
 
 
@@ -155,7 +162,9 @@ def backend_3270(
     current_screen: int,
     emulator: bool,
 ) -> int | None:
+
     aid = None
+
     while aid not in tn3270.AIDS:
         try:
             aid = clientsock.recv(1)
@@ -183,20 +192,61 @@ def backend_3270(
     return dict(current_screen=current_screen, clear=clear)
 
 
-def replay_handler(clientsock: socket.socket, screens: list, emulator: bool):
+def listen_for_commands():
+    while True:
+        command = input("Digite um comando: ")
+        command_queue.put(command)
+
+
+def replay_handler(clientsock: socket.socket, screens: dict, emulator: bool):
+    screens_list = list(screens.values())
     current_screen = 0
     clear = False
+    command_thread = threading.Thread(target=listen_for_commands, daemon=True)
+    command_thread.start()
+
     try:
+        peer_name = clientsock.getpeername()
+        logger.info(f"Iniciando replay para {peer_name}")        
         clientsock.sendall(b'\xff\xfd\x18\xff\xfb\x18')
 
         while True:
             if not clear:
-                buf = screens[current_screen]
+                buf = screens_list[current_screen]
                 clientsock.sendall(buf)
 
-            result: dict = backend_3270(
-                clientsock, screens, current_screen, emulator
-            )
+            # Verifica se há comandos na fila
+            try:
+                command = command_queue.get_nowait()
+                if command.startswith("set "):
+                    screen_name = command.split(" ", 1)[1].upper()
+                    screen_index = next(
+                        (
+                            i for i, screen in enumerate(screens.keys())
+                            if screen_name in screen
+                        ),
+                        None
+                    )
+                    if screen_index is not None:
+                        current_screen = screen_index
+                        print(f"[+] Mudando para a tela: {screen_name}")
+                        continue
+                if command.startswith("add "):
+                    screen_name, screen_data = command.split(" ", 2)[1:]
+                    screen_name = screen_name.upper()
+
+                    # Converte a string recebida para bytes sem alterar os valores hexadecimais
+                    screen_data_bytes = bytes.fromhex(screen_data)
+
+                    final_bytes = tn3270.START_SCREEN + screen_data_bytes + tn3270.IAC + tn3270.TN_EOR
+
+                    # Adicionar tela
+                    screens[screen_name] = final_bytes
+                    screens_list.append(final_bytes)
+            except queue.Empty:
+                pass
+
+            result = backend_3270(clientsock, screens_list, current_screen, emulator)
             current_screen = result.get('current_screen')
             clear = result.get('clear')
 
