@@ -1,0 +1,866 @@
+2025-05-27 20:41:21,586 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:21,589 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,591 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=3)
+2025-05-27 20:41:21,591 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,593 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:21,593 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,593 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=5)
+2025-05-27 20:41:21,594 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,595 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:21,595 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,595 - x3270_emulator - INFO - Fechando aplicativo
+2025-05-27 20:41:21,596 - x3270_emulator - INFO - Aplicativo fechado com código de retorno: 0
+2025-05-27 20:41:21,597 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:21,597 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,598 - x3270_emulator - INFO - Fechando aplicativo
+2025-05-27 20:41:21,598 - x3270_emulator - INFO - Aplicativo fechado com código de retorno: 1
+2025-05-27 20:41:21,599 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:21,600 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,601 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:21,601 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:21,605 - x3270_emulator - INFO - Executando comando: b'TestCmd'
+2025-05-27 20:41:21,605 - x3270_emulator - INFO - Comando executado com sucesso (OK)
+2025-05-27 20:41:21,607 - x3270_emulator - INFO - Executando comando: b'GetData'
+2025-05-27 20:41:21,608 - x3270_emulator - INFO - Comando executado com sucesso (OK)
+2025-05-27 20:41:21,609 - x3270_emulator - INFO - Executando comando: b'ErrorCmd'
+2025-05-27 20:41:21,610 - x3270_emulator - ERROR - Comando falhou: [sem mensagem de erro]
+2025-05-27 20:41:21,610 - x3270_emulator - ERROR - Erro durante execução do comando: [sem mensagem de erro]
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 191, in execute
+    return self.handle_result(result.decode('utf-8'))
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 230, in handle_result
+    raise CommandError(error_msg)
+exceptions.CommandError: [sem mensagem de erro]
+2025-05-27 20:41:21,611 - x3270_emulator - INFO - Executando comando: b'ErrorCmdDataFirst'
+2025-05-27 20:41:21,611 - x3270_emulator - ERROR - Comando falhou: Error message line 1Error message line 2
+2025-05-27 20:41:21,611 - x3270_emulator - ERROR - Erro durante execução do comando: Error message line 1Error message line 2
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 191, in execute
+    return self.handle_result(result.decode('utf-8'))
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 230, in handle_result
+    raise CommandError(error_msg)
+exceptions.CommandError: Error message line 1Error message line 2
+2025-05-27 20:41:21,613 - x3270_emulator - INFO - Executando comando: b'Quit'
+2025-05-27 20:41:21,613 - x3270_emulator - INFO - Comando Quit executado com sucesso
+2025-05-27 20:41:21,615 - x3270_emulator - INFO - Executando comando: b'WeirdCmd'
+2025-05-27 20:41:21,615 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:21,615 - x3270_emulator - WARNING - Tentativa 1/5 falhou, aguardando 1s
+2025-05-27 20:41:22,616 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:22,616 - x3270_emulator - WARNING - Tentativa 2/5 falhou, aguardando 1s
+2025-05-27 20:41:23,617 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:23,617 - x3270_emulator - WARNING - Tentativa 3/5 falhou, aguardando 1s
+2025-05-27 20:41:24,618 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:24,618 - x3270_emulator - WARNING - Tentativa 4/5 falhou, aguardando 1s
+2025-05-27 20:41:25,619 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:25,619 - x3270_emulator - WARNING - Tentativa 5/5 falhou, aguardando 1s
+2025-05-27 20:41:26,620 - x3270_emulator - ERROR - Comando falhou: [sem mensagem de erro]
+2025-05-27 20:41:26,620 - x3270_emulator - ERROR - Erro durante execução do comando: [sem mensagem de erro]
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 191, in execute
+    return self.handle_result(result.decode('utf-8'))
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 230, in handle_result
+    raise CommandError(error_msg)
+exceptions.CommandError: [sem mensagem de erro]
+2025-05-27 20:41:26,630 - x3270_emulator - INFO - Inicializando Wc3270App com modelo: 3
+2025-05-27 20:41:26,631 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=3)
+2025-05-27 20:41:26,631 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:26,634 - x3270_emulator - INFO - Inicializando Wc3270App com modelo: 4
+2025-05-27 20:41:26,635 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=4)
+2025-05-27 20:41:26,635 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:26,635 - x3270_emulator - INFO - Conectando ao host: myhost.com
+2025-05-27 20:41:26,635 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:26,635 - x3270_emulator - INFO - Criando socket para porta 12345
+2025-05-27 20:41:26,635 - x3270_emulator - INFO - Conexão de socket estabelecida com sucesso
+2025-05-27 20:41:26,635 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:26,639 - x3270_emulator - INFO - Inicializando Wc3270App com modelo: 2
+2025-05-27 20:41:26,639 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=2)
+2025-05-27 20:41:26,639 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:26,639 - x3270_emulator - INFO - Conectando ao host: otherhost.com
+2025-05-27 20:41:26,639 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:26,640 - x3270_emulator - INFO - Criando socket para porta 12345
+2025-05-27 20:41:26,640 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 1/5)
+2025-05-27 20:41:27,640 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 2/5)
+2025-05-27 20:41:28,641 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 3/5)
+2025-05-27 20:41:29,642 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 4/5)
+2025-05-27 20:41:30,643 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 5/5)
+2025-05-27 20:41:31,644 - x3270_emulator - ERROR - Falha ao conectar após 5 tentativas
+2025-05-27 20:41:31,645 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:31,651 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,652 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,654 - x3270_emulator - INFO - Limpando tela
+2025-05-27 20:41:31,654 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:31,654 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,654 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,654 - x3270_emulator - INFO - Tela limpa com sucesso
+2025-05-27 20:41:31,655 - x3270_emulator - INFO - Limpando tela
+2025-05-27 20:41:31,655 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:31,655 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,655 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,655 - x3270_emulator - INFO - Tela limpa com sucesso
+2025-05-27 20:41:31,658 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,658 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,660 - x3270_emulator - INFO - Limpando tela
+2025-05-27 20:41:31,660 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:31,661 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,661 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,661 - x3270_emulator - WARNING - Tela não foi limpa completamente na tentativa 1
+2025-05-27 20:41:31,661 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:31,661 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,661 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,661 - x3270_emulator - WARNING - Tela não foi limpa completamente na tentativa 2
+2025-05-27 20:41:31,661 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:31,661 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,662 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,662 - x3270_emulator - INFO - Tela limpa com sucesso
+2025-05-27 20:41:31,664 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,665 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,665 - x3270_emulator - INFO - Aguardando campo de entrada (timeout=10s)
+2025-05-27 20:41:31,666 - x3270_emulator - INFO - Executando comando wait com args=(10, 'InputField'), kwargs={}
+2025-05-27 20:41:31,668 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,669 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,670 - x3270_emulator - INFO - Aguardando campo de entrada (timeout=5s)
+2025-05-27 20:41:31,670 - x3270_emulator - INFO - Executando comando wait com args=(5, 'InputField'), kwargs={}
+2025-05-27 20:41:31,670 - x3270_emulator - ERROR - Erro ao executar comando wait: Wait timed out
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Wait timed out
+2025-05-27 20:41:31,703 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,703 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,704 - x3270_emulator - INFO - Verificando se string 'expected string' existe na posição (5,10)
+2025-05-27 20:41:31,704 - x3270_emulator - INFO - Executando comando ascii com args=(4, 9, 15), kwargs={}
+2025-05-27 20:41:31,705 - x3270_emulator - INFO - Resultado: True (encontrado: 'expected string')
+2025-05-27 20:41:31,708 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,708 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,709 - x3270_emulator - INFO - Verificando se string 'expected' existe na posição (1,1)
+2025-05-27 20:41:31,709 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 8), kwargs={}
+2025-05-27 20:41:31,709 - x3270_emulator - INFO - Resultado: False (encontrado: 'actual string')
+2025-05-27 20:41:31,712 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,712 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,713 - x3270_emulator - INFO - Verificando se string 'test' existe na posição (2,3)
+2025-05-27 20:41:31,713 - x3270_emulator - INFO - Executando comando ascii com args=(1, 2, 4), kwargs={}
+2025-05-27 20:41:31,713 - x3270_emulator - ERROR - Erro ao executar comando ascii: Failed to get string
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Failed to get string
+2025-05-27 20:41:31,714 - x3270_emulator - ERROR - Erro ao obter string: Failed to get string
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 543, in get_string
+    result = self.ascii(ypos, xpos, length)
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Failed to get string
+2025-05-27 20:41:31,715 - x3270_emulator - ERROR - Erro ao verificar string: Failed to get string
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 471, in string_found
+    found = self.get_string(ypos, xpos, len(string))
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 543, in get_string
+    result = self.ascii(ypos, xpos, length)
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Failed to get string
+2025-05-27 20:41:31,719 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,719 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,720 - x3270_emulator - INFO - Movendo cursor para posição (10,20)
+2025-05-27 20:41:31,720 - x3270_emulator - INFO - Executando comando movecursor1 com args=(10, 20), kwargs={}
+2025-05-27 20:41:31,721 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,722 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,723 - x3270_emulator - INFO - Enviando tecla PF3
+2025-05-27 20:41:31,723 - x3270_emulator - INFO - Executando comando PF com args=('3',), kwargs={}
+2025-05-27 20:41:31,723 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,725 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,725 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,726 - x3270_emulator - INFO - Enviando tecla ENTER
+2025-05-27 20:41:31,726 - x3270_emulator - INFO - Executando comando enter com args=(), kwargs={}
+2025-05-27 20:41:31,726 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,728 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,728 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,729 - x3270_emulator - INFO - Enviando string 'test string' na posição atual
+2025-05-27 20:41:31,729 - x3270_emulator - INFO - Executando comando string com args=('test string',), kwargs={}
+2025-05-27 20:41:31,731 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,731 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,732 - x3270_emulator - INFO - Enviando string 'data' para posição (5,15)
+2025-05-27 20:41:31,732 - x3270_emulator - INFO - Movendo cursor para posição (5,15)
+2025-05-27 20:41:31,732 - x3270_emulator - INFO - Executando comando movecursor1 com args=(5, 15), kwargs={}
+2025-05-27 20:41:31,732 - x3270_emulator - INFO - Executando comando string com args=('data',), kwargs={}
+2025-05-27 20:41:31,734 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,735 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,736 - x3270_emulator - INFO - Enviando string 'long string data' na posição atual
+2025-05-27 20:41:31,736 - x3270_emulator - INFO - Executando comando string com args=('long string data',), kwargs={}
+2025-05-27 20:41:31,736 - x3270_emulator - ERROR - Erro ao executar comando string: Write to protected field
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Write to protected field
+2025-05-27 20:41:31,739 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,739 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,740 - x3270_emulator - INFO - Executando comando ascii com args=(9, 4, 16), kwargs={}
+2025-05-27 20:41:31,742 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,742 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,743 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,744 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,745 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,745 - x3270_emulator - INFO - Salvando tela em path_test\myscreen.html
+2025-05-27 20:41:31,745 - x3270_emulator - INFO - Executando comando printtext com args=('html', 'file', 'path_test\\myscreen.html'), kwargs={}
+2025-05-27 20:41:31,746 - x3270_emulator - INFO - Tela salva com sucesso
+2025-05-27 20:41:31,747 - x3270_emulator - INFO - Inicializando Ws3270App com modelo: 4
+2025-05-27 20:41:31,747 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=4)
+2025-05-27 20:41:31,748 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:31,749 - x3270_emulator - INFO - Inicializando X3270App com modelo: 2
+2025-05-27 20:41:31,749 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,750 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:31,751 - x3270_emulator - INFO - Inicializando S3270App com modelo: 5
+2025-05-27 20:41:31,751 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=5)
+2025-05-27 20:41:31,752 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:31,754 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,755 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,755 - x3270_emulator - INFO - Aguardando string 'target string' na posição (1,1), equal=True, timeout=3s
+2025-05-27 20:41:31,755 - x3270_emulator - INFO - Resultado da comparação: True
+2025-05-27 20:41:31,757 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,757 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,758 - x3270_emulator - INFO - Aguardando string 'expected' na posição (2,2), equal=True, timeout=2s
+2025-05-27 20:41:31,758 - x3270_emulator - INFO - Resultado da comparação: False
+2025-05-27 20:41:31,760 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,760 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,761 - x3270_emulator - INFO - Aguardando string 'target' na posição (3,3), equal=False, timeout=2s
+2025-05-27 20:41:31,761 - x3270_emulator - INFO - Executando comando ascii com args=(2, 2, 6), kwargs={}
+2025-05-27 20:41:31,761 - x3270_emulator - INFO - Resultado da comparação: True
+2025-05-27 20:41:31,762 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,763 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,763 - x3270_emulator - INFO - Deletando campo atual
+2025-05-27 20:41:31,764 - x3270_emulator - INFO - Executando comando deletefield com args=(), kwargs={}
+2025-05-27 20:41:31,766 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,766 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,767 - x3270_emulator - INFO - Enviando tecla HOME
+2025-05-27 20:41:31,767 - x3270_emulator - INFO - Executando comando home com args=(), kwargs={}
+2025-05-27 20:41:31,767 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:31,770 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,770 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,771 - x3270_emulator - INFO - Executando comando ascii com args=(0, 4, 2, 11), kwargs={}
+2025-05-27 20:41:31,773 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,773 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,774 - x3270_emulator - INFO - Buscando string 'target' na tela (ignore_case=False)
+2025-05-27 20:41:31,774 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:31,774 - x3270_emulator - INFO - String encontrada na linha 1
+2025-05-27 20:41:31,776 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,776 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Buscando string 'missing' na tela (ignore_case=False)
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Executando comando ascii com args=(1, 0, 80), kwargs={}
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Executando comando ascii com args=(2, 0, 80), kwargs={}
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Executando comando ascii com args=(3, 0, 80), kwargs={}
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Executando comando ascii com args=(4, 0, 80), kwargs={}
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Executando comando ascii com args=(5, 0, 80), kwargs={}
+2025-05-27 20:41:31,777 - x3270_emulator - INFO - Executando comando ascii com args=(6, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(7, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(8, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(9, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(10, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(11, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(12, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(13, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(14, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(15, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(16, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(17, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(18, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(19, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(20, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(21, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(22, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(23, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(24, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(25, 0, 80), kwargs={}
+2025-05-27 20:41:31,778 - x3270_emulator - INFO - Executando comando ascii com args=(26, 0, 80), kwargs={}
+2025-05-27 20:41:31,779 - x3270_emulator - INFO - Executando comando ascii com args=(27, 0, 80), kwargs={}
+2025-05-27 20:41:31,779 - x3270_emulator - INFO - Executando comando ascii com args=(28, 0, 80), kwargs={}
+2025-05-27 20:41:31,779 - x3270_emulator - INFO - Executando comando ascii com args=(29, 0, 80), kwargs={}
+2025-05-27 20:41:31,779 - x3270_emulator - INFO - Executando comando ascii com args=(30, 0, 80), kwargs={}
+2025-05-27 20:41:31,779 - x3270_emulator - INFO - Executando comando ascii com args=(31, 0, 80), kwargs={}
+2025-05-27 20:41:31,779 - x3270_emulator - INFO - String não encontrada em nenhuma linha
+2025-05-27 20:41:31,781 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,781 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,781 - x3270_emulator - INFO - Buscando string 'text here' na tela (ignore_case=True)
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - String encontrada na linha 1
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Buscando string 'TEXT HERE' na tela (ignore_case=True)
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - String encontrada na linha 1
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Buscando string 'text here' na tela (ignore_case=False)
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(1, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(2, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(3, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(4, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(5, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(6, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(7, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(8, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(9, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(10, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(11, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(12, 0, 80), kwargs={}
+2025-05-27 20:41:31,782 - x3270_emulator - INFO - Executando comando ascii com args=(13, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(14, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(15, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(16, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(17, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(18, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(19, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(20, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(21, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(22, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(23, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(24, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(25, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(26, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(27, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(28, 0, 80), kwargs={}
+2025-05-27 20:41:31,783 - x3270_emulator - INFO - Executando comando ascii com args=(29, 0, 80), kwargs={}
+2025-05-27 20:41:31,784 - x3270_emulator - INFO - Executando comando ascii com args=(30, 0, 80), kwargs={}
+2025-05-27 20:41:31,784 - x3270_emulator - INFO - Executando comando ascii com args=(31, 0, 80), kwargs={}
+2025-05-27 20:41:31,784 - x3270_emulator - INFO - String não encontrada em nenhuma linha
+2025-05-27 20:41:31,787 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,788 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,788 - x3270_emulator - INFO - Buscando posições da string 'target' (ignore_case=False)
+2025-05-27 20:41:31,789 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,789 - x3270_emulator - INFO - Posições encontradas: [(1, 5), (2, 5), (3, 1)]
+2025-05-27 20:41:31,791 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,791 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,792 - x3270_emulator - INFO - Buscando posições da string 'find me' (ignore_case=True)
+2025-05-27 20:41:31,792 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,792 - x3270_emulator - INFO - Posições encontradas: [(1, 1), (2, 1)]
+2025-05-27 20:41:31,792 - x3270_emulator - INFO - Buscando posições da string 'find me' (ignore_case=False)
+2025-05-27 20:41:31,792 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,792 - x3270_emulator - INFO - Posições encontradas: [(2, 1)]
+2025-05-27 20:41:31,794 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,795 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,795 - x3270_emulator - INFO - Buscando posições da string 'missing' (ignore_case=False)
+2025-05-27 20:41:31,795 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:31,795 - x3270_emulator - INFO - Posições encontradas: []
+2025-05-27 20:41:31,797 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,797 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,798 - x3270_emulator - INFO - Terminando emulador
+2025-05-27 20:41:31,798 - x3270_emulator - INFO - Executando comando quit com args=(), kwargs={}
+2025-05-27 20:41:31,799 - x3270_emulator - INFO - Emulador terminado com sucesso
+2025-05-27 20:41:31,801 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,802 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,803 - x3270_emulator - INFO - Estado de conexão: True
+2025-05-27 20:41:31,806 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,806 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,807 - x3270_emulator - INFO - Estado de conexão: False
+2025-05-27 20:41:31,809 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,809 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,810 - x3270_emulator - INFO - Conectando ao host: myhost:1234 (tls=False)
+2025-05-27 20:41:31,810 - x3270_emulator - INFO - Executando comando connect com args=('myhost:1234',), kwargs={}
+2025-05-27 20:41:31,810 - x3270_emulator - INFO - Executando comando wait com args=(2, '3270mode'), kwargs={}
+2025-05-27 20:41:31,810 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:31,812 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,813 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,814 - x3270_emulator - INFO - Conectando ao host: securehost:992 (tls=True)
+2025-05-27 20:41:31,814 - x3270_emulator - INFO - Executando comando connect com args=('L:Y:securehost:992',), kwargs={}
+2025-05-27 20:41:31,815 - x3270_emulator - INFO - Executando comando wait com args=(2, '3270mode'), kwargs={}
+2025-05-27 20:41:31,815 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:31,819 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,819 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,820 - x3270_emulator - INFO - Tentando reconectar ao host
+2025-05-27 20:41:31,820 - x3270_emulator - INFO - Executando comando reconnect com args=(), kwargs={}
+2025-05-27 20:41:31,821 - x3270_emulator - INFO - Reconexão bem-sucedida
+2025-05-27 20:41:31,821 - x3270_emulator - INFO - Criando nova instância para reconexão
+2025-05-27 20:41:31,821 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,821 - x3270_emulator - INFO - Conectando ao host: None:None (tls=None)
+2025-05-27 20:41:31,821 - x3270_emulator - INFO - Atributos de self atualizados com sucesso
+2025-05-27 20:41:31,823 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,823 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,825 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:31,826 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:31,826 - x3270_emulator - INFO - Executando comando: b'testcommand()'
+2025-05-27 20:41:31,826 - x3270_emulator - INFO - Comando executado com sucesso (OK)
+2025-05-27 20:41:31,827 - x3270_emulator - ERROR - Status não tem items suficientes.
+2025-05-27 20:41:40,406 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:40,409 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,410 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=3)
+2025-05-27 20:41:40,410 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,412 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:40,412 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,412 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=5)
+2025-05-27 20:41:40,412 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,414 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:40,414 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,414 - x3270_emulator - INFO - Fechando aplicativo
+2025-05-27 20:41:40,414 - x3270_emulator - INFO - Aplicativo fechado com código de retorno: 0
+2025-05-27 20:41:40,416 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:40,416 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,416 - x3270_emulator - INFO - Fechando aplicativo
+2025-05-27 20:41:40,416 - x3270_emulator - INFO - Aplicativo fechado com código de retorno: 1
+2025-05-27 20:41:40,417 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:40,417 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,419 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:40,419 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:40,422 - x3270_emulator - INFO - Executando comando: b'TestCmd'
+2025-05-27 20:41:40,422 - x3270_emulator - INFO - Comando executado com sucesso (OK)
+2025-05-27 20:41:40,424 - x3270_emulator - INFO - Executando comando: b'GetData'
+2025-05-27 20:41:40,424 - x3270_emulator - INFO - Comando executado com sucesso (OK)
+2025-05-27 20:41:40,426 - x3270_emulator - INFO - Executando comando: b'ErrorCmd'
+2025-05-27 20:41:40,426 - x3270_emulator - ERROR - Comando falhou: [sem mensagem de erro]
+2025-05-27 20:41:40,427 - x3270_emulator - ERROR - Erro durante execução do comando: [sem mensagem de erro]
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 191, in execute
+    return self.handle_result(result.decode('utf-8'))
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 230, in handle_result
+    raise CommandError(error_msg)
+exceptions.CommandError: [sem mensagem de erro]
+2025-05-27 20:41:40,428 - x3270_emulator - INFO - Executando comando: b'ErrorCmdDataFirst'
+2025-05-27 20:41:40,429 - x3270_emulator - ERROR - Comando falhou: Error message line 1Error message line 2
+2025-05-27 20:41:40,429 - x3270_emulator - ERROR - Erro durante execução do comando: Error message line 1Error message line 2
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 191, in execute
+    return self.handle_result(result.decode('utf-8'))
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 230, in handle_result
+    raise CommandError(error_msg)
+exceptions.CommandError: Error message line 1Error message line 2
+2025-05-27 20:41:40,430 - x3270_emulator - INFO - Executando comando: b'Quit'
+2025-05-27 20:41:40,431 - x3270_emulator - INFO - Comando Quit executado com sucesso
+2025-05-27 20:41:40,432 - x3270_emulator - INFO - Executando comando: b'WeirdCmd'
+2025-05-27 20:41:40,433 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:40,433 - x3270_emulator - WARNING - Tentativa 1/5 falhou, aguardando 1s
+2025-05-27 20:41:41,434 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:41,434 - x3270_emulator - WARNING - Tentativa 2/5 falhou, aguardando 1s
+2025-05-27 20:41:42,435 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:42,436 - x3270_emulator - WARNING - Tentativa 3/5 falhou, aguardando 1s
+2025-05-27 20:41:43,437 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:43,437 - x3270_emulator - WARNING - Tentativa 4/5 falhou, aguardando 1s
+2025-05-27 20:41:44,438 - x3270_emulator - WARNING - "erro" esperado, mas recebido: unexpected_result.
+2025-05-27 20:41:44,438 - x3270_emulator - WARNING - Tentativa 5/5 falhou, aguardando 1s
+2025-05-27 20:41:45,439 - x3270_emulator - ERROR - Comando falhou: [sem mensagem de erro]
+2025-05-27 20:41:45,439 - x3270_emulator - ERROR - Erro durante execução do comando: [sem mensagem de erro]
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 191, in execute
+    return self.handle_result(result.decode('utf-8'))
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 230, in handle_result
+    raise CommandError(error_msg)
+exceptions.CommandError: [sem mensagem de erro]
+2025-05-27 20:41:45,447 - x3270_emulator - INFO - Inicializando Wc3270App com modelo: 3
+2025-05-27 20:41:45,447 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=3)
+2025-05-27 20:41:45,447 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:45,451 - x3270_emulator - INFO - Inicializando Wc3270App com modelo: 4
+2025-05-27 20:41:45,451 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=4)
+2025-05-27 20:41:45,452 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:45,452 - x3270_emulator - INFO - Conectando ao host: myhost.com
+2025-05-27 20:41:45,452 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:45,452 - x3270_emulator - INFO - Criando socket para porta 12345
+2025-05-27 20:41:45,452 - x3270_emulator - INFO - Conexão de socket estabelecida com sucesso
+2025-05-27 20:41:45,452 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:45,456 - x3270_emulator - INFO - Inicializando Wc3270App com modelo: 2
+2025-05-27 20:41:45,456 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=True, model=2)
+2025-05-27 20:41:45,456 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:45,456 - x3270_emulator - INFO - Conectando ao host: otherhost.com
+2025-05-27 20:41:45,456 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:45,456 - x3270_emulator - INFO - Criando socket para porta 12345
+2025-05-27 20:41:45,457 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 1/5)
+2025-05-27 20:41:46,457 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 2/5)
+2025-05-27 20:41:47,458 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 3/5)
+2025-05-27 20:41:48,459 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 4/5)
+2025-05-27 20:41:49,460 - x3270_emulator - WARNING - Conexão recusada, tentando novamente em 1s (tentativa 5/5)
+2025-05-27 20:41:50,461 - x3270_emulator - ERROR - Falha ao conectar após 5 tentativas
+2025-05-27 20:41:50,461 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:50,464 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,464 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,465 - x3270_emulator - INFO - Limpando tela
+2025-05-27 20:41:50,466 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:50,466 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,466 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,466 - x3270_emulator - INFO - Tela limpa com sucesso
+2025-05-27 20:41:50,466 - x3270_emulator - INFO - Limpando tela
+2025-05-27 20:41:50,466 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:50,466 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,467 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,467 - x3270_emulator - INFO - Tela limpa com sucesso
+2025-05-27 20:41:50,469 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,470 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,471 - x3270_emulator - INFO - Limpando tela
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - WARNING - Tela não foi limpa completamente na tentativa 1
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - WARNING - Tela não foi limpa completamente na tentativa 2
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando clear com args=(), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,472 - x3270_emulator - INFO - Tela limpa com sucesso
+2025-05-27 20:41:50,475 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,476 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,476 - x3270_emulator - INFO - Aguardando campo de entrada (timeout=10s)
+2025-05-27 20:41:50,477 - x3270_emulator - INFO - Executando comando wait com args=(10, 'InputField'), kwargs={}
+2025-05-27 20:41:50,479 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,479 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,480 - x3270_emulator - INFO - Aguardando campo de entrada (timeout=5s)
+2025-05-27 20:41:50,480 - x3270_emulator - INFO - Executando comando wait com args=(5, 'InputField'), kwargs={}
+2025-05-27 20:41:50,480 - x3270_emulator - ERROR - Erro ao executar comando wait: Wait timed out
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Wait timed out
+2025-05-27 20:41:50,484 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,485 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,486 - x3270_emulator - INFO - Verificando se string 'expected string' existe na posição (5,10)
+2025-05-27 20:41:50,486 - x3270_emulator - INFO - Executando comando ascii com args=(4, 9, 15), kwargs={}
+2025-05-27 20:41:50,486 - x3270_emulator - INFO - Resultado: True (encontrado: 'expected string')
+2025-05-27 20:41:50,488 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,488 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,489 - x3270_emulator - INFO - Verificando se string 'expected' existe na posição (1,1)
+2025-05-27 20:41:50,489 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 8), kwargs={}
+2025-05-27 20:41:50,489 - x3270_emulator - INFO - Resultado: False (encontrado: 'actual string')
+2025-05-27 20:41:50,491 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,492 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,492 - x3270_emulator - INFO - Verificando se string 'test' existe na posição (2,3)
+2025-05-27 20:41:50,492 - x3270_emulator - INFO - Executando comando ascii com args=(1, 2, 4), kwargs={}
+2025-05-27 20:41:50,492 - x3270_emulator - ERROR - Erro ao executar comando ascii: Failed to get string
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Failed to get string
+2025-05-27 20:41:50,493 - x3270_emulator - ERROR - Erro ao obter string: Failed to get string
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 543, in get_string
+    result = self.ascii(ypos, xpos, length)
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Failed to get string
+2025-05-27 20:41:50,494 - x3270_emulator - ERROR - Erro ao verificar string: Failed to get string
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 471, in string_found
+    found = self.get_string(ypos, xpos, len(string))
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 543, in get_string
+    result = self.ascii(ypos, xpos, length)
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Failed to get string
+2025-05-27 20:41:50,497 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,497 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,498 - x3270_emulator - INFO - Movendo cursor para posição (10,20)
+2025-05-27 20:41:50,498 - x3270_emulator - INFO - Executando comando movecursor1 com args=(10, 20), kwargs={}
+2025-05-27 20:41:50,500 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,501 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,501 - x3270_emulator - INFO - Enviando tecla PF3
+2025-05-27 20:41:50,501 - x3270_emulator - INFO - Executando comando PF com args=('3',), kwargs={}
+2025-05-27 20:41:50,502 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,505 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,505 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,506 - x3270_emulator - INFO - Enviando tecla ENTER
+2025-05-27 20:41:50,506 - x3270_emulator - INFO - Executando comando enter com args=(), kwargs={}
+2025-05-27 20:41:50,506 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,509 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,509 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,512 - x3270_emulator - INFO - Enviando string 'test string' na posição atual
+2025-05-27 20:41:50,512 - x3270_emulator - INFO - Executando comando string com args=('test string',), kwargs={}
+2025-05-27 20:41:50,516 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,517 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,518 - x3270_emulator - INFO - Enviando string 'data' para posição (5,15)
+2025-05-27 20:41:50,518 - x3270_emulator - INFO - Movendo cursor para posição (5,15)
+2025-05-27 20:41:50,518 - x3270_emulator - INFO - Executando comando movecursor1 com args=(5, 15), kwargs={}
+2025-05-27 20:41:50,518 - x3270_emulator - INFO - Executando comando string com args=('data',), kwargs={}
+2025-05-27 20:41:50,522 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,522 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,523 - x3270_emulator - INFO - Enviando string 'long string data' na posição atual
+2025-05-27 20:41:50,523 - x3270_emulator - INFO - Executando comando string com args=('long string data',), kwargs={}
+2025-05-27 20:41:50,523 - x3270_emulator - ERROR - Erro ao executar comando string: Write to protected field
+Traceback (most recent call last):
+  File "C:\projetos\pyx3270\pyx3270\emulator.py", line 718, in command_func
+    cmd = self._exec_command(
+        f'{name}({all_args})'.encode('utf8')
+    )
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\e5674469\.pyenv\pyenv-win\versions\3.13.1\Lib\unittest\mock.py", line 1226, in _execute_mock_call
+    raise effect
+exceptions.CommandError: Write to protected field
+2025-05-27 20:41:50,526 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,527 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,528 - x3270_emulator - INFO - Executando comando ascii com args=(9, 4, 16), kwargs={}
+2025-05-27 20:41:50,529 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,530 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,530 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,533 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,533 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,534 - x3270_emulator - INFO - Salvando tela em path_test\myscreen.html
+2025-05-27 20:41:50,534 - x3270_emulator - INFO - Executando comando printtext com args=('html', 'file', 'path_test\\myscreen.html'), kwargs={}
+2025-05-27 20:41:50,534 - x3270_emulator - INFO - Tela salva com sucesso
+2025-05-27 20:41:50,536 - x3270_emulator - INFO - Inicializando Ws3270App com modelo: 4
+2025-05-27 20:41:50,537 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=4)
+2025-05-27 20:41:50,537 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:50,539 - x3270_emulator - INFO - Inicializando X3270App com modelo: 2
+2025-05-27 20:41:50,539 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,539 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:50,541 - x3270_emulator - INFO - Inicializando S3270App com modelo: 5
+2025-05-27 20:41:50,541 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=5)
+2025-05-27 20:41:50,541 - x3270_emulator - INFO - Processo iniciado com PID: 12345
+2025-05-27 20:41:50,543 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,543 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,544 - x3270_emulator - INFO - Aguardando string 'target string' na posição (1,1), equal=True, timeout=3s
+2025-05-27 20:41:50,544 - x3270_emulator - INFO - Resultado da comparação: True
+2025-05-27 20:41:50,546 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,546 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,547 - x3270_emulator - INFO - Aguardando string 'expected' na posição (2,2), equal=True, timeout=2s
+2025-05-27 20:41:50,547 - x3270_emulator - INFO - Resultado da comparação: False
+2025-05-27 20:41:50,549 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,549 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,550 - x3270_emulator - INFO - Aguardando string 'target' na posição (3,3), equal=False, timeout=2s
+2025-05-27 20:41:50,550 - x3270_emulator - INFO - Executando comando ascii com args=(2, 2, 6), kwargs={}
+2025-05-27 20:41:50,550 - x3270_emulator - INFO - Resultado da comparação: True
+2025-05-27 20:41:50,552 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,553 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,553 - x3270_emulator - INFO - Deletando campo atual
+2025-05-27 20:41:50,554 - x3270_emulator - INFO - Executando comando deletefield com args=(), kwargs={}
+2025-05-27 20:41:50,556 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,556 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,557 - x3270_emulator - INFO - Enviando tecla HOME
+2025-05-27 20:41:50,557 - x3270_emulator - INFO - Executando comando home com args=(), kwargs={}
+2025-05-27 20:41:50,558 - x3270_emulator - INFO - Executando comando wait com args=(5, 'unlock'), kwargs={}
+2025-05-27 20:41:50,560 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,560 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,561 - x3270_emulator - INFO - Executando comando ascii com args=(0, 4, 2, 11), kwargs={}
+2025-05-27 20:41:50,562 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,563 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,564 - x3270_emulator - INFO - Buscando string 'target' na tela (ignore_case=False)
+2025-05-27 20:41:50,564 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:50,564 - x3270_emulator - INFO - String encontrada na linha 1
+2025-05-27 20:41:50,566 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,566 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Buscando string 'missing' na tela (ignore_case=False)
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(1, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(2, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(3, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(4, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(5, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(6, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(7, 0, 80), kwargs={}
+2025-05-27 20:41:50,567 - x3270_emulator - INFO - Executando comando ascii com args=(8, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(9, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(10, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(11, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(12, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(13, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(14, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(15, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(16, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(17, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(18, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(19, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(20, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(21, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(22, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(23, 0, 80), kwargs={}
+2025-05-27 20:41:50,568 - x3270_emulator - INFO - Executando comando ascii com args=(24, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - Executando comando ascii com args=(25, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - Executando comando ascii com args=(26, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - Executando comando ascii com args=(27, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - Executando comando ascii com args=(28, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - Executando comando ascii com args=(29, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - Executando comando ascii com args=(30, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - Executando comando ascii com args=(31, 0, 80), kwargs={}
+2025-05-27 20:41:50,569 - x3270_emulator - INFO - String não encontrada em nenhuma linha
+2025-05-27 20:41:50,571 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,572 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,572 - x3270_emulator - INFO - Buscando string 'text here' na tela (ignore_case=True)
+2025-05-27 20:41:50,572 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:50,572 - x3270_emulator - INFO - String encontrada na linha 1
+2025-05-27 20:41:50,572 - x3270_emulator - INFO - Buscando string 'TEXT HERE' na tela (ignore_case=True)
+2025-05-27 20:41:50,572 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - String encontrada na linha 1
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Buscando string 'text here' na tela (ignore_case=False)
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(0, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(1, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(2, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(3, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(4, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(5, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(6, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(7, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(8, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(9, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(10, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(11, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(12, 0, 80), kwargs={}
+2025-05-27 20:41:50,573 - x3270_emulator - INFO - Executando comando ascii com args=(13, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(14, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(15, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(16, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(17, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(18, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(19, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(20, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(21, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(22, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(23, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(24, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(25, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(26, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(27, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(28, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(29, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(30, 0, 80), kwargs={}
+2025-05-27 20:41:50,574 - x3270_emulator - INFO - Executando comando ascii com args=(31, 0, 80), kwargs={}
+2025-05-27 20:41:50,575 - x3270_emulator - INFO - String não encontrada em nenhuma linha
+2025-05-27 20:41:50,576 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,577 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,577 - x3270_emulator - INFO - Buscando posições da string 'target' (ignore_case=False)
+2025-05-27 20:41:50,577 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,578 - x3270_emulator - INFO - Posições encontradas: [(1, 5), (2, 5), (3, 1)]
+2025-05-27 20:41:50,580 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,580 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,581 - x3270_emulator - INFO - Buscando posições da string 'find me' (ignore_case=True)
+2025-05-27 20:41:50,581 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,581 - x3270_emulator - INFO - Posições encontradas: [(1, 1), (2, 1)]
+2025-05-27 20:41:50,581 - x3270_emulator - INFO - Buscando posições da string 'find me' (ignore_case=False)
+2025-05-27 20:41:50,581 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,581 - x3270_emulator - INFO - Posições encontradas: [(2, 1)]
+2025-05-27 20:41:50,583 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,584 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,584 - x3270_emulator - INFO - Buscando posições da string 'missing' (ignore_case=False)
+2025-05-27 20:41:50,584 - x3270_emulator - INFO - Executando comando ascii com args=(), kwargs={}
+2025-05-27 20:41:50,585 - x3270_emulator - INFO - Posições encontradas: []
+2025-05-27 20:41:50,587 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,587 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,587 - x3270_emulator - INFO - Terminando emulador
+2025-05-27 20:41:50,588 - x3270_emulator - INFO - Executando comando quit com args=(), kwargs={}
+2025-05-27 20:41:50,589 - x3270_emulator - INFO - Emulador terminado com sucesso
+2025-05-27 20:41:50,593 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,593 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,594 - x3270_emulator - INFO - Estado de conexão: True
+2025-05-27 20:41:50,596 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,597 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,598 - x3270_emulator - INFO - Estado de conexão: False
+2025-05-27 20:41:50,600 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,601 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,601 - x3270_emulator - INFO - Conectando ao host: myhost:1234 (tls=False)
+2025-05-27 20:41:50,601 - x3270_emulator - INFO - Executando comando connect com args=('myhost:1234',), kwargs={}
+2025-05-27 20:41:50,602 - x3270_emulator - INFO - Executando comando wait com args=(2, '3270mode'), kwargs={}
+2025-05-27 20:41:50,602 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:50,604 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,605 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,605 - x3270_emulator - INFO - Conectando ao host: securehost:992 (tls=True)
+2025-05-27 20:41:50,605 - x3270_emulator - INFO - Executando comando connect com args=('L:Y:securehost:992',), kwargs={}
+2025-05-27 20:41:50,606 - x3270_emulator - INFO - Executando comando wait com args=(2, '3270mode'), kwargs={}
+2025-05-27 20:41:50,606 - x3270_emulator - INFO - Conexão estabelecida com sucesso
+2025-05-27 20:41:50,607 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,608 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,608 - x3270_emulator - INFO - Tentando reconectar ao host
+2025-05-27 20:41:50,608 - x3270_emulator - INFO - Executando comando reconnect com args=(), kwargs={}
+2025-05-27 20:41:50,609 - x3270_emulator - INFO - Reconexão bem-sucedida
+2025-05-27 20:41:50,609 - x3270_emulator - INFO - Criando nova instância para reconexão
+2025-05-27 20:41:50,609 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,609 - x3270_emulator - INFO - Conectando ao host: None:None (tls=None)
+2025-05-27 20:41:50,609 - x3270_emulator - INFO - Atributos de self atualizados com sucesso
+2025-05-27 20:41:50,610 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,610 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,612 - x3270_emulator - INFO - Inicializando ExecutableApp (shell=False, model=2)
+2025-05-27 20:41:50,613 - x3270_emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-05-27 20:41:50,613 - x3270_emulator - INFO - Executando comando: b'testcommand()'
+2025-05-27 20:41:50,614 - x3270_emulator - INFO - Comando executado com sucesso (OK)
+2025-05-27 20:41:50,614 - x3270_emulator - ERROR - Status não tem items suficientes.

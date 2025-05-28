@@ -453,7 +453,8 @@ class X3270Cmd(AbstractEmulatorCmd):
                 else:
                     result = found != string
                 logger.info(f'Resultado da comparação: {result}')
-                return result
+                if result:
+                    break
             except Exception as e:
                 logger.debug(f'Erro ao buscar string: {e}, tentando novamente')
                 continue
@@ -839,7 +840,8 @@ class X3270(AbstractEmulator, X3270Cmd):
             if self.app:
                 if not self.app.connect(strint_conn):
                     logger.debug(
-                        'Método connect do app retornou False, tentando método connect direto'
+                        'Método connect do app retornou False, ' +
+                        'tentando método connect direto'
                     )
                     self.connect(strint_conn)
                 logger.debug('Aguardando modo 3270')
