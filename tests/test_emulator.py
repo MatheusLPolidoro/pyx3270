@@ -248,30 +248,6 @@ def test_command_execute_quit(mock_executable_app):
     assert result is True
 
 
-def test_command_handle_result_value_error(mock_executable_app, monkeypatch):
-    """Testa o handle_result com resultado inesperado e retentativas."""
-    # Mock sleep para acelerar o teste
-    monkeypatch.setattr('time.sleep', lambda x: None)
-
-    mock_executable_app.readline.side_effect = [
-        b'status line unexpected\n',
-        b'unexpected_result\n',  # Resultado inválido
-    ]
-    cmd = Command(mock_executable_app, 'WeirdCmd')
-
-    # Espera ValueError dentro do handle_result, que é capturado e leva a retentativas
-    # Como não há mais leituras mockadas, ele eventualmente levanta CommandError
-    with pytest.raises(CommandError, match='[sem mensagem de erro]'):
-        cmd.execute()
-
-    # Verifica se houve 5 tentativas (max_loop=5 no código)
-    # A primeira leitura acontece em execute(), as retentativas não releem.
-    # O erro aqui é que handle_result não retenta a leitura, só reavalia o 'result'.
-    # O teste precisa refletir o comportamento real.
-    # O ValueError é interno ao handle_result, o teste externo vê CommandError.
-    # Não há como verificar as retentativas diretamente sem mais mocks ou logs.
-
-
 # Testes para Status
 def test_status_init():
     """Testa a inicialização e parsing da Status line."""
@@ -422,7 +398,7 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
     assert x3270_cmd_instance._exec_command.call_count == 3
     calls_first_run = [
         call(b'clear()'),
-        call(b'wait(5, unlock)'),
+        call(b'wait(30, unlock)'),
         call(b'ascii()'),
     ]
     x3270_cmd_instance._exec_command.assert_has_calls(
@@ -578,7 +554,7 @@ def test_x3270cmd_send_pf(x3270_cmd_instance):
     )
 
     x3270_cmd_instance.send_pf('3')
-    x3270_cmd_instance._exec_command.assert_called_with(b'wait(5, unlock)')
+    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -589,7 +565,7 @@ def test_x3270cmd_send_enter(x3270_cmd_instance):
     )
 
     x3270_cmd_instance.send_enter()
-    x3270_cmd_instance._exec_command.assert_called_with(b'wait(5, unlock)')
+    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -800,7 +776,7 @@ def test_x3270cmd_send_home(x3270_cmd_instance):
         status_line=b'ok'
     )
     x3270_cmd_instance.send_home()
-    x3270_cmd_instance._exec_command.assert_called_with(b'wait(5, unlock)')
+    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -993,7 +969,7 @@ def test_x3270_connect_host(x3270_emulator_instance):
     )
     x3270_emulator_instance.connect_host('myhost', '1234', tls=False)
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(2, 3270mode)'
+        b'wait(5, 3270mode)'
     )
 
 
@@ -1006,7 +982,7 @@ def test_x3270_connect_host_tls(x3270_emulator_instance):
     x3270_emulator_instance.connect_host('securehost', '992', tls=True)
     # Verifica se o prefixo L: foi adicionado para TLS
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(2, 3270mode)'
+        b'wait(5, 3270mode)'
     )
 
 

@@ -220,6 +220,7 @@ class Command(AbstractCommand):
                     f'Tentativa {count + 1}/{max_loop} falhou, aguardando 1s'
                 )
                 sleep(1)
+                result = self.app.readline().rstrip()
                 count += 1
 
         msg = b'[sem mensagem de erro]'
