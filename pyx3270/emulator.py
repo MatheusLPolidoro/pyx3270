@@ -411,7 +411,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         while count < max_loop:
             logger.debug(f'Tentativa {count + 1}/{max_loop} de limpar tela')
             self.clear()
-            self.wait(5, 'unlock')
+            self.wait(30, 'unlock')
             if not self.get_full_screen(header=True).strip():
                 logger.info('Tela limpa com sucesso')
                 break
@@ -490,12 +490,17 @@ class X3270Cmd(AbstractEmulatorCmd):
     def send_pf(self, value: int) -> None:
         logger.info(f'Enviando tecla PF{value}')
         self.PF(value)
-        self.wait(5, 'unlock')
+        self.wait(30, 'unlock')
         logger.debug(f'PF{value} enviado e tela desbloqueada')
 
     def send_string(
         self, tosend: str, ypos: int | None = None, xpos: int | None = None
     ) -> None:
+        if not tosend:
+            logger.info(
+                f"tosend não é string."
+            )
+            return
         if xpos is not None and ypos is not None:
             logger.info(
                 f"Enviando string '{tosend}' para posição ({ypos},{xpos})"
@@ -518,13 +523,13 @@ class X3270Cmd(AbstractEmulatorCmd):
     def send_enter(self) -> None:
         logger.info('Enviando tecla ENTER')
         self.enter()
-        self.wait(5, 'unlock')
+        self.wait(30, 'unlock')
         logger.debug('ENTER enviado e tela desbloqueada')
 
     def send_home(self) -> None:
         logger.info('Enviando tecla HOME')
         self.home()
-        self.wait(5, 'unlock')
+        self.wait(30, 'unlock')
         logger.debug('HOME enviado e tela desbloqueada')
 
     def get_string(self, ypos: int, xpos: int, length: int) -> str:
@@ -749,7 +754,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                     value = int(name[-1])
                 logger.info(f'Enviando tecla PF{value}')
                 self._exec_command(f'PF({value})')
-                self.wait(5, 'unlock')
+                self.wait(30, 'unlock')
                 logger.debug(f'PF{value} enviado e tela desbloqueada')
 
             return command_func
@@ -845,7 +850,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                     )
                     self.connect(strint_conn)
                 logger.debug('Aguardando modo 3270')
-                self.wait(2, '3270mode')
+                self.wait(5, '3270mode')
                 logger.info('Conexão estabelecida com sucesso')
         except CommandError as e:
             logger.warning(f'CommandError durante conexão: {e}')
