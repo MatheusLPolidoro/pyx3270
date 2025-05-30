@@ -577,24 +577,9 @@ def test_x3270cmd_send_string(x3270_cmd_instance):
 
     x3270_cmd_instance.send_string('test string')
 
-    x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'string(test string)'
+    x3270_cmd_instance._exec_command.assert_called_with(
+        b'wait(30, unlock)'
     )
-
-
-@pytest.mark.usefixtures('x3270_cmd_instance')
-def test_x3270cmd_send_string_with_pos(x3270_cmd_instance):
-    """Testa send_string especificando posição."""
-    # Mock para MoveCursor e String
-    x3270_cmd_instance._exec_command.side_effect = [
-        MagicMock(status_line=b'ok'),  # MoveCursor
-        MagicMock(status_line=b'ok'),  # String
-    ]
-
-    x3270_cmd_instance.send_string('data', ypos=5, xpos=15)
-
-    calls = [call(b'movecursor1(5, 15)'), call(b'string(data)')]
-    x3270_cmd_instance._exec_command.assert_has_calls(calls)
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')

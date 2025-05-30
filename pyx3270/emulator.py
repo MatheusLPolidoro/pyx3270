@@ -192,6 +192,7 @@ class Command(AbstractCommand):
 
                 logger.debug(f'Dados recebidos: {line}')
                 self.data.append(line[6:].rstrip('\n\r'.encode('utf-8')))
+            
         except Exception as e:
             logger.error(
                 f'Erro durante execução do comando: {e}', exc_info=True
@@ -210,24 +211,22 @@ class Command(AbstractCommand):
                 elif result.lower() == 'ok':
                     logger.info('Comando executado com sucesso (OK)')
                     return True
-                elif result.lower() != 'error':
+                else:
                     error_msg = f'"erro" esperado, mas recebido: {result}.'
                     logger.warning(error_msg)
                     raise ValueError(error_msg)
-                break
             except ValueError:
                 logger.warning(
                     f'Tentativa {count + 1}/{max_loop} falhou, aguardando 1s'
                 )
-                sleep(1)
-                result = self.app.readline().rstrip()
+                sleep(0.35)
                 count += 1
 
         msg = b'[sem mensagem de erro]'
         if self.data:
             msg = ''.encode('utf-8').join(self.data).rstrip()
         error_msg = msg.decode('utf-8')
-        logger.error(f'Comando falhou: {error_msg}')
+        logger.error(f'Comando falhou: {error_msg}')        
         raise CommandError(error_msg)
 
 
@@ -436,7 +435,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         xpos: int,
         string: str,
         equal: bool = True,
-        timeout: int = 3,
+        timeout: int = 5,
     ) -> bool:
         logger.info(
             f"Aguardando string '{string}' na posição ({ypos},{xpos}), equal={equal}, timeout={timeout}s"
@@ -491,6 +490,7 @@ class X3270Cmd(AbstractEmulatorCmd):
     def send_pf(self, value: int) -> None:
         logger.info(f'Enviando tecla PF{value}')
         self.PF(value)
+        sleep(0.5)
         self.wait(30, 'unlock')
         logger.debug(f'PF{value} enviado e tela desbloqueada')
 
@@ -519,6 +519,7 @@ class X3270Cmd(AbstractEmulatorCmd):
             )
 
         self.string(tosend)
+        self.wait(30, 'unlock')
         logger.debug('String enviada')
 
     def send_enter(self) -> None:
@@ -789,16 +790,28 @@ class X3270(AbstractEmulator, X3270Cmd):
             error_msg = 'Tentativa de executar comando em emulador terminado'
             logger.error(error_msg)
             raise TerminatedError
-
-        try:
-            cmd = Command(self.app, cmdstr)
-            cmd.execute()
-            self.status = Status(cmd.status_line)
-            logger.debug(f'Comando executado, status: {self.status}')
-            return cmd
-        except Exception as e:
-            logger.error(f'Erro ao executar comando: {e}', exc_info=True)
-            raise
+        max_loop = 5
+        for exec in range(max_loop):
+            try:
+                cmd = Command(self.app, cmdstr)
+                cmd.execute()
+                self.status = Status(cmd.status_line)
+                logger.debug(f'Comando executado, status: {self.status}')
+                return cmd
+            except Exception as e:
+                logger.error(f'Erro ao executar comando: {e}', exc_info=True)
+                logger.warning(
+                    f'Nova tentativa de exec command: {exec}/{max_loop}'
+                )
+                sleep(exec)
+                self.reset()
+                self.wait(10, 'unlock')
+                self.tab()
+        logger.error(
+            f'Erro ao executar comando total de tentativas: {max_loop}',
+            exc_info=True
+        )
+        raise CommandError
 
     def terminate(self) -> None:
         logger.info('Terminando emulador')

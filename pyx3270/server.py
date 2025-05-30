@@ -1,11 +1,11 @@
-import codecs
+from logging.handlers import TimedRotatingFileHandler
 import os
 import pathlib
 import re
 import select
 import socket
 import sys
-from logging import DEBUG, getLogger
+import logging
 import queue
 import threading
 
@@ -16,9 +16,28 @@ sys.path.append(str(pathlib.Path(__file__).parent))
 import pyx3270.tn3270 as tn3270
 from pyx3270.emulator import X3270
 
-logger = getLogger()
-logger.setLevel(DEBUG)
+logger = logging.getLogger('server')
+logger.setLevel(logging.DEBUG)
 
+# Evita duplicação de handlers
+if not logger.handlers:
+    handler = TimedRotatingFileHandler(
+        filename='server.log',
+        when='midnight',  # Roda diariamente
+        interval=1,  # Intervalo de 1 dia
+        backupCount=7,  # Mantém arquivos dos últimos 7 dias
+        encoding='utf-8',  # Mantém acentos
+    )
+
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+
+# Se quiser evitar que os logs sejam propagados para o logger raiz
+logger.propagate = False
 
 def ensure_dir(path):
     if path and not os.path.isdir(path):
@@ -172,17 +191,18 @@ def backend_3270(
         except socket.timeout:
             continue
 
-    press = clientsock.recv(3)
-    key_press = press in {
-        b'@@' + tn3270.IAC,
-        b'@@' + tn3270.WSF,
-        tn3270.IAC + tn3270.TN_EOR,
-        b'K\xe9\xff',
-    }
+    press = clientsock.recv(1)
+
+    # Verifica se press contém um código esperado
+    key_press = press and press not in tn3270.AIDS  
     clear = False
+
     if aid in {tn3270.PF3, tn3270.PF7} and key_press and emulator:
         current_screen = max(0, current_screen - 1)
-    elif aid in {tn3270.PF4, tn3270.PF8, tn3270.ENTER} and key_press:
+    elif (
+        aid in {tn3270.PF4, tn3270.PF8, tn3270.ENTER} 
+        and key_press and emulator
+    ):
         current_screen = min(len(screens) - 1, current_screen + 1)
     elif aid == tn3270.CLEAR and key_press:
         clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
@@ -217,13 +237,18 @@ def replay_handler(clientsock: socket.socket, screens: dict, emulator: bool):
             # Verifica se há comandos na fila
             try:
                 command = command_queue.get_nowait()
+                command_log = (
+                    command if not command.startswith('add ') 
+                    else ' '.join(command.split()[:2])
+                )
+                logger.info(f"Comando recebido: {command_log}")
                 if command.startswith('set '):
                     screen_name = command.split(' ', 1)[1].upper()
                     screen_index = next(
                         (
                             i
                             for i, screen in enumerate(screens.keys())
-                            if screen_name in screen
+                            if screen_name in screen.upper()
                         ),
                         None,
                     )
@@ -231,7 +256,7 @@ def replay_handler(clientsock: socket.socket, screens: dict, emulator: bool):
                         current_screen = screen_index
                         print(f'[+] Mudando para a tela: {screen_name}')
                         continue
-                if command.startswith('add '):
+                elif command.startswith('add '):
                     screen_name, screen_data = command.split(' ', 2)[1:]
                     screen_name = screen_name.upper()
 
@@ -248,6 +273,23 @@ def replay_handler(clientsock: socket.socket, screens: dict, emulator: bool):
                     # Adicionar tela
                     screens[screen_name] = final_bytes
                     screens_list.append(final_bytes)
+                elif command.startswith("change directory "):
+                    new_dir = command.split(" ", 2)[2].strip()
+                    if os.path.isdir(new_dir):
+                        screens = load_screens(new_dir)  # Recarrega as telas
+                        screens_list = list(screens.values())  # Atualiza a lista de telas
+                        current_screen = 0
+                        logger.info(f"[+] Mudando para o diretório de telas: {new_dir}")
+                    else:
+                        logger.info(f"[!] Diretório inválido: {new_dir}")
+                elif command.startswith("next") and not emulator:
+                    current_screen = min(len(screens), current_screen + 1)
+                    logger.info(f"[!] Comando 'next' enviado: {current_screen}")
+                    continue
+                elif command.startswith("prev") and not emulator:
+                    current_screen = max(0, current_screen - 1)
+                    logger.info(f"[!] Comando 'prev' enviado: {current_screen}")
+                    continue
             except queue.Empty:
                 pass
 

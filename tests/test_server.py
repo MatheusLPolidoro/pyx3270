@@ -222,7 +222,7 @@ def test_backend_3270_timeout(mock_socket_constructor):
     screens = {'s0': b's0', 's1': b's1'}
 
     result = server.backend_3270(mock_clientsock, screens, 0, emulator=False)
-    assert result == {'current_screen': 1, 'clear': False}
+    assert result == {'current_screen': 0, 'clear': False}
     assert mock_clientsock.recv.call_count == 3  # 1 timeout, 1 AID, 1 keypress
 
 
