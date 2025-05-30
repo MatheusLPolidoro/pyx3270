@@ -66,8 +66,7 @@ def test_load_screens_empty_dir(tmp_path, monkeypatch):
     mock_ensure_dir = MagicMock()
     monkeypatch.setattr(server, 'ensure_dir', mock_ensure_dir)
 
-    screens = server.load_screens(str(record_dir))
-
+    screens = server.load_screens_basic(str(record_dir))
     mock_ensure_dir.assert_called_once_with(str(record_dir))
     assert screens == dict()
 
@@ -89,7 +88,7 @@ def test_load_screens_with_files(tmp_path, monkeypatch):
     mock_ensure_dir = MagicMock()
     monkeypatch.setattr(server, 'ensure_dir', mock_ensure_dir)
 
-    screens = server.load_screens(str(record_dir))
+    screens = server.load_screens_basic(str(record_dir))
     screens_list = list(screens.values())
 
     mock_ensure_dir.assert_called_once_with(str(record_dir))
@@ -245,7 +244,9 @@ def test_replay_handler(mock_backend, monkeypatch):
         Exception('Simulate loop break'),  # Para sair do loop
     ]
 
-    server.replay_handler(mock_clientsock, screens, emulator=True)
+    server.replay_handler(
+        mock_clientsock, screens, emulator=True, base_directory='./screens'
+    )
 
     # Verifica chamadas
     mock_clientsock.sendall.assert_has_calls([

@@ -9,7 +9,7 @@ from pynput import keyboard
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 
-from emulator import BINARY_FOLDER, X3270
+from emulator import X3270
 from server import load_screens, record_handler, replay_handler
 
 app = typer.Typer()
@@ -45,7 +45,6 @@ def replay(
     emulator: bool = typer.Option(default=True),
 ):
     screens = load_screens(directory)
-    screens = load_screens(BINARY_FOLDER) if not screens else screens
 
     rich.print(f'[+] REPLAY do caminho: {directory}')
     tnsock = start_sock(port)
@@ -60,7 +59,8 @@ def replay(
         rich.print(f'[+] Replay de conexões de {addr}')
 
         th = threading.Thread(
-            target=replay_handler, args=(clientsock, screens, emulator)
+            target=replay_handler,
+            args=(clientsock, screens, emulator, directory),
         )
         th.start()
 

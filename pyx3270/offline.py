@@ -3,6 +3,7 @@ import subprocess
 import sys
 from .emulator import logger
 
+
 class PyX3270Manager:
     def __init__(self, directory='./screens'):
         self.command = [
@@ -21,9 +22,8 @@ class PyX3270Manager:
             self.command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            text=True
+            text=True,
         )
-
 
     def _exec(self, command: str) -> None:
         if self.process.poll() is not None:
@@ -32,7 +32,7 @@ class PyX3270Manager:
             )
             return
 
-        logger.info(f"[+] Enviando comando offline: {command}")
+        logger.info(f'[+] Enviando comando offline: {command}')
         self.process.stdin.write(f'{command}\n')
         self.process.stdin.flush()
         self.emu.PF(1)

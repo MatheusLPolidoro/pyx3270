@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Logs com data
+*.log*
+
 # Arquivo de usuarios
 *user.py
 *tests_files_oneb2k/

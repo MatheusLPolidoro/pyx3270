@@ -43,7 +43,7 @@ quote-style = 'single'
 lint = "ruff check . --diff"
 format = "ruff format ."
 test = "python -m pytest . -s -x --cov=pyx3270 -vv"
-post_test = "coverage html"
+post_test = "python -m coverage html"
 
 [tool.setuptools.packages.find]
 where = ["."]

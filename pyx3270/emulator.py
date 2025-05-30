@@ -192,7 +192,7 @@ class Command(AbstractCommand):
 
                 logger.debug(f'Dados recebidos: {line}')
                 self.data.append(line[6:].rstrip('\n\r'.encode('utf-8')))
-            
+
         except Exception as e:
             logger.error(
                 f'Erro durante execução do comando: {e}', exc_info=True
@@ -226,7 +226,7 @@ class Command(AbstractCommand):
         if self.data:
             msg = ''.encode('utf-8').join(self.data).rstrip()
         error_msg = msg.decode('utf-8')
-        logger.error(f'Comando falhou: {error_msg}')        
+        logger.error(f'Comando falhou: {error_msg}')
         raise CommandError(error_msg)
 
 
@@ -490,7 +490,6 @@ class X3270Cmd(AbstractEmulatorCmd):
     def send_pf(self, value: int) -> None:
         logger.info(f'Enviando tecla PF{value}')
         self.PF(value)
-        sleep(0.5)
         self.wait(30, 'unlock')
         logger.debug(f'PF{value} enviado e tela desbloqueada')
 
@@ -498,9 +497,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         self, tosend: str, ypos: int | None = None, xpos: int | None = None
     ) -> None:
         if not tosend:
-            logger.info(
-                f"tosend não é string."
-            )
+            logger.info(f'tosend não é string.')
             return
         if xpos is not None and ypos is not None:
             logger.info(
@@ -809,7 +806,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                 self.tab()
         logger.error(
             f'Erro ao executar comando total de tentativas: {max_loop}',
-            exc_info=True
+            exc_info=True,
         )
         raise CommandError
 
@@ -859,8 +856,8 @@ class X3270(AbstractEmulator, X3270Cmd):
             if self.app:
                 if not self.app.connect(strint_conn):
                     logger.debug(
-                        'Método connect do app retornou False, ' +
-                        'tentando método connect direto'
+                        'Método connect do app retornou False, '
+                        + 'tentando método connect direto'
                     )
                     self.connect(strint_conn)
                 logger.debug('Aguardando modo 3270')

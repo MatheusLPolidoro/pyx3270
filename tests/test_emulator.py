@@ -577,9 +577,7 @@ def test_x3270cmd_send_string(x3270_cmd_instance):
 
     x3270_cmd_instance.send_string('test string')
 
-    x3270_cmd_instance._exec_command.assert_called_with(
-        b'wait(30, unlock)'
-    )
+    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
