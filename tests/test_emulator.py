@@ -781,7 +781,7 @@ def test_x3270cmd_get_string_area(x3270_cmd_instance):
     assert result == expected_result
     # Verifica o comando Ascii com coordenadas de área
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'ascii(0, 4, 2, 11)'
+        b'ascii(0, 4, 3, 11)'
     )
 
 

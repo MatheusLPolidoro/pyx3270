@@ -39,7 +39,6 @@ if not logger.handlers:
 # Se quiser evitar que os logs sejam propagados para o logger raiz
 logger.propagate = False
 
-
 def ensure_dir(path):
     if path and not os.path.isdir(path):
         os.makedirs(path)
@@ -74,41 +73,32 @@ def load_screens(record_dir):
     ensure_dir(record_dir)  # Garante que o diretório existe
     screens = {}
     try:
-        if not any(f.endswith('.bin') for f in os.listdir(record_dir)):
+        if not any(f.endswith(".bin") for f in os.listdir(record_dir)):
             screens = load_screens_basic(BINARY_FOLDER)
 
-            for root, _, files in os.walk(
-                record_dir
-            ):  # Percorre todas as subpastas
-                sorted_files = sorted(
-                    files
-                )  # Ordena os arquivos de cada pasta separadamente
-
-                for f in sorted_files:
-                    if f.endswith('.bin'):
-                        file_path = os.path.join(root, f)
-                        with open(file_path, 'rb') as fd:
-                            data = fd.read()
-                            # Garante que termina com tn3270.IAC TN_EOR
-                            if not data.endswith(tn3270.IAC + tn3270.TN_EOR):
-                                data += tn3270.IAC + tn3270.TN_EOR
-                            screens[str(f).upper().replace('.BIN', '')] = data
+        for root, _, files in os.walk(record_dir):  # Percorre todas as subpastas
+            sorted_files = sorted(files)  # Ordena os arquivos de cada pasta separadamente
+            for f in sorted_files:
+                if f.endswith('.bin'):
+                    file_path = os.path.join(root, f)
+                    with open(file_path, 'rb') as fd:
+                        data = fd.read()
+                        # Garante que termina com tn3270.IAC TN_EOR
+                        if not data.endswith(tn3270.IAC + tn3270.TN_EOR):
+                            data += tn3270.IAC + tn3270.TN_EOR
+                        screens[str(f).upper().replace('.BIN', '')] = data
     except Exception as ex:
-        input(ex)
+        logger.error(f'Falha ao carregar caminho: {record_dir}')
     return screens
 
 
 def find_directory(base_dir, search_name):
     """Busca um diretório dentro da pasta base, considerando maiúsculas/minúsculas e busca parcial."""
-    search_name = (
-        search_name.lower()
-    )  # Normaliza para comparação case-insensitive
+    search_name = search_name.lower()  # Normaliza para comparação case-insensitive
 
     for dir_name in os.listdir(base_dir):
         if os.path.isdir(os.path.join(base_dir, dir_name)):
-            if (
-                search_name in dir_name.lower()
-            ):  # Compara de forma insensível a maiúsculas/minúsculas
+            if search_name in dir_name.lower():  # Compara de forma insensível a maiúsculas/minúsculas
                 return os.path.join(base_dir, dir_name)
 
     return None  # Retorna None se não encontrar um diretório correspondente
@@ -243,15 +233,14 @@ def backend_3270(
     press = clientsock.recv(1)
 
     # Verifica se press contém um código esperado
-    key_press = press and press not in tn3270.AIDS
+    key_press = press and press not in tn3270.AIDS  
     clear = False
 
     if aid in {tn3270.PF3, tn3270.PF7} and key_press and emulator:
         current_screen = max(0, current_screen - 1)
     elif (
-        aid in {tn3270.PF4, tn3270.PF8, tn3270.ENTER}
-        and key_press
-        and emulator
+        aid in {tn3270.PF4, tn3270.PF8, tn3270.ENTER} 
+        and key_press and emulator
     ):
         current_screen = min(len(screens) - 1, current_screen + 1)
     elif aid == tn3270.CLEAR and key_press:
@@ -271,7 +260,7 @@ def replay_handler(
     clientsock: socket.socket,
     screens: dict,
     emulator: bool,
-    base_directory: str,
+    base_directory: str
 ):
     screens_list = list(screens.values())
     current_screen = 0
@@ -298,11 +287,10 @@ def replay_handler(
             try:
                 command = command_queue.get_nowait()
                 command_log = (
-                    command
-                    if not command.startswith('add ')
+                    command if not command.startswith('add ') 
                     else ' '.join(command.split()[:2])
                 )
-                logger.info(f'Comando recebido: {command_log}')
+                logger.info(f"Comando recebido: {command_log}")
                 if command.startswith('set '):
                     screen_name = command.split(' ', 1)[1].upper()
                     screen_index = next(
@@ -334,31 +322,28 @@ def replay_handler(
                     # Adicionar tela
                     screens[screen_name] = final_bytes
                     screens_list.append(final_bytes)
-                elif command.startswith('change directory '):
+                elif command.startswith("change directory "):
                     new_dir = find_directory(
-                        base_directory, command.split(' ', 2)[2].strip()
+                        base_directory, command.split(" ", 2)[2].strip()
                     )
                     if os.path.isdir(new_dir):
-                        screens = load_screens_basic(new_dir)
-                        screens_list = list(screens.values())
+                        screens = load_screens_basic(new_dir)  # Recarrega as telas
+                        screens_list = list(screens.values())  # Atualiza a lista de telas
                         current_screen = 0
-                        logger.info(
-                            f'[+] Mudando para o diretório de telas: {new_dir}'
-                        )
+                        logger.info(f'[+] Mudando para o diretório de telas: {new_dir}')
                     else:
                         logger.info(f'[!] Diretório inválido: {new_dir}')
-                elif command.startswith('next') and not emulator:
+                elif command.startswith('next'):
                     current_screen = min(len(screens), current_screen + 1)
-                    logger.info(
-                        f"[!] Comando 'next' enviado: {current_screen}"
-                    )
+                    logger.info(f"[!] Comando 'next' enviado: {current_screen}")
                     continue
-                elif command.startswith('prev') and not emulator:
+                elif command.startswith('prev'):
                     current_screen = max(0, current_screen - 1)
-                    logger.info(
-                        f"[!] Comando 'prev' enviado: {current_screen}"
-                    )
+                    logger.info(f"[!] Comando 'prev' enviado: {current_screen}")
                     continue
+                elif command.startswith('q'):
+                    logger.info("[!] Comando 'quit' enviado.")
+                    break
             except queue.Empty:
                 pass
 

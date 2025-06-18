@@ -10,7 +10,7 @@ from pynput import keyboard
 sys.path.append(str(pathlib.Path(__file__).parent))
 
 from emulator import X3270
-from server import load_screens, record_handler, replay_handler
+from .server import load_screens, record_handler, replay_handler
 
 app = typer.Typer()
 
@@ -59,8 +59,9 @@ def replay(
         rich.print(f'[+] Replay de conexões de {addr}')
 
         th = threading.Thread(
-            target=replay_handler,
-            args=(clientsock, screens, emulator, directory),
+            target=replay_handler, args=(
+                clientsock, screens, emulator, directory
+            )
         )
         th.start()
 
