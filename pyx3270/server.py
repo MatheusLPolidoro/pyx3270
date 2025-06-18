@@ -22,7 +22,7 @@ logger.setLevel(logging.DEBUG)
 # Evita duplicação de handlers
 if not logger.handlers:
     handler = TimedRotatingFileHandler(
-        filename='server.log',
+        filename='./logs/server.log',
         when='midnight',  # Roda diariamente
         interval=1,  # Intervalo de 1 dia
         backupCount=7,  # Mantém arquivos dos últimos 7 dias

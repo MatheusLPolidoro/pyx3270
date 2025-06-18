@@ -29,7 +29,7 @@ from iemulator import (
     AbstractExecutableApp,
 )
 
-logger = logging.getLogger('x3270_emulator')
+logger = logging.getLogger('./logs/x3270_emulator')
 logger.setLevel(logging.INFO)
 
 # Evita duplicação de handlers
@@ -563,7 +563,6 @@ class X3270Cmd(AbstractEmulatorCmd):
             self.check_limits(ypose, xpose)
             yposi -= 1
             xposi -= 1
-            ypose -= 1
             ypose -= yposi
             xpose -= xposi
             result = self.ascii(yposi, xposi, ypose, xpose)
