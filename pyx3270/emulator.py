@@ -29,13 +29,14 @@ from iemulator import (
     AbstractExecutableApp,
 )
 
+os.makedirs('./logs', exist_ok=True)
 logger = logging.getLogger('./logs/x3270_emulator')
 logger.setLevel(logging.INFO)
 
 # Evita duplicação de handlers
 if not logger.handlers:
     handler = TimedRotatingFileHandler(
-        filename='x3270_emulator.log',
+        filename='./logs/x3270_emulator.log',
         when='midnight',  # Roda diariamente
         interval=1,  # Intervalo de 1 dia
         backupCount=7,  # Mantém arquivos dos últimos 7 dias

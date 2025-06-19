@@ -59,9 +59,8 @@ def replay(
         rich.print(f'[+] Replay de conexões de {addr}')
 
         th = threading.Thread(
-            target=replay_handler, args=(
-                clientsock, screens, emulator, directory
-            )
+            target=replay_handler,
+            args=(clientsock, screens, emulator, directory),
         )
         th.start()
 
