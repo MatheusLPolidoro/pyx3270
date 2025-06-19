@@ -1,18 +1,27 @@
-# Pyx3270
-
-Automatiza seu mainframe.
+# Descrição
+Uma Lib para automatizar sistemas maiframe com python.
+Fornece ferramentas para automatização, gravação e reprodução de sistemas mainframe.
 
 ## :bookmark_tabs: Comandos
 
 * `pyx3270 record [address] [directory] [tls] [model] [emulator]` - Inicia a gravação das telas do terminal e salva os bytes no diretorio.
 * `pyx3270 replay [directory] [port] [tls] [model] [emulator]` - Inicia a reprodução das telas gravadas e armazanadas anteriormente em modo offline.
 
-## :clock2: Changelogs
 
-:: towncrier-draft Unreleased changes
+## :open_file_folder: Layout do Projeto
 
---8<-- "CHANGELOG.md"
-
+```
+├───pyx3270
+│   │   command_config.py
+│   │   emulator.py
+│   │   exceptions.py
+│   │   iemulator.py
+│   │   server.py
+│   │   tn3270.py
+│   │   __init__.py
+│   └───__main__.py
+└───screens
+```
 
 ## :jigsaw: Diagrama de Classes
 
@@ -162,18 +171,8 @@ classDiagram
 
 ```
 
-## :open_file_folder: Layout do Projeto
+## :clock2: Changelogs
 
-```
-├───pyx3270
-│   │   command_config.py
-│   │   emulator.py
-│   │   exceptions.py
-│   │   iemulator.py
-│   │   server.py
-│   │   tn3270.py
-│   │   __init__.py
-│   └───__main__.py
-│
-└───screens
-```
+:: towncrier-draft Unreleased changes
+
+--8<-- "CHANGELOG.md"

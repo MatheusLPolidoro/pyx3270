@@ -56,6 +56,7 @@ requires = ["setuptools>=61.0,<70"]
 build-backend = "setuptools.build_meta"
 
 [tool.towncrier]
+encoding = "utf-8-sig"
 package = "pyx3270"
 package_dir = "."
 filename = "CHANGELOG.md"
