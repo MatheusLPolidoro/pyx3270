@@ -17,7 +17,7 @@ import pyx3270.tn3270 as tn3270
 from pyx3270.emulator import X3270, BINARY_FOLDER
 
 os.makedirs('./logs', exist_ok=True)
-logger = logging.getLogger('./logs/server')
+logger = logging.getLogger('server')
 logger.setLevel(logging.DEBUG)
 
 # Evita duplicação de handlers

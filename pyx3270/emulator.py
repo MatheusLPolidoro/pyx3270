@@ -30,7 +30,7 @@ from iemulator import (
 )
 
 os.makedirs('./logs', exist_ok=True)
-logger = logging.getLogger('./logs/x3270_emulator')
+logger = logging.getLogger('x3270_emulator')
 logger.setLevel(logging.INFO)
 
 # Evita duplicação de handlers
