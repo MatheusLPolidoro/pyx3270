@@ -1,7 +1,7 @@
 # Navegação e controle do sistema execução OFFLINE
 import subprocess
 import sys
-from .emulator import logger
+from pyx3270.emulator import logger
 from time import sleep
 
 class PyX3270Manager:
