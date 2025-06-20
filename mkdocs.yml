@@ -22,7 +22,9 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
-plugins: 
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
   - towncrier:
       encoding: utf-8-sig
 
