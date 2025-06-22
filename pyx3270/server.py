@@ -248,13 +248,16 @@ def backend_3270(
 
     if aid in {tn3270.PF3, tn3270.PF7} and key_press and emulator:
         current_screen = max(0, current_screen - 1)
+        logger.info('[!] Comando de retorno recebido.')
     elif (
         aid in {tn3270.PF4, tn3270.PF8, tn3270.ENTER}
         and key_press
         and emulator
     ):
+        logger.info('[!] Comando de paginação/confirmação recebido.')
         current_screen = min(len(screens) - 1, current_screen + 1)
-    elif aid == tn3270.CLEAR and key_press:
+    elif aid == tn3270.CLEAR and key_press and emulator:
+        logger.info('[!] Comando CLEAR recebido.')
         clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
         clear = True
 
@@ -361,6 +364,13 @@ def replay_handler(
                     current_screen = max(0, current_screen - 1)
                     logger.info(
                         f"[!] Comando 'prev' enviado: {current_screen}"
+                    )
+                    continue
+                elif command.startswith('clear'):
+                    clear = True
+                    clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
+                    logger.info(
+                        f"[!] Comando 'clear' enviado: {current_screen}"
                     )
                     continue
                 elif command.startswith('q'):
