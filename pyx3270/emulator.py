@@ -495,26 +495,33 @@ class X3270Cmd(AbstractEmulatorCmd):
         logger.debug(f'PF{value} enviado e tela desbloqueada')
 
     def send_string(
-        self, tosend: str, ypos: int | None = None, xpos: int | None = None
+        self,
+        tosend: str,
+        ypos: int | None = None,
+        xpos: int | None = None,
+        password: bool = False
     ) -> None:
         if not tosend:
             logger.info(f'tosend não é string.')
             return
-        if xpos is not None and ypos is not None:
-            logger.info(
-                f"Enviando string '{tosend}' para posição ({ypos},{xpos})"
-            )
-            self.move_to(ypos, xpos)
-        else:
-            logger.info(f"Enviando string '{tosend}' na posição atual")
-
         # Remove caracteres especiais
         original = tosend
         tosend = re.sub(r"[()\"']", '', tosend)
+
+        tosend_str = 'password' if password else tosend
+
         if original != tosend:
             logger.debug(
-                f"String modificada para '{tosend}' (removidos caracteres especiais)"
+                f"String modificada para '{tosend_str}' (removidos caracteres especiais)"
             )
+
+        if xpos is not None and ypos is not None:
+            logger.info(
+                f"Enviando string '{tosend_str}' para posição ({ypos},{xpos})"
+            )
+            self.move_to(ypos, xpos)
+        else:
+            logger.info(f"Enviando string '{tosend_str}' na posição atual")
 
         self.string(tosend)
         self.wait(30, 'unlock')
