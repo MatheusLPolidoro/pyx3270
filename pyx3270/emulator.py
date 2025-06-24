@@ -587,7 +587,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         try:
             text = self.ascii()
             if not header:
-                start = (self.model_dimensions['columns'] - 1) * 2
+                start = self.model_dimensions['columns']
                 text = text[start:]
                 logger.debug('Header removido do conteúdo')
             logger.debug(f'Conteúdo obtido com {len(text)} caracteres')

@@ -1,6 +1,7 @@
 # Navegação e controle do sistema execução OFFLINE
 import subprocess
 import sys
+from time import sleep
 from .emulator import logger
 
 
@@ -36,6 +37,7 @@ class PyX3270Manager:
         self.process.stdin.write(f'{command}\n')
         self.process.stdin.flush()
         self.emu.PF(1)
+        sleep(0.1)
 
     def next(self):
         """Define a tela específica e aguarda processamento corretamente."""
