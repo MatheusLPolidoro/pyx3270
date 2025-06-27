@@ -412,7 +412,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         while count < max_loop:
             logger.debug(f'Tentativa {count + 1}/{max_loop} de limpar tela')
             self.clear()
-            self.wait(30, 'unlock')
+            self.wait(180, 'unlock')
             if not self.get_full_screen(header=True).strip():
                 logger.info('Tela limpa com sucesso')
                 break
@@ -491,7 +491,7 @@ class X3270Cmd(AbstractEmulatorCmd):
     def send_pf(self, value: int) -> None:
         logger.info(f'Enviando tecla PF{value}')
         self.PF(value)
-        self.wait(30, 'unlock')
+        self.wait(180, 'unlock')
         logger.debug(f'PF{value} enviado e tela desbloqueada')
 
     def send_string(
@@ -524,19 +524,19 @@ class X3270Cmd(AbstractEmulatorCmd):
             logger.info(f"Enviando string '{tosend_str}' na posição atual")
 
         self.string(tosend)
-        self.wait(30, 'unlock')
+        self.wait(180, 'unlock')
         logger.debug('String enviada')
 
     def send_enter(self) -> None:
         logger.info('Enviando tecla ENTER')
         self.enter()
-        self.wait(30, 'unlock')
+        self.wait(180, 'unlock')
         logger.debug('ENTER enviado e tela desbloqueada')
 
     def send_home(self) -> None:
         logger.info('Enviando tecla HOME')
         self.home()
-        self.wait(30, 'unlock')
+        self.wait(180, 'unlock')
         logger.debug('HOME enviado e tela desbloqueada')
 
     def get_string(self, ypos: int, xpos: int, length: int) -> str:
@@ -760,7 +760,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                     value = int(name[-1])
                 logger.info(f'Enviando tecla PF{value}')
                 self._exec_command(f'PF({value})')
-                self.wait(30, 'unlock')
+                self.wait(180, 'unlock')
                 logger.debug(f'PF{value} enviado e tela desbloqueada')
 
             return command_func
@@ -809,7 +809,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                 )
                 sleep(exec)
                 self.reset()
-                self.wait(10, 'unlock')
+                self.wait(60, 'unlock')
                 self.tab()
         logger.error(
             f'Erro ao executar comando total de tentativas: {max_loop}',
