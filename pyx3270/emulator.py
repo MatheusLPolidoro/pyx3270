@@ -51,7 +51,7 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 # Se quiser evitar que os logs sejam propagados para o logger raiz
-logger.propagate = False
+logger.propagate = True
 
 
 BINARY_FOLDER = f'{os.path.dirname(__file__)}/binary'
@@ -178,7 +178,7 @@ class Command(AbstractCommand):
         self.data = []
 
     def execute(self) -> bool:
-        logger.info(f'Executando comando: {self.cmdstr}')
+        logger.debug(f'Executando comando: {self.cmdstr}')
         try:
             self.app.write(self.cmdstr + b'\n')
 
@@ -210,7 +210,7 @@ class Command(AbstractCommand):
                     logger.info('Comando Quit executado com sucesso')
                     return True
                 elif result.lower() == 'ok':
-                    logger.info('Comando executado com sucesso (OK)')
+                    logger.debug('Comando executado com sucesso (OK)')
                     return True
                 else:
                     error_msg = f'"erro" esperado, mas recebido: {result}.'
@@ -896,11 +896,5 @@ class X3270(AbstractEmulator, X3270Cmd):
             # Atualiza todos os atributos de self com os do novo objeto
             self.__dict__.update(new_instance.__dict__)
 
-            logger.info('Atributos de self atualizados com sucesso')
+            logger.debug('Atributos de self atualizados com sucesso')
             return self
-
-
-if __name__ == '__main__':
-    emu = X3270(True)
-    emu.connect_host('177.139.188.25', 3270, False)
-    pass
