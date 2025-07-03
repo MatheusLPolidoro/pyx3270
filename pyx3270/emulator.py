@@ -80,7 +80,7 @@ class ExecutableApp(AbstractExecutableApp):
     args = list()
 
     def __init__(self, shell: bool = False, model: MODEL_TYPE = '2') -> None:
-        logger.info(
+        logger.debug(
             f'Inicializando ExecutableApp (shell={shell}, model={model})'
         )
         self.shell = shell
@@ -115,7 +115,7 @@ class ExecutableApp(AbstractExecutableApp):
         try:
             logger.debug(f'Executando comando: {self.args}')
             self.subprocess = subprocess.Popen(self.args, **kwargs)
-            logger.info(f'Processo iniciado com PID: {self.subprocess.pid}')
+            logger.debug(f'Processo iniciado com PID: {self.subprocess.pid}')
         except Exception as e:
             logger.error(f'Erro ao iniciar processo: {e}', exc_info=True)
             raise
@@ -426,9 +426,15 @@ class X3270Cmd(AbstractEmulatorCmd):
             )
 
     def wait_for_field(self, timeout: int = 30) -> None:
-        logger.info(f'Aguardando campo de entrada (timeout={timeout}s)')
-        self.wait(timeout, 'InputField')
-        logger.debug('Campo de entrada encontrado ou timeout atingido')
+        logger.debug(f'Aguardando campo de entrada (timeout={timeout}s)')
+        try:
+            self.wait(timeout, 'InputField')
+            logger.debug('Campo de entrada carregado.')
+        except Exception:
+            logger.warning(
+                f'Campo de entrada não carregado após tempo limite: {timeout}'
+            )
+            
 
     def wait_string_found(
         self,
@@ -438,7 +444,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         equal: bool = True,
         timeout: int = 5,
     ) -> bool:
-        logger.info(
+        logger.debug(
             f"Aguardando string '{string}' na posição ({ypos},{xpos}), equal={equal}, timeout={timeout}s"
         )
 
@@ -453,7 +459,7 @@ class X3270Cmd(AbstractEmulatorCmd):
                     result = found == string
                 else:
                     result = found != string
-                logger.info(f'Resultado da comparação: {result}')
+                logger.debug(f'Resultado da comparação: {result}')
                 if result:
                     break
             except Exception as e:
@@ -466,25 +472,25 @@ class X3270Cmd(AbstractEmulatorCmd):
         return result
 
     def string_found(self, ypos: int, xpos: int, string: str) -> bool:
-        logger.info(
+        logger.debug(
             f"Verificando se string '{string}' existe na posição ({ypos},{xpos})"
         )
         try:
             found = self.get_string(ypos, xpos, len(string))
             result = found == string
-            logger.info(f"Resultado: {result} (encontrado: '{found}')")
+            logger.debug(f"Resultado: {result} (encontrado: '{found}')")
             return result
         except Exception as e:
             logger.error(f'Erro ao verificar string: {e}', exc_info=True)
             return False
 
     def delete_field(self) -> None:
-        logger.info('Deletando campo atual')
+        logger.debug('Deletando campo atual')
         self.deletefield()
         logger.debug('Campo deletado')
 
     def move_to(self, ypos: int, xpos: int) -> None:
-        logger.info(f'Movendo cursor para posição ({ypos},{xpos})')
+        logger.debug(f'Movendo cursor para posição ({ypos},{xpos})')
         self.movecursor1(ypos, xpos)
         logger.debug('Cursor movido')
 
@@ -502,7 +508,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         password: bool = False
     ) -> None:
         if not tosend:
-            logger.info(f'tosend não é string.')
+            logger.warn(f'tosend não é string.')
             return
         # Remove caracteres especiais
         original = tosend
@@ -517,11 +523,11 @@ class X3270Cmd(AbstractEmulatorCmd):
 
         if xpos is not None and ypos is not None:
             logger.info(
-                f"Enviando string '{tosend_str}' para posição ({ypos},{xpos})"
+                f"Enviando string '{tosend_str}' para posição {ypos=} {xpos=}"
             )
             self.move_to(ypos, xpos)
         else:
-            logger.info(f"Enviando string '{tosend_str}' na posição atual")
+            logger.info(f"Enviando string '{tosend_str}' na posição atual.")
 
         self.string(tosend)
         self.wait(180, 'unlock')
@@ -622,7 +628,7 @@ class X3270Cmd(AbstractEmulatorCmd):
 
     def search_string(self, string: str, ignore_case: bool = False) -> bool:
         logger.info(
-            f"Buscando string '{string}' na tela (ignore_case={ignore_case})"
+            f"Buscando texto '{string}' na tela ({ignore_case=})"
         )
         try:
             for ypos in range(1, self.model_dimensions['rows'] + 1):
@@ -643,20 +649,20 @@ class X3270Cmd(AbstractEmulatorCmd):
                     )
 
                 if string_comp in line_comp:
-                    logger.info(f'String encontrada na linha {ypos}')
+                    logger.info(f'Texto encontrada na linha {ypos}')
                     return True
 
-            logger.info('String não encontrada em nenhuma linha')
+            logger.info('Texto não encontrada em nenhuma linha')
             return False
         except Exception as e:
-            logger.error(f'Erro durante busca de string: {e}', exc_info=True)
+            logger.error(f'Erro durante busca de texto: {e}', exc_info=True)
             return False
 
     def get_string_positions(
         self, string: str, ignore_case=False
     ) -> list[tuple[int]]:
         logger.info(
-            f"Buscando posições da string '{string}' (ignore_case={ignore_case})"
+            f"Buscando posições da texto '{string}' ({ignore_case=})"
         )
         try:
             screen_content = self.get_full_screen(header=True)
@@ -710,7 +716,7 @@ class X3270(AbstractEmulator, X3270Cmd):
             params, description = command_map[name]
 
             def command_func(*args, **kwargs):
-                logger.info(
+                logger.debug(
                     f'Executando comando {name} com args={args}, kwargs={kwargs}'
                 )
                 if len(args) + len(kwargs) < len(params):
@@ -774,15 +780,15 @@ class X3270(AbstractEmulator, X3270Cmd):
         try:
             if os.name == 'nt':  # windows
                 if self.visible:
-                    logger.info('Criando Wc3270App (Windows, visível)')
+                    logger.debug('Criando Wc3270App (Windows, visível)')
                     return Wc3270App(self.model)
-                logger.info('Criando Ws3270App (Windows, não visível)')
+                logger.debug('Criando Ws3270App (Windows, não visível)')
                 return Ws3270App(self.model)
 
             if self.visible:  # linux
-                logger.info('Criando X3270App (Linux, visível)')
+                logger.debug('Criando X3270App (Linux, visível)')
                 return X3270App(self.model)
-            logger.info('Criando S3270App (Linux, não visível)')
+            logger.debug('Criando S3270App (Linux, não visível)')
             return S3270App(self.model)
         except Exception as e:
             logger.error(f'Erro ao criar aplicativo: {e}', exc_info=True)
