@@ -1,58 +1,28 @@
 import errno
-import logging
 import math
 import os
-import pathlib
 import re
 import socket
 import subprocess
-import sys
 from contextlib import closing
 from functools import cache, lru_cache
 from time import sleep, time
 from typing import Literal
-from logging.handlers import TimedRotatingFileHandler
 
-sys.path.append(str(pathlib.Path(__file__).parent))
-
-from command_config import command_map
-from exceptions import (
+from pyx3270.command_config import command_map
+from pyx3270.exceptions import (
     CommandError,
     FieldTruncateError,
     NotConnectedException,
     TerminatedError,
 )
-from iemulator import (
+from pyx3270.iemulator import (
     AbstractCommand,
     AbstractEmulator,
     AbstractEmulatorCmd,
     AbstractExecutableApp,
 )
-
-os.makedirs('./logs', exist_ok=True)
-logger = logging.getLogger('x3270_emulator')
-logger.setLevel(logging.INFO)
-
-# Evita duplicação de handlers
-if not logger.handlers:
-    handler = TimedRotatingFileHandler(
-        filename='./logs/x3270_emulator.log',
-        when='midnight',  # Roda diariamente
-        interval=1,  # Intervalo de 1 dia
-        backupCount=7,  # Mantém arquivos dos últimos 7 dias
-        encoding='utf-8',  # Mantém acentos
-    )
-
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    handler.setFormatter(formatter)
-
-    logger.addHandler(handler)
-
-# Se quiser evitar que os logs sejam propagados para o logger raiz
-logger.propagate = True
-
+from pyx3270.logging_config import emulator_logger as logger
 
 BINARY_FOLDER = f'{os.path.dirname(__file__)}/binary'
 MODEL_TYPE = Literal['2', '3', '4', '5']
@@ -254,10 +224,10 @@ class Status:
             self.window_id = parts[10] or None
             self.exec_time = parts[11] or None
             logger.debug(
-                f'Status inicializado: connection_state={self.connection_state}, emulator_mode={self.emulator_mode}'
+                f'Status: {self.connection_state=}, {self.emulator_mode=}'
             )
         except IndexError:
-            logger.error(f'Status não tem items suficientes.')
+            logger.error('Status não tem items suficientes.')
 
     def __str__(self) -> str:
         return f'Status: {self.status_line}'
@@ -300,7 +270,7 @@ class Wc3270App(ExecutableApp):
         while count < max_loop:
             try:
                 logger.debug(
-                    f'Tentativa {count + 1}/{max_loop} de conexão ao localhost:{self.script_port}'
+                    f'Tentativa {count + 1}/{max_loop} port:{self.script_port}'
                 )
                 sock.connect(('localhost', self.script_port))
                 logger.info('Conexão de socket estabelecida com sucesso')
@@ -312,7 +282,8 @@ class Wc3270App(ExecutableApp):
                     )
                     raise NotConnectedException
                 logger.warning(
-                    f'Conexão recusada, tentando novamente em 1s (tentativa {count + 1}/{max_loop})'
+                    f'Conexão recusada, tentando novamente em 1s '
+                    f'({count + 1}/{max_loop})'
                 )
                 sleep(1)
                 count += 1
@@ -360,10 +331,8 @@ class Wc3270App(ExecutableApp):
             self.socket_fh.write(data)
             self.socket_fh.flush()
             logger.debug('Dados escritos com sucesso')
-        except OSError as e:
-            logger.error(
-                f'Erro de E/S ao escrever no socket: {e}', exc_info=True
-            )
+        except OSError:
+            logger.error('Erro de E/S ao escrever no socket', exc_info=True)
             raise NotConnectedException
 
     def readline(self) -> bytes:
@@ -375,8 +344,8 @@ class Wc3270App(ExecutableApp):
             line = self.socket_fh.readline()
             logger.debug(f'Linha lida: {line}')
             return line
-        except Exception as e:
-            logger.error(f'Erro ao ler do socket: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao ler do socket', exc_info=True)
             raise NotConnectedException
 
 
@@ -405,6 +374,8 @@ class S3270App(ExecutableApp):
 
 
 class X3270Cmd(AbstractEmulatorCmd):
+    time_unlock: int = 60
+
     def clear_screen(self) -> None:
         logger.info('Limpando tela')
         count = 0
@@ -412,7 +383,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         while count < max_loop:
             logger.debug(f'Tentativa {count + 1}/{max_loop} de limpar tela')
             self.clear()
-            self.wait(180, 'unlock')
+            self.wait(self.time_unlock, 'unlock')
             if not self.get_full_screen(header=True).strip():
                 logger.info('Tela limpa com sucesso')
                 break
@@ -422,7 +393,8 @@ class X3270Cmd(AbstractEmulatorCmd):
             count += 1
         if count >= max_loop:
             logger.warning(
-                f'Não foi possível limpar a tela completamente após {max_loop} tentativas'
+                f'Não foi possível limpar a tela completamente'
+                f' após {max_loop} tentativas'
             )
 
     def wait_for_field(self, timeout: int = 30) -> None:
@@ -430,11 +402,10 @@ class X3270Cmd(AbstractEmulatorCmd):
         try:
             self.wait(timeout, 'InputField')
             logger.debug('Campo de entrada carregado.')
-        except Exception:
+        except CommandError:
             logger.warning(
-                f'Campo de entrada não carregado após tempo limite: {timeout}'
+                f'Timeout atingido: {timeout}s.campo entrada não encontrado.'
             )
-            
 
     def wait_string_found(
         self,
@@ -445,7 +416,8 @@ class X3270Cmd(AbstractEmulatorCmd):
         timeout: int = 5,
     ) -> bool:
         logger.debug(
-            f"Aguardando string '{string}' na posição ({ypos},{xpos}), equal={equal}, timeout={timeout}s"
+            f'Aguardando {string=} na posição '
+            f'({ypos},{xpos}), {equal=}, {timeout=}s'
         )
 
         end_time = time() + timeout
@@ -462,8 +434,8 @@ class X3270Cmd(AbstractEmulatorCmd):
                 logger.debug(f'Resultado da comparação: {result}')
                 if result:
                     break
-            except Exception as e:
-                logger.debug(f'Erro ao buscar string: {e}, tentando novamente')
+            except Exception:
+                logger.debug('Erro ao buscar string, tentando novamente')
                 continue
 
         logger.warning(
@@ -473,15 +445,15 @@ class X3270Cmd(AbstractEmulatorCmd):
 
     def string_found(self, ypos: int, xpos: int, string: str) -> bool:
         logger.debug(
-            f"Verificando se string '{string}' existe na posição ({ypos},{xpos})"
+            f'Verificando se {string=} existe na posição ({ypos},{xpos})'
         )
         try:
             found = self.get_string(ypos, xpos, len(string))
             result = found == string
             logger.debug(f"Resultado: {result} (encontrado: '{found}')")
             return result
-        except Exception as e:
-            logger.error(f'Erro ao verificar string: {e}', exc_info=True)
+        except Exception:
+            logger.error(f'Erro ao verificar {string=}', exc_info=True)
             return False
 
     def delete_field(self) -> None:
@@ -497,7 +469,7 @@ class X3270Cmd(AbstractEmulatorCmd):
     def send_pf(self, value: int) -> None:
         logger.info(f'Enviando tecla PF{value}')
         self.PF(value)
-        self.wait(180, 'unlock')
+        self.wait(self.time_unlock, 'unlock')
         logger.debug(f'PF{value} enviado e tela desbloqueada')
 
     def send_string(
@@ -505,10 +477,10 @@ class X3270Cmd(AbstractEmulatorCmd):
         tosend: str,
         ypos: int | None = None,
         xpos: int | None = None,
-        password: bool = False
+        password: bool = False,
     ) -> None:
         if not tosend:
-            logger.warn(f'tosend não é string.')
+            logger.warning('tosend não é string, send_string não executado.')
             return
         # Remove caracteres especiais
         original = tosend
@@ -518,7 +490,8 @@ class X3270Cmd(AbstractEmulatorCmd):
 
         if original != tosend:
             logger.debug(
-                f"String modificada para '{tosend_str}' (removidos caracteres especiais)"
+                f'String modificada para {tosend_str} '
+                f'(removidos caracteres especiais)'
             )
 
         if xpos is not None and ypos is not None:
@@ -530,30 +503,32 @@ class X3270Cmd(AbstractEmulatorCmd):
             logger.info(f"Enviando string '{tosend_str}' na posição atual.")
 
         self.string(tosend)
-        self.wait(180, 'unlock')
+        self.wait(self.time_unlock, 'unlock')
         logger.debug('String enviada')
 
     def send_enter(self) -> None:
         logger.info('Enviando tecla ENTER')
         self.enter()
-        self.wait(180, 'unlock')
+        self.wait(self.time_unlock, 'unlock')
         logger.debug('ENTER enviado e tela desbloqueada')
 
     def send_home(self) -> None:
         logger.info('Enviando tecla HOME')
         self.home()
-        self.wait(180, 'unlock')
+        self.wait(self.time_unlock, 'unlock')
         logger.debug('HOME enviado e tela desbloqueada')
 
     def get_string(self, ypos: int, xpos: int, length: int) -> str:
         logger.debug(
-            f'Obtendo string na posição ({ypos},{xpos}) com comprimento {length}'
+            f'Obtendo string na posição ({ypos},{xpos})'
+            f' com comprimento {length}'
         )
         try:
             self.check_limits(ypos, xpos)
             if (xpos + length) > (self.model_dimensions['columns'] + 1):
                 logger.error(
-                    f'Comprimento excede limite da tela: {xpos}+{length} > {self.model_dimensions["columns"] + 1}'
+                    f'Comprimento excede limite da tela: {xpos}+{length}'
+                    f' > {self.model_dimensions["columns"] + 1}'
                 )
                 raise FieldTruncateError
 
@@ -562,8 +537,8 @@ class X3270Cmd(AbstractEmulatorCmd):
             result = self.ascii(ypos, xpos, length)
             logger.debug(f"String obtida: '{result}'")
             return result
-        except Exception as e:
-            logger.error(f'Erro ao obter string: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao obter string', exc_info=True)
             raise
 
     def get_string_area(
@@ -617,19 +592,23 @@ class X3270Cmd(AbstractEmulatorCmd):
     def check_limits(self, ypos, xpos):
         logger.debug(f'Verificando limites para posição ({ypos},{xpos})')
         if ypos > self.model_dimensions['rows']:
-            error_msg = f'Você excedeu o limite do eixo y da tela do mainframe: {ypos} > {self.model_dimensions["rows"]}'
+            error_msg = (
+                f'Você excedeu o limite do eixo y da tela do mainframe: '
+                f'{ypos} > {self.model_dimensions["rows"]}'
+            )
             logger.error(error_msg)
             raise FieldTruncateError(error_msg)
         if xpos > self.model_dimensions['columns']:
-            error_msg = f'Você excedeu o limite do eixo x da tela do mainframe: {xpos} > {self.model_dimensions["columns"]}'
+            error_msg = (
+                f'Você excedeu o limite do eixo x da tela do mainframe: '
+                f'{xpos} > {self.model_dimensions["columns"]}'
+            )
             logger.error(error_msg)
             raise FieldTruncateError(error_msg)
         logger.debug('Posição dentro dos limites')
 
     def search_string(self, string: str, ignore_case: bool = False) -> bool:
-        logger.info(
-            f"Buscando texto '{string}' na tela ({ignore_case=})"
-        )
+        logger.info(f"Buscando texto '{string}' na tela ({ignore_case=})")
         try:
             for ypos in range(1, self.model_dimensions['rows'] + 1):
                 line = self.get_string(
@@ -661,9 +640,7 @@ class X3270Cmd(AbstractEmulatorCmd):
     def get_string_positions(
         self, string: str, ignore_case=False
     ) -> list[tuple[int]]:
-        logger.info(
-            f"Buscando posições da texto '{string}' ({ignore_case=})"
-        )
+        logger.info(f"Buscando posições da texto '{string}' ({ignore_case=})")
         try:
             screen_content = self.get_full_screen(header=True)
             flags = 0 if not ignore_case else re.IGNORECASE
@@ -706,18 +683,19 @@ class X3270(AbstractEmulator, X3270Cmd):
         self.host = None
         self.port = None
         self.tls = None
+        self.mode_3270 = None
         logger.debug('X3270 inicializado')
 
     def __getattr__(self, name):
         logger.debug(f'Acessando atributo dinâmico: {name}')
         # Mapeamento de comandos com parâmetros e descrições
-        if name in command_map:
+        if name and name in command_map:
             logger.debug(f'Comando encontrado no command_map: {name}')
             params, description = command_map[name]
 
             def command_func(*args, **kwargs):
                 logger.debug(
-                    f'Executando comando {name} com args={args}, kwargs={kwargs}'
+                    f'Executando comando {name} com {args=}, {kwargs=}'
                 )
                 if len(args) + len(kwargs) < len(params):
                     error_msg = (
@@ -766,7 +744,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                     value = int(name[-1])
                 logger.info(f'Enviando tecla PF{value}')
                 self._exec_command(f'PF({value})')
-                self.wait(180, 'unlock')
+                self.wait(self.time_unlock, 'unlock')
                 logger.debug(f'PF{value} enviado e tela desbloqueada')
 
             return command_func
@@ -808,6 +786,9 @@ class X3270(AbstractEmulator, X3270Cmd):
                 self.status = Status(cmd.status_line)
                 logger.debug(f'Comando executado, status: {self.status}')
                 return cmd
+            except NotConnectedException as e:
+                logger.error(f'Emulador não conectado: {e}', exc_info=True)
+                raise NotConnectedException
             except Exception as e:
                 logger.error(f'Erro ao executar comando: {e}', exc_info=True)
                 logger.warning(
@@ -856,11 +837,14 @@ class X3270(AbstractEmulator, X3270Cmd):
             logger.error(f'Erro ao verificar conexão: {e}', exc_info=True)
             return False
 
-    def connect_host(self, host: str, port: str, tls: bool = True) -> None:
+    def connect_host(
+        self, host: str, port: str, tls: bool = True, mode_3270: bool = True
+    ) -> None:
         logger.info(f'Conectando ao host: {host}:{port} (tls={tls})')
         self.host = host
         self.port = port
         self.tls = tls
+        self.mode_3270 = mode_3270
         tls_prefix = 'L:Y:' if tls else ''
         strint_conn = f'{tls_prefix}{host}:{port}'
         logger.debug(f'String de conexão: {strint_conn}')
@@ -873,8 +857,9 @@ class X3270(AbstractEmulator, X3270Cmd):
                         + 'tentando método connect direto'
                     )
                     self.connect(strint_conn)
-                logger.debug('Aguardando modo 3270')
-                self.wait(5, '3270mode')
+                if mode_3270:
+                    logger.debug('Aguardando modo 3270')
+                    self.wait(5, '3270mode')
                 logger.info('Conexão estabelecida com sucesso')
         except CommandError as e:
             logger.warning(f'CommandError durante conexão: {e}')
@@ -895,10 +880,11 @@ class X3270(AbstractEmulator, X3270Cmd):
             self.terminate()
         finally:
             logger.info('Criando nova instância para reconexão')
-            args = self.host, self.port, self.tls
+            args = self.host, self.port, self.tls, self.mode_3270
+            logger.debug(f'Argumentos para nova instância: {args}')
             new_instance = X3270(self.visible, self.model)
             new_instance.connect_host(*args)
-
+            logger.debug('Nova instância criada com sucesso')
             # Atualiza todos os atributos de self com os do novo objeto
             self.__dict__.update(new_instance.__dict__)
 
