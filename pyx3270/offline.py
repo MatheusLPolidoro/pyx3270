@@ -1,8 +1,8 @@
-# Navegação e controle do sistema execução OFFLINE
 import subprocess
 import sys
 from time import sleep
-from .emulator import logger
+
+from pyx3270.emulator import logger
 
 
 class PyX3270Manager:
@@ -52,9 +52,9 @@ class PyX3270Manager:
         self._exec('clear')
 
     def send_pf(self, val: int):
-        if val in (4, 8):
+        if val in {4, 8}:
             self.next()
-        elif val in (3, 7):
+        elif val in {3, 7}:
             self.prev()
 
     def set_screen(self, screen: str):
