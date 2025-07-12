@@ -1,57 +1,39 @@
-from logging.handlers import TimedRotatingFileHandler
 import os
-import pathlib
+import queue
 import re
 import select
 import socket
 import sys
-import logging
-import queue
 import threading
+from dataclasses import dataclass
+
+from pyx3270 import tn3270
+from pyx3270.emulator import BINARY_FOLDER, X3270
+from pyx3270.logging_config import server_logger as logger
+
+
+@dataclass
+class ReplayState:
+    screens: dict
+    screens_list: list
+    current_screen: int
+    clear: bool
+
 
 command_queue = queue.Queue()
 
-sys.path.append(str(pathlib.Path(__file__).parent))
 
-import pyx3270.tn3270 as tn3270
-from pyx3270.emulator import X3270, BINARY_FOLDER
-
-os.makedirs('./logs', exist_ok=True)
-logger = logging.getLogger('server')
-logger.setLevel(logging.DEBUG)
-
-# Evita duplicação de handlers
-if not logger.handlers:
-    handler = TimedRotatingFileHandler(
-        filename='./logs/server.log',
-        when='midnight',  # Roda diariamente
-        interval=1,  # Intervalo de 1 dia
-        backupCount=7,  # Mantém arquivos dos últimos 7 dias
-        encoding='utf-8',  # Mantém acentos
-    )
-
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    handler.setFormatter(formatter)
-
-    logger.addHandler(handler)
-
-# Se quiser evitar que os logs sejam propagados para o logger raiz
-logger.propagate = False
-
-
-def ensure_dir(path):
+def ensure_dir(path: str | None) -> None:
     if path and not os.path.isdir(path):
         os.makedirs(path)
 
 
-def is_screen_tn3270(data):
+def is_screen_tn3270(data: bytes) -> bool:
     min_file_len = 100
     return len(data) > min_file_len and b'\x11' in data
 
 
-def load_screens_basic(record_dir):
+def load_screens_basic(record_dir: str) -> dict:
     """Carrega todos os arquivos .bin do diretório e subdiretórios."""
     ensure_dir(record_dir)  # Garante que o diretório existe
     screens = {}
@@ -70,36 +52,44 @@ def load_screens_basic(record_dir):
     return screens
 
 
-def load_screens(record_dir):
+def load_screens(record_dir: str) -> dict:
     """Carrega arquivos .bin mantendo a ordem dentro de cada subdiretório."""
     ensure_dir(record_dir)  # Garante que o diretório existe
-    screens = {}
-    try:
-        if not any(f.endswith('.bin') for f in os.listdir(record_dir)):
-            screens = load_screens_basic(BINARY_FOLDER)
 
-        for root, _, files in os.walk(
-            record_dir
-        ):  # Percorre todas as subpastas
-            sorted_files = sorted(
-                files
-            )  # Ordena os arquivos de cada pasta separadamente
-            for f in sorted_files:
-                if f.endswith('.bin'):
-                    file_path = os.path.join(root, f)
-                    with open(file_path, 'rb') as fd:
-                        data = fd.read()
-                        # Garante que termina com tn3270.IAC TN_EOR
-                        if not data.endswith(tn3270.IAC + tn3270.TN_EOR):
-                            data += tn3270.IAC + tn3270.TN_EOR
-                        screens[str(f).upper().replace('.BIN', '')] = data
-    except Exception as ex:
+    screens = {}
+
+    try:
+        has_bin = any(f.endswith('.bin') for f in os.listdir(record_dir))
+        if not has_bin:
+            return load_screens_basic(BINARY_FOLDER)
+
+        for root, _, files in os.walk(record_dir):
+            for f in sorted(files):
+                if not f.endswith('.bin'):
+                    continue
+
+                file_path = os.path.join(root, f)
+                with open(file_path, 'rb') as fd:
+                    data = fd.read()
+
+                # Garante que termina com tn3270.IAC + TN_EOR
+                if not data.endswith(tn3270.IAC + tn3270.TN_EOR):
+                    data += tn3270.IAC + tn3270.TN_EOR
+
+                key = f.upper().replace('.BIN', '')
+                screens[key] = data
+
+    except Exception:
         logger.error(f'Falha ao carregar caminho: {record_dir}')
+
     return screens
 
 
-def find_directory(base_dir, search_name):
-    """Busca um diretório dentro da pasta base, considerando maiúsculas/minúsculas e busca parcial."""
+def find_directory(base_dir: str, search_name: str) -> str | None:
+    """
+    Busca um diretório dentro da pasta base, considerando
+    maiúsculas/minúsculas e busca parcial.
+    """
     search_name = (
         search_name.lower()
     )  # Normaliza para comparação case-insensitive
@@ -149,7 +139,7 @@ def record_handler(
     address: str,
     record_dir=None,
     delay=0.01,
-):
+) -> None:
     serversock = connect_serversock(clientsock, address)
 
     if not serversock:
@@ -229,14 +219,14 @@ def backend_3270(
     screens: list[bytes],
     current_screen: int,
     emulator: bool,
-) -> int | None:
+) -> dict[str, int | bool]:
     aid = None
 
     while aid not in tn3270.AIDS:
         try:
             aid = clientsock.recv(1)
             if not aid:
-                raise Exception('Terminal fechado.')
+                raise ConnectionResetError('Terminal fechado.')
         except socket.timeout:
             continue
 
@@ -267,7 +257,95 @@ def backend_3270(
 def listen_for_commands():
     while True:
         command = input('Digite um comando: ')
+        if command.lower() == 'q':
+            logger.info('[!] Comando "quit" recebido, encerrando...')
+            sys.exit(0)
         command_queue.put(command)
+
+
+def handle_set(command: str, screens: dict) -> int | None:
+    screen_name = command.split(' ', 1)[1].upper()
+    for i, key in enumerate(screens.keys()):
+        if screen_name in key:
+            print(f'[+] Mudando para a tela: {screen_name}')
+            return i
+    return None
+
+
+def handle_add(command: str, screens: dict, screens_list: list):
+    try:
+        screen_name, screen_data = command.split(' ', 2)[1:]
+        screen_name = screen_name.upper()
+        screen_bytes = bytes.fromhex(screen_data)
+        final_bytes = (
+            tn3270.START_SCREEN + screen_bytes + tn3270.IAC + tn3270.TN_EOR
+        )
+        screens[screen_name] = final_bytes
+        screens_list.append(final_bytes)
+    except ValueError:
+        logger.warning('[!] Formato inválido ao adicionar tela')
+
+
+def handle_change_directory(command: str, base_directory: str):
+    new_dir = find_directory(base_directory, command.split(' ', 2)[2].strip())
+    if os.path.isdir(new_dir):
+        new_screens = load_screens_basic(new_dir)
+        logger.info(f'[+] Mudando para o diretório de telas: {new_dir}')
+        return new_screens, list(new_screens.values()), 0
+    else:
+        logger.info(f'[!] Diretório inválido: {new_dir}')
+        return {}, [], 0
+
+
+def process_command(
+    command: str,
+    clientsock: socket.socket,
+    base_directory: str,
+    state: ReplayState,
+) -> ReplayState:
+    command_log = (
+        command
+        if not command.startswith('add ')
+        else ' '.join(command.split()[:2])
+    )
+    logger.info(f'Comando recebido: {command_log}')
+
+    if command.startswith('set '):
+        index = handle_set(command, state.screens)
+        if index is not None:
+            state.current_screen = index
+
+    elif command.startswith('add '):
+        handle_add(command, state.screens, state.screens_list)
+
+    elif command.startswith('change directory '):
+        screens = load_screens_basic(
+            find_directory(base_directory, command.split(' ', 2)[2].strip())
+        )
+        state.screens = screens
+        state.screens_list = list(screens.values())
+        state.current_screen = 0
+
+    elif command == 'next':
+        state.current_screen = min(
+            len(state.screens), state.current_screen + 1
+        )
+        logger.info(f"[!] Comando 'next' enviado: {state.current_screen}")
+
+    elif command == 'prev':
+        state.current_screen = max(0, state.current_screen - 1)
+        logger.info(f"[!] Comando 'prev' enviado: {state.current_screen}")
+
+    elif command == 'clear':
+        state.clear = True
+        clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
+        logger.info(f"[!] Comando 'clear' enviado: {state.current_screen}")
+
+    elif command == 'q':
+        logger.info("[!] Comando 'quit' enviado.")
+        clientsock.close()
+
+    return state
 
 
 def replay_handler(
@@ -275,10 +353,14 @@ def replay_handler(
     screens: dict,
     emulator: bool,
     base_directory: str,
-):
-    screens_list = list(screens.values())
-    current_screen = 0
-    clear = False
+) -> None:
+    state = ReplayState(
+        screens=screens,
+        screens_list=list(screens.values()),
+        current_screen=0,
+        clear=False,
+    )
+
     command_thread = threading.Thread(target=listen_for_commands, daemon=True)
     command_thread.start()
 
@@ -288,102 +370,31 @@ def replay_handler(
         clientsock.sendall(b'\xff\xfd\x18\xff\xfb\x18')
 
         while True:
-            if not clear:
-                try:
-                    buf = screens_list[current_screen]
-                    clientsock.sendall(buf)
-                except IndexError:
-                    current_screen = len(screens_list) - 1
-                    buf = screens_list[current_screen]
-                    clientsock.sendall(buf)
+            try:
+                if not state.clear:
+                    clientsock.sendall(
+                        state.screens_list[state.current_screen]
+                    )
+            except IndexError:
+                state.current_screen = len(state.screens_list) - 1
+                clientsock.sendall(state.screens_list[state.current_screen])
 
-            # Verifica se há comandos na fila
             try:
                 command = command_queue.get_nowait()
-                command_log = (
-                    command
-                    if not command.startswith('add ')
-                    else ' '.join(command.split()[:2])
+                state = process_command(
+                    command, clientsock, base_directory, state
                 )
-                logger.info(f'Comando recebido: {command_log}')
-                if command.startswith('set '):
-                    screen_name = command.split(' ', 1)[1].upper()
-                    screen_index = next(
-                        (
-                            i
-                            for i, screen in enumerate(screens.keys())
-                            if screen_name in screen.upper()
-                        ),
-                        None,
-                    )
-                    if screen_index is not None:
-                        current_screen = screen_index
-                        print(f'[+] Mudando para a tela: {screen_name}')
-                        continue
-                elif command.startswith('add '):
-                    screen_name, screen_data = command.split(' ', 2)[1:]
-                    screen_name = screen_name.upper()
-
-                    # Converte a string recebida para bytes sem alterar os valores hexadecimais
-                    screen_data_bytes = bytes.fromhex(screen_data)
-
-                    final_bytes = (
-                        tn3270.START_SCREEN
-                        + screen_data_bytes
-                        + tn3270.IAC
-                        + tn3270.TN_EOR
-                    )
-
-                    # Adicionar tela
-                    screens[screen_name] = final_bytes
-                    screens_list.append(final_bytes)
-                elif command.startswith('change directory '):
-                    new_dir = find_directory(
-                        base_directory, command.split(' ', 2)[2].strip()
-                    )
-                    if os.path.isdir(new_dir):
-                        screens = load_screens_basic(
-                            new_dir
-                        )  # Recarrega as telas
-                        screens_list = list(
-                            screens.values()
-                        )  # Atualiza a lista de telas
-                        current_screen = 0
-                        logger.info(
-                            f'[+] Mudando para o diretório de telas: {new_dir}'
-                        )
-                    else:
-                        logger.info(f'[!] Diretório inválido: {new_dir}')
-                elif command.startswith('next'):
-                    current_screen = min(len(screens), current_screen + 1)
-                    logger.info(
-                        f"[!] Comando 'next' enviado: {current_screen}"
-                    )
-                    continue
-                elif command.startswith('prev'):
-                    current_screen = max(0, current_screen - 1)
-                    logger.info(
-                        f"[!] Comando 'prev' enviado: {current_screen}"
-                    )
-                    continue
-                elif command.startswith('clear'):
-                    clear = True
-                    clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
-                    logger.info(
-                        f"[!] Comando 'clear' enviado: {current_screen}"
-                    )
-                    continue
-                elif command.startswith('q'):
-                    logger.info("[!] Comando 'quit' enviado.")
-                    break
             except queue.Empty:
                 pass
 
             result = backend_3270(
-                clientsock, screens_list, current_screen, emulator
+                clientsock, state.screens_list, state.current_screen, emulator
             )
-            current_screen = result.get('current_screen')
-            clear = result.get('clear')
+
+            state.current_screen = result.get(
+                'current_screen', state.current_screen
+            )
+            state.clear = result.get('clear', state.clear)
 
     except Exception as e:
         logger.error(f'[!] Erro fora do esperado: {str(e)}')
