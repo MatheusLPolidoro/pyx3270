@@ -1,7 +1,46 @@
-import pytest
-from unittest.mock import MagicMock, patch
+import socket
+from contextlib import ExitStack
+from types import SimpleNamespace
+from unittest.mock import MagicMock, mock_open, patch
 
-from pyx3270.emulator import ExecutableApp, X3270
+import pytest
+
+from pyx3270.emulator import X3270, ExecutableApp
+
+_real_socket_class = socket.socket
+
+
+@pytest.fixture
+def record_mocks():
+    with ExitStack() as stack:
+        # Patches no módulo 'pyx3270.server'
+        connect_serversock = stack.enter_context(
+            patch('pyx3270.server.connect_serversock')
+        )
+        ensure_dir = stack.enter_context(patch('pyx3270.server.ensure_dir'))
+        is_screen = stack.enter_context(
+            patch('pyx3270.server.is_screen_tn3270')
+        )
+
+        # Patches fora do server.py
+        mock_select = stack.enter_context(patch('select.select'))
+        mock_open_func = stack.enter_context(
+            patch('builtins.open', new_callable=mock_open)
+        )
+        mock_join = stack.enter_context(patch('os.path.join'))
+
+        mocks = SimpleNamespace(
+            clientsock=MagicMock(spec=_real_socket_class, fileno=lambda: 3),
+            serversock=MagicMock(spec=_real_socket_class, fileno=lambda: 4),
+            connect_serversock=connect_serversock,
+            ensure_dir=ensure_dir,
+            is_screen=is_screen,
+            select=mock_select,
+            open_func=mock_open_func,
+            join=mock_join,
+        )
+
+        yield mocks
 
 
 @pytest.fixture
@@ -41,14 +80,12 @@ def mock_os_name(monkeypatch):
 @pytest.fixture
 def mock_executable_app_instance(mock_subprocess_popen):
     """Fixture para uma instância mockada de ExecutableApp."""
-    # Usamos patch.object para mockar métodos da classe base abstrata se necessário
     with patch.object(
         ExecutableApp, '_spawn_app', return_value=None
     ), patch.object(
         ExecutableApp, '_get_executable_app_args', return_value=['dummy_args']
     ):
         app = ExecutableApp(shell=False, model='2')
-        # Mockar métodos de leitura/escrita diretamente na instância mockada pelo popen
         app.subprocess = mock_subprocess_popen.return_value
         app.subprocess.stdout.readline.return_value = b'ok\n'
         yield app
@@ -57,11 +94,8 @@ def mock_executable_app_instance(mock_subprocess_popen):
 @pytest.fixture
 def x3270_emulator_instance(mock_executable_app_instance):
     """Fixture para uma instância de X3270 com app mockado."""
-    # Mock _create_app para evitar a criação real do app na inicialização do X3270
-    with patch.object(
-        X3270, '_create_app', return_value=None
-    ) as mock_create_app:
-        emulator = X3270(visible=False, model='3')
+    with patch.object(X3270, '_create_app', return_value=None):
+        emulator = X3270(visible=False, model='3', )
         # Atribui manualmente o app mockado (já que _create_app está mockado)
         emulator.app = mock_executable_app_instance
         # Mocka o método principal de execução de comandos
@@ -72,9 +106,7 @@ def x3270_emulator_instance(mock_executable_app_instance):
 @pytest.fixture
 def x3270_cmd_instance(x3270_emulator_instance):
     """Fixture para uma instância de X3270Cmd associada a um X3270 mockado."""
-    # X3270Cmd é frequentemente instanciado dentro de X3270, mas podemos criar um
-    # diretamente para teste, passando o emulador mockado.
-    # No entanto, a classe X3270Cmd herda de X3270, então a fixture anterior já serve.
-    # Apenas garantimos que o _exec_command está mockado.
-    x3270_emulator_instance._exec_command.reset_mock()  # Reseta o mock para cada teste
-    return x3270_emulator_instance  # Retorna a instância do emulador que também é o Cmd
+    # Reseta o mock para cada teste
+    x3270_emulator_instance._exec_command.reset_mock()
+    # Retorna a instância do emulador que também é o Cmd
+    return x3270_emulator_instance

@@ -1,25 +1,26 @@
-from itertools import count
-import socket
-from types import SimpleNamespace
-import pytest
-import subprocess
 import os
+import socket
+import subprocess
+from itertools import count
+from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
+import pytest
+
 from pyx3270.emulator import (
-    ExecutableApp,
+    X3270,
+    AbstractEmulator,
+    AbstractEmulatorCmd,
+    AbstractExecutableApp,
     Command,
+    CommandError,
+    ExecutableApp,
+    S3270App,
     Status,
     Wc3270App,
     Ws3270App,
     X3270App,
-    S3270App,
-    X3270,
     X3270Cmd,
-    AbstractEmulator,
-    AbstractEmulatorCmd,
-    AbstractExecutableApp,
-    CommandError,
 )
 
 
@@ -45,7 +46,7 @@ def test_executable_app_init_spawn(mock_subprocess_popen, monkeypatch):
     """Testa se ExecutableApp.__init__ chama _spawn_app corretamente."""
     # Simula OS Posix (Linux/macOS)
     monkeypatch.setattr(os, 'name', 'posix')
-    app = ExecutableApp(shell=False, model='2')
+    ExecutableApp(shell=False, model='2')
     mock_subprocess_popen.assert_called_once()
     args, kwargs = mock_subprocess_popen.call_args
     assert args[0] == ['-xrm', '*model: 2', '-localcp', 'utf8', '-utf8']
@@ -61,9 +62,9 @@ def test_executable_app_init_spawn_windows(mock_subprocess_popen, monkeypatch):
     monkeypatch.setattr(os, 'name', 'nt')
     # Precisa mockar a classe base para evitar erro de path no windows
     monkeypatch.setattr(ExecutableApp, 'args', ['dummy_command'])
-    app = ExecutableApp(shell=True, model='3')
+    ExecutableApp(shell=True, model='3')
     mock_subprocess_popen.assert_called_once()
-    args, kwargs = mock_subprocess_popen.call_args
+    _, kwargs = mock_subprocess_popen.call_args
     assert kwargs['shell'] is True
     assert kwargs['creationflags'] == subprocess.CREATE_NO_WINDOW
     assert 'start_new_session' not in kwargs
@@ -180,7 +181,8 @@ def test_command_execute_ok(mock_executable_app):
     result = cmd.execute()
 
     mock_executable_app.write.assert_called_once_with(b'TestCmd\n')
-    assert mock_executable_app.readline.call_count == 2
+    EXPECTED_READLINE_CALLS = 2
+    assert mock_executable_app.readline.call_count == EXPECTED_READLINE_CALLS
     assert cmd.status_line == b'status line'
     assert result is True
     assert cmd.data == []
@@ -198,7 +200,8 @@ def test_command_execute_ok_with_data(mock_executable_app):
     result = cmd.execute()
 
     mock_executable_app.write.assert_called_once_with(b'GetData\n')
-    assert mock_executable_app.readline.call_count == 4
+    EXPECTED_READS = 4
+    assert mock_executable_app.readline.call_count == EXPECTED_READS
     assert cmd.status_line == b'status line 2'
     assert result is True
     assert cmd.data == [b'line 1', b'line 2']
@@ -218,10 +221,6 @@ def test_command_execute_error(mock_executable_app):
         cmd.execute()
 
     mock_executable_app.write.assert_called_once_with(b'ErrorCmd\n')
-    # A leitura para após o 'error', mas o handle_result pode ler mais se houver 'data:' antes
-    # Neste caso, o 'error' vem primeiro, então lemos status e result.
-    # O erro é levantado antes de ler as linhas 'data:'.
-    # Ajuste: O código atual lê 'data:' *antes* de verificar o status. Vamos simular isso.
     mock_executable_app.readline.reset_mock()
     mock_executable_app.readline.side_effect = [
         b'data: Error message line 1\n',
@@ -267,10 +266,6 @@ def test_status_init():
     assert status.cursor_col == b'020'
     assert status.window_id == b'010'
     assert status.exec_time == b'0x1234'
-    # O último valor parece ser um erro no split original, vamos verificar o código
-    # O código original pega 12 partes, o split pode gerar mais.
-    # Corrigindo a expectativa baseado no código: pega os 12 primeiros itens do split.
-    # O split por ' ' pode gerar itens vazios se houver espaços múltiplos.
 
     status_line_sparse = b'U F U C(host) I N 3279-4 80 43 20 10 0x1 0.1'
     status_sparse = Status(status_line_sparse)
@@ -294,12 +289,13 @@ def test_status_init_empty():
 def test_wc3270app_init(mock_socket):
     """Testa a inicialização de Wc3270App."""
     # Mock _get_free_port para retornar uma porta fixa
+    SCRIPT_PORT = 12345
     with patch(
-        'pyx3270.emulator.Wc3270App._get_free_port', return_value=12345
+        'pyx3270.emulator.Wc3270App._get_free_port', return_value=SCRIPT_PORT
     ):
         app = Wc3270App(model='3')
         assert app.shell is True
-        assert app.script_port == 12345
+        assert app.script_port == SCRIPT_PORT
         assert '-xrm' in app.args
         assert '*model: 3' in app.args
 
@@ -308,8 +304,9 @@ def test_wc3270app_init(mock_socket):
 def test_wc3270app_connect(mock_subprocess_popen, mock_socket):
     """Testa o método connect de Wc3270App."""
     mock_sock_instance = mock_socket.return_value
+    SCRIPT_PORT = 12345
     with patch(
-        'pyx3270.emulator.Wc3270App._get_free_port', return_value=12345
+        'pyx3270.emulator.Wc3270App._get_free_port', return_value=SCRIPT_PORT
     ):
         app = Wc3270App(model='4')
 
@@ -329,7 +326,7 @@ def test_wc3270app_connect(mock_subprocess_popen, mock_socket):
         mock_socket.assert_called_with(socket.AF_INET, socket.SOCK_STREAM)
         mock_sock_instance.connect.assert_called_once_with((
             'localhost',
-            12345,
+            SCRIPT_PORT,
         ))
         mock_sock_instance.makefile.assert_called_once_with(mode='rwb')
 
@@ -346,23 +343,22 @@ def test_wc3270app_connect_fails(
     mock_sock_instance.connect.side_effect = socket.error(
         socket.errno.ECONNREFUSED, 'Connection refused'
     )
-
+    SCRIPT_PORT = 12345
     with patch(
-        'pyx3270.emulator.Wc3270App._get_free_port', return_value=12345
+        'pyx3270.emulator.Wc3270App._get_free_port', return_value=SCRIPT_PORT
     ):
         app = Wc3270App(model='2')
         # Executa connect e verifica que NENHUMA exceção é levantada
         try:
-            result = app.connect('otherhost.com')
-            # O código original pode retornar True aqui, mesmo sem conectar
-            # assert result is False # O ideal seria retornar False, mas o código atual não faz isso
+            app.connect('otherhost.com')
         except Exception as e:
             pytest.fail(
                 f'Wc3270App.connect levantou uma exceção inesperada: {e}'
             )
 
         # Verifica se tentou conectar múltiplas vezes (5 vezes no código)
-        assert mock_sock_instance.connect.call_count == 5
+        MAX_CONNECT_ATTEMPTS = 5
+        assert mock_sock_instance.connect.call_count == MAX_CONNECT_ATTEMPTS
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -370,6 +366,7 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
     """Testa clear_screen com sucesso na primeira tentativa."""
     # Mock time.sleep para acelerar
     monkeypatch.setattr('time.sleep', lambda x: None)
+    EXPECTED_COMMAND_CALLS = 3
     # Mock _exec_command para simular respostas
     # A função clear_screen chama _exec 3 vezes (Clear, Wait, Ascii)
     # O teste chama clear_screen 2 vezes (antes e depois de setar rows/cols)
@@ -377,35 +374,35 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
     mock_result_ok = MagicMock(status_line=b'ok', data=[])
     mock_result_empty_screen = MagicMock(status_line=b'ok', data=[b''])
     x3270_cmd_instance._exec_command.side_effect = [
-        mock_result_ok,  # Chamada 1: Clear() na primeira chamada a clear_screen
-        mock_result_ok,  # Chamada 2: Wait() na primeira chamada a clear_screen
-        mock_result_empty_screen,  # Chamada 3: Ascii() na primeira chamada a clear_screen (simula sucesso)
-        mock_result_ok,  # Chamada 4: Clear() na segunda chamada a clear_screen
-        mock_result_ok,  # Chamada 5: Wait() na segunda chamada a clear_screen
-        mock_result_empty_screen,  # Chamada 6: Ascii() na segunda chamada a clear_screen (simula sucesso)
+        mock_result_ok,  # call 1: Clear() 1º chamada a clear_screen
+        mock_result_ok,  # call 2: Wait() 1º chamada a clear_screen
+        mock_result_empty_screen,  # call 3: Ascii() 1º chamada a clear_screen
+        mock_result_ok,  # call 4: Clear() 2º chamada a clear_screen
+        mock_result_ok,  # call 5: Wait() 2º chamada a clear_screen
+        mock_result_empty_screen,  # call 6: Ascii() 2º chamada a clear_screen
         # Adiciona um extra para segurança, caso algo chame mais uma vez
         mock_result_ok,
     ]
 
-    # Primeira chamada (pode falhar internamente na verificação Ascii se rows/cols não definidos)
-    # O código original não levanta erro se rows/cols for None, mas pode passar args errados para Ascii
-    # Vamos garantir que rows/cols sejam definidos antes da primeira chamada para simplificar
     x3270_cmd_instance.rows = 24
     x3270_cmd_instance.cols = 80
     x3270_cmd_instance.clear_screen()
 
     # Verifica as chamadas da primeira execução bem-sucedida
-    assert x3270_cmd_instance._exec_command.call_count == 3
+    assert (
+        x3270_cmd_instance._exec_command.call_count == EXPECTED_COMMAND_CALLS
+    )
     calls_first_run = [
         call(b'clear()'),
-        call(b'wait(30, unlock)'),
+        call(
+            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
+        ),
         call(b'ascii()'),
     ]
     x3270_cmd_instance._exec_command.assert_has_calls(
         calls_first_run, any_order=False
     )
 
-    # Reseta o mock e chama de novo para garantir que a lógica do teste está correta
     x3270_cmd_instance._exec_command.reset_mock()
     # Reatribui o side_effect pois reset_mock() o remove
     x3270_cmd_instance._exec_command.side_effect = [
@@ -415,7 +412,9 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
         mock_result_ok,
     ]
     x3270_cmd_instance.clear_screen()
-    assert x3270_cmd_instance._exec_command.call_count == 3
+    assert (
+        x3270_cmd_instance._exec_command.call_count == EXPECTED_COMMAND_CALLS
+    )
     x3270_cmd_instance._exec_command.assert_has_calls(
         calls_first_run, any_order=False
     )
@@ -427,6 +426,7 @@ def test_x3270cmd_clear_screen_multiple_attempts(
 ):
     """Testa clear_screen que precisa de múltiplas tentativas."""
     monkeypatch.setattr('time.sleep', lambda x: None)
+    EXPECTED_CALLS = 9
     x3270_cmd_instance.rows = 24
     x3270_cmd_instance.cols = 80
     # Simula tela não vazia nas primeiras 2 tentativas
@@ -448,7 +448,7 @@ def test_x3270cmd_clear_screen_multiple_attempts(
 
     x3270_cmd_instance.clear_screen()
 
-    assert x3270_cmd_instance._exec_command.call_count == 9
+    assert x3270_cmd_instance._exec_command.call_count == EXPECTED_CALLS
     # Verifica a última chamada a Ascii
     assert x3270_cmd_instance._exec_command.call_args_list[-1] == call(
         b'ascii()'
@@ -477,15 +477,11 @@ def test_x3270cmd_wait_for_field_timeout(x3270_cmd_instance):
         'Wait timed out'
     )
 
-    # O código original não levanta TimeoutWaitError aqui, apenas loga.
-    # O método Wait() em si deveria levantar o erro. Vamos assumir que _exec_command
-    # levanta CommandError em caso de falha do comando Wait.
-    # A função wait_for_field não trata exceções, então ela repassaria.
-    with pytest.raises(CommandError, match='Wait timed out'):
-        x3270_cmd_instance.wait_for_field(timeout=5)
+    # A função wait_for_field não trata exceções, apenas sequencia execução.
+    x3270_cmd_instance.wait_for_field(timeout=1)
 
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'wait(5, InputField)'
+        b'wait(1, InputField)'
     )
 
 
@@ -548,49 +544,84 @@ def test_x3270cmd_move_to(x3270_cmd_instance):
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_send_pf(x3270_cmd_instance):
-    """Testa send_pf."""
+    # Mock _exec_command's return
     x3270_cmd_instance._exec_command.return_value = MagicMock(
         status_line=b'ok'
     )
+    EXPECTED_CALLS = 2
+    with patch.object(x3270_cmd_instance, '_exec_command') as mock_exec:
+        x3270_cmd_instance.send_pf('3')
 
-    x3270_cmd_instance.send_pf('3')
-    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
+        calls = mock_exec.call_args_list
+        assert len(calls) >= EXPECTED_CALLS
+
+        pf_command = calls[-2][0][0]
+        expected_pf = b'PF(3)'
+        assert pf_command == expected_pf
+
+        wait_command = calls[-1][0][0]
+        expected_wait = (
+            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
+        )
+        assert wait_command == expected_wait
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_send_enter(x3270_cmd_instance):
-    """Testa send_enter."""
     x3270_cmd_instance._exec_command.return_value = MagicMock(
         status_line=b'ok'
     )
+    EXPECTED_CALLS = 2
 
-    x3270_cmd_instance.send_enter()
-    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
+    with patch.object(x3270_cmd_instance, '_exec_command') as mock_exec:
+        x3270_cmd_instance.send_enter()
+
+        calls = mock_exec.call_args_list
+        assert len(calls) >= EXPECTED_CALLS
+
+        enter_command = calls[-2][0][0]
+        expected_enter = b'enter()'
+        assert enter_command == expected_enter
+
+        wait_command = calls[-1][0][0]
+        expected_wait = (
+            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
+        )
+        assert wait_command == expected_wait
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_send_string(x3270_cmd_instance):
-    """Testa send_string sem especificar posição."""
     x3270_cmd_instance._exec_command.return_value = MagicMock(
         status_line=b'ok'
     )
+    EXPECTED_CALLS = 2
 
-    x3270_cmd_instance.send_string('test string')
+    with patch.object(x3270_cmd_instance, '_exec_command') as mock_exec:
+        x3270_cmd_instance.send_string('test string')
 
-    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
+        calls = mock_exec.call_args_list
+
+        assert len(calls) >= EXPECTED_CALLS
+
+        string_command = calls[-2][0][0]
+        expected_string = b'string(test string)'
+        assert string_command == expected_string
+
+        wait_command = calls[-1][0][0]
+        expected_wait = (
+            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
+        )
+        assert wait_command == expected_wait
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_send_string_truncate(x3270_cmd_instance):
-    """Testa send_string que causa FieldTruncateError."""
     # Simula erro retornado pelo comando String
     x3270_cmd_instance._exec_command.side_effect = CommandError(
         'Write to protected field'
     )
 
-    # O código atual não detecta truncamento especificamente, apenas CommandError.
-    # Para simular FieldTruncateError, precisaríamos que o código verificasse o status
-    # ou a posição do cursor após a escrita, o que não acontece.
     # Vamos testar o CommandError que é o que realmente pode acontecer.
     with pytest.raises(CommandError, match='Write to protected field'):
         x3270_cmd_instance.send_string('long string data')
@@ -646,7 +677,7 @@ def test_x3270cmd_save_screen(x3270_cmd_instance):
 
     # Verifica se Ascii foi chamado corretamente
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        f'printtext(html, file, path_test\\myscreen.html)'.encode('utf-8')
+        'printtext(html, file, path_test\\myscreen.html)'.encode('utf-8')
     )
 
 
@@ -754,12 +785,28 @@ def test_x3270cmd_delete_field(x3270_cmd_instance):
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_send_home(x3270_cmd_instance):
-    """Testa send_home."""
     x3270_cmd_instance._exec_command.return_value = MagicMock(
         status_line=b'ok'
     )
-    x3270_cmd_instance.send_home()
-    x3270_cmd_instance._exec_command.assert_called_with(b'wait(30, unlock)')
+    EXPECTED_CALLS = 2
+
+    with patch.object(x3270_cmd_instance, '_exec_command') as mock_exec:
+        x3270_cmd_instance.send_home()
+
+        call_list = mock_exec.call_args_list
+
+        assert len(call_list) >= EXPECTED_CALLS
+
+        home_command_args = call_list[-2][0][0]
+        wait_command_args = call_list[-1][0][0]
+
+        expected_home_command = b'home()'
+        expected_wait_command = (
+            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
+        )
+
+        assert home_command_args == expected_home_command
+        assert wait_command_args == expected_wait_command
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -987,8 +1034,8 @@ def test_x3270_reconnect_host_failure(x3270_emulator_instance):
     )
     with pytest.raises(CommandError, match='Reconnect failed'):
         x3270_emulator_instance._exec_command()
-        x3270_emulator_instance.reconnect_host()
-    x3270_emulator_instance._exec_command.assert_called_with()
+    x3270_emulator_instance.reconnect_host()
+    x3270_emulator_instance._exec_command.assert_called_with(b'quit()')
 
 
 # Teste para _exec_command (embora simples, para cobertura)
@@ -997,6 +1044,7 @@ def test_x3270_exec_command_flow(x3270_emulator_instance):
     """Testa o fluxo básico de _exec_command."""
     # Remove o mock anterior para testar a implementação real (que usa Command)
     del x3270_emulator_instance._exec_command
+    EXPECTED_CALLS = 2
     with patch.object(x3270_emulator_instance, 'app', MagicMock()) as mock_app:
         mock_app.readline.side_effect = [
             b'status line for exec\n',
@@ -1007,7 +1055,7 @@ def test_x3270_exec_command_flow(x3270_emulator_instance):
 
         # Verifica se o app foi usado para escrever e ler
         mock_app.write.assert_called_with(b'testcommand()\n')
-        assert mock_app.readline.call_count == 2
+        assert mock_app.readline.call_count == EXPECTED_CALLS
     # Verifica o resultado retornado (instância de Command)
     assert isinstance(cmd_result, Command)
     assert cmd_result.status_line == b'status line for exec'

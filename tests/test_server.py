@@ -1,11 +1,11 @@
-import pytest
-import socket
 import os
-from unittest.mock import MagicMock, patch, mock_open, call
+import socket
+from unittest.mock import MagicMock, call, patch
+
+import pytest
 
 from pyx3270 import server, tn3270
 from pyx3270.emulator import X3270
-
 
 _real_socket_class = socket.socket
 
@@ -92,7 +92,9 @@ def test_load_screens_with_files(tmp_path, monkeypatch):
     screens_list = list(screens.values())
 
     mock_ensure_dir.assert_called_once_with(str(record_dir))
-    assert len(screens_list) == 3
+    EXPECTED_FILES = {'000', '001', '002'}
+    assert set(screens.keys()) == EXPECTED_FILES
+    assert len(screens_list) == len(EXPECTED_FILES)
     # Verifica a ordem e o conteúdo (com EOR adicionado se necessário)
     assert screens_list[0] == b'screen0_data' + tn3270.IAC + tn3270.TN_EOR
     assert screens_list[1] == b'screen1_data' + tn3270.IAC + tn3270.TN_EOR
@@ -205,13 +207,15 @@ def test_backend_3270_navigation(mock_socket_constructor):
     assert result == {'current_screen': 2, 'clear': False}
 
     # Teste 7: Fechamento do terminal
-    with pytest.raises(Exception, match=''):
+    mock_clientsock.recv.side_effect = [b'']
+    with pytest.raises(ConnectionResetError, match='Terminal fechado.'):
         server.backend_3270(mock_clientsock, screens, 2, emulator=True)
 
 
 @patch('socket.socket')
 def test_backend_3270_timeout(mock_socket_constructor):
     """Testa backend_3270 com timeout no recv."""
+    EXPECTED_CALLS = 3
     mock_clientsock = MagicMock(spec=_real_socket_class)
     mock_clientsock.recv.side_effect = [
         socket.timeout,
@@ -222,7 +226,7 @@ def test_backend_3270_timeout(mock_socket_constructor):
 
     result = server.backend_3270(mock_clientsock, screens, 0, emulator=False)
     assert result == {'current_screen': 0, 'clear': False}
-    assert mock_clientsock.recv.call_count == 3  # 1 timeout, 1 AID, 1 keypress
+    assert mock_clientsock.recv.call_count == EXPECTED_CALLS
 
 
 @patch('pyx3270.server.backend_3270')
@@ -256,32 +260,22 @@ def test_replay_handler(mock_backend, monkeypatch):
         call(screens_list[1]),
         call(screens_list[2]),
     ])
-    assert mock_backend.call_count == 5  # Chamado até a exceção
+    EXPECTED_CALLS = 5
+    assert mock_backend.call_count == EXPECTED_CALLS  # Chamado até a exceção
     mock_clientsock.close.assert_called_once()  # Garante que fechou no finally
 
 
-@patch('pyx3270.server.connect_serversock')
-@patch('pyx3270.server.ensure_dir')
-@patch('select.select')
-@patch('builtins.open', new_callable=mock_open)
-@patch('os.path.join')
-@patch('pyx3270.server.is_screen_tn3270')
-def test_record_handler_basic_flow(
-    mock_is_screen,
-    mock_join,
-    mock_open_func,
-    mock_select,
-    mock_ensure_dir,
-    mock_connect_serversock,
-):
+def test_record_handler_basic_flow(record_mocks):
     """Testa o fluxo básico de gravação em record_handler (sem TLS)."""
-    mock_clientsock = MagicMock(spec=_real_socket_class, fileno=lambda: 3)
-    mock_serversock = MagicMock(spec=_real_socket_class, fileno=lambda: 4)
-    mock_connect_serversock.return_value = mock_serversock
+    mock_clientsock = record_mocks.clientsock
+    mock_serversock = record_mocks.serversock
+    record_mocks.connect_serversock.return_value = mock_serversock
     mock_emu = MagicMock(spec=X3270)
     mock_emu.tls = False  # Teste sem TLS
     record_dir = '/fake/dir'
-    mock_join.side_effect = lambda *args: os.path.normpath('/'.join(args))
+    record_mocks.join.side_effect = lambda *args: os.path.normpath(
+        '/'.join(args)
+    )
 
     # Dados simulados recebidos
     client_data = b'client_req' + tn3270.IAC + tn3270.TN_EOR
@@ -290,7 +284,7 @@ def test_record_handler_basic_flow(
     server_data_screen2 = b'server_resp_screen2' + tn3270.IAC + tn3270.TN_EOR
 
     # Configura select para retornar sockets e simular fim
-    mock_select.side_effect = [
+    record_mocks.select.side_effect = [
         ([mock_clientsock], [], []),  # Cliente envia
         ([mock_serversock], [], []),  # Servidor envia tela 1
         ([mock_serversock], [], []),  # Servidor envia dados não-tela
@@ -307,18 +301,20 @@ def test_record_handler_basic_flow(
     ]
 
     # Configura is_screen_tn3270
-    mock_is_screen.side_effect = (
+    record_mocks.is_screen.side_effect = (
         lambda data: tn3270.IAC + tn3270.TN_EOR in data
     )
 
-    server.record_handler(mock_emu, mock_clientsock, 'host:port', record_dir)
+    server.record_handler(mock_emu, mock_clientsock, 'host:992', record_dir)
 
     # Verificações
-    mock_connect_serversock.assert_called_once_with(
-        mock_clientsock, 'host:port'
+    record_mocks.connect_serversock.assert_called_once_with(
+        mock_clientsock, 'host:992'
     )
-    mock_ensure_dir.assert_called_once_with(record_dir)
-    assert mock_select.call_count == 5
+
+    record_mocks.ensure_dir.assert_called_once_with(record_dir)
+    EXPECTED_CALLS = 5
+    assert record_mocks.select.call_count == EXPECTED_CALLS
 
     # Verifica envios entre sockets
     mock_serversock.sendall.assert_called_once_with(client_data)
@@ -329,8 +325,10 @@ def test_record_handler_basic_flow(
     ])
 
     # Verifica gravação dos arquivos
-    assert mock_join.call_count == 2  # Chamado para tela 1 e tela 2
-    mock_open_func.assert_has_calls(
+    # Chamado para tela 1 e tela 2
+    EXPECTED_CALLS = 2
+    assert record_mocks.join.call_count == EXPECTED_CALLS
+    record_mocks.open_func.assert_has_calls(
         [
             call(os.path.normpath('/fake/dir/000.bin'), 'wb'),
             call(os.path.normpath('/fake/dir/001.bin'), 'wb'),
@@ -339,7 +337,9 @@ def test_record_handler_basic_flow(
     )
 
     # Verifica o conteúdo escrito (mock_open captura escritas)
-    handle = mock_open_func()  # mock do arquivo aberto (mesmo para todos)
+    handle = (
+        record_mocks.open_func()
+    )  # mock do arquivo aberto (mesmo para todos)
 
     # Obtem todas as chamadas ao write (argumentos escritos)
     write_calls = [
@@ -371,4 +371,4 @@ def test_record_handler_connect_fail(mock_connect_serversock):
         mock_clientsock, 'badhost:port'
     )
     # Não deve tentar fechar sockets ou fazer outras operações
-    mock_clientsock.close.assert_not_called()  # connect_serversock já fecha o cliente
+    mock_clientsock.close.assert_not_called()
