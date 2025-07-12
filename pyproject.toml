@@ -40,7 +40,7 @@ preview = true
 quote-style = 'single'
 
 [tool.taskipy.tasks]
-lint = "ruff check . --diff"
+fix = "ruff check . --fix"
 format = "ruff format ."
 test = "python -m pytest . -s -x --cov=pyx3270 -vv"
 post_test = "python -m coverage html"
