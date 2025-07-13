@@ -1,16 +1,24 @@
 site_name: Pyx3270
+nav:
+  - Início: index.md
+  - Indrodução: introducao.md
+  - Changelog: changelog.md
+  - Estrutura do Projeto: estrutura.md
 
 theme:
   name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
   language: pt-BR
   features:
     - content.code.annotate
     - content.tabs.link
   palette:
-
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: blue-grey
+      accent: indigo
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
@@ -18,6 +26,8 @@ theme:
     # Palette toggle for dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: blue-grey
+      accent: teal
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -25,8 +35,16 @@ theme:
 plugins:
   - search:
       separator: '[\s\-\.]+'
-  - towncrier:
-      encoding: utf-8-sig
+  - towncrier
+  - gen-files:
+      scripts:
+        - docs/gen_tree.py
+
+extra_css:
+  - assets/css/extra.css
+
+extra_javascript:
+  - assets/js/filetree.js
 
 markdown_extensions:
   - pymdownx.snippets

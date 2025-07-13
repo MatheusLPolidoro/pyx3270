@@ -1,0 +1,83 @@
+.tree-container {
+    font-family: system-ui, sans-serif;
+    font-size: 0.9rem;
+    background-color: #71719617;
+    padding: 5px !important;
+    border-radius: 2px;
+    border: solid 1px #9f818147;
+}
+
+.file-tree .file-tree ul,
+.file-tree li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.file-tree ul {
+    margin-left: 1em;
+    border-left: 1px solid #444c6a;
+}
+
+.file, .folder {
+    margin-left: 25px;
+}
+
+.file-tree .folder>ul {
+    display: none;
+}
+
+.file-tree .folder.open>ul {
+    display: block;
+}
+
+.file-tree .folder-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+}
+
+.folder-header {
+    transform: translateX(-19px);
+}
+
+.file-tree .caret {
+    transition: transform 0.2s ease;
+    font-size: 12px;
+    transform: translate(0px, 2px);
+    margin-right: 10px;
+}
+
+.file-tree .folder.open .caret {
+    transform: translate(0px, 2px) rotate(90deg);
+}
+
+.file-tree svg {
+    flex-shrink: 0;
+}
+
+.file-tree .folder-header:hover {
+    color: #5493e6;
+}
+
+.file-tree .folder-header:hover .folder-icon svg {
+    fill: #6ba3eb;
+}
+
+.folder-icon svg {
+    position: absolute;
+    transform: translateY(-6px);
+    width: 18px;
+    max-width: 18px;
+}
+
+.icon svg {
+    position: absolute;
+    height: 19px;
+    width: 19px;
+    max-height: 19px;
+    max-width: 19px;
+    margin-right: 5px;
+    margin-top: 9px;
+}
