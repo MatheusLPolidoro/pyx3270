@@ -95,7 +95,10 @@ def mock_executable_app_instance(mock_subprocess_popen):
 def x3270_emulator_instance(mock_executable_app_instance):
     """Fixture para uma instância de X3270 com app mockado."""
     with patch.object(X3270, '_create_app', return_value=None):
-        emulator = X3270(visible=False, model='3', )
+        emulator = X3270(
+            visible=False,
+            model='3',
+        )
         # Atribui manualmente o app mockado (já que _create_app está mockado)
         emulator.app = mock_executable_app_instance
         # Mocka o método principal de execução de comandos
