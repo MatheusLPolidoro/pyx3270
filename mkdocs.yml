@@ -1,6 +1,7 @@
 site_name: Pyx3270
 nav:
   - Início: index.md
+  - Comandos X3270: comandos.md
   - Indrodução: introducao.md
   - Changelog: changelog.md
   - Estrutura do Projeto: estrutura.md
@@ -10,9 +11,12 @@ theme:
   logo: assets/logo.svg
   favicon: assets/favicon.ico
   language: pt-BR
+  highlightjs: true
   features:
     - content.code.annotate
     - content.tabs.link
+    - navigation.sections
+    - content.code.copy
   palette:
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
@@ -47,6 +51,7 @@ extra_javascript:
   - assets/js/filetree.js
 
 markdown_extensions:
+  - pymdownx.highlight
   - pymdownx.snippets
   - attr_list
   - md_in_html

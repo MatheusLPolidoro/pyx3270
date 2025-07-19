@@ -291,10 +291,10 @@ def handle_change_directory(command: str, base_directory: str):
     if os.path.isdir(new_dir):
         new_screens = load_screens_basic(new_dir)
         logger.info(f'[+] Mudando para o diretório de telas: {new_dir}')
-        return new_screens, list(new_screens.values()), 0
+        return new_screens, list(new_screens.values())
     else:
         logger.info(f'[!] Diretório inválido: {new_dir}')
-        return {}, [], 0
+        return {}, []
 
 
 def process_command(
@@ -319,11 +319,9 @@ def process_command(
         handle_add(command, state.screens, state.screens_list)
 
     elif command.startswith('change directory '):
-        screens = load_screens_basic(
-            find_directory(base_directory, command.split(' ', 2)[2].strip())
+        state.screens, state.screens_list = handle_change_directory(
+            command, base_directory
         )
-        state.screens = screens
-        state.screens_list = list(screens.values())
         state.current_screen = 0
 
     elif command == 'next':

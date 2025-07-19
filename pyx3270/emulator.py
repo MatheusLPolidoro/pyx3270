@@ -768,6 +768,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                 return X3270App(self.model)
             logger.debug('Criando S3270App (Linux, não visível)')
             return S3270App(self.model)
+
         except Exception as e:
             logger.error(f'Erro ao criar aplicativo: {e}', exc_info=True)
             raise

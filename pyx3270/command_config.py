@@ -100,7 +100,7 @@ command_map = {
     'snap': ([('args', str)], 'Manipula snapshots da tela.'),
     'source': ([('file', str)], 'Executa comandos de um arquivo.'),
     'string': ([('text', str)], 'Envia string para o campo atual.'),
-    'sysReq': ([], 'Envia tecla System Request (SysReq).'),
+    'sysreq': ([], 'Envia tecla System Request (SysReq).'),
     'tab': ([], 'Move cursor para próximo campo.'),
     'temporarycomposemap': (
         [('map', str)],

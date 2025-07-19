@@ -80,10 +80,10 @@ def record(
     rich.print(f'[+] RECORD na porta {port}')
     tnsock = start_sock(port)
 
-    rich.print(f'[+] Escutando localhost, porta {port}')
+    rich.print(f'[+] Escutando localhost, origem {host= } {port=}')
     if emulator:
         emu = X3270(visible=True, model=model)
-        emu.connect_host('localhost', port, tls)
+        emu.connect_host('localhost', port, tls, mode_3270=False)
 
     while True:
         clientsock, addr = tnsock.accept()

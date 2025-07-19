@@ -1,9 +1,5 @@
-try:
-    BrokenPipeError
-except NameError:
-
-    class BrokenPipeError(Exception):
-        """o PIPE/cano de envio do TerminalClient não esta funcionando."""
+class BrokenPipeError(Exception):
+    """o PIPE/cano de envio do TerminalClient não esta funcionando."""
 
 
 class CommandError(Exception):

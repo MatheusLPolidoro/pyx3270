@@ -3,10 +3,11 @@ import sys
 from time import sleep
 
 from pyx3270.emulator import logger
+from pyx3270.iemulator import AbstractEmulator
 
 
 class PyX3270Manager:
-    def __init__(self, directory='./screens'):
+    def __init__(self, emu: AbstractEmulator, directory='./screens'):
         self.command = [
             sys.executable,
             '-m',
@@ -17,7 +18,7 @@ class PyX3270Manager:
             '--no-tls',
             '--no-emulator',
         ]
-
+        self.emu = emu
         # Usa subprocess.Popen para iniciar o servidor
         self.process = subprocess.Popen(
             self.command,
