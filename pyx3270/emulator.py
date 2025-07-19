@@ -300,7 +300,7 @@ class Wc3270App(ExecutableApp):
         self.args = [
             'start',
             '/wait',
-            f'{BINARY_FOLDER}/wc3270',
+            f'"{BINARY_FOLDER}/wc3270"',
         ] + self.args
         self.args.extend(['-scriptport', str(self.script_port), host])
         logger.debug(f'Argumentos completos: {self.args}')
@@ -350,7 +350,7 @@ class Wc3270App(ExecutableApp):
 
 
 class Ws3270App(ExecutableApp):
-    args = [f'{BINARY_FOLDER}/ws3270', '-xrm', 'ws3270.unlockDelay: False']
+    args = [f'"{BINARY_FOLDER}/ws3270"', '-xrm', 'ws3270.unlockDelay: False']
 
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info(f'Inicializando Ws3270App com modelo: {model}')
