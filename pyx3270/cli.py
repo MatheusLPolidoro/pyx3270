@@ -49,7 +49,7 @@ def replay(
     rich.print(f'[+] Escutando localhost, porta {port}')
 
     if emulator:
-        emu = X3270(visible=True, model=model)
+        emu = X3270(visible=True, model=model, save_log_file=True)
         emu.connect_host('localhost', port, tls, mode_3270=False)
 
     while True:
@@ -82,7 +82,7 @@ def record(
 
     rich.print(f'[+] Escutando localhost, origem {host= } {port=}')
     if emulator:
-        emu = X3270(visible=True, model=model)
+        emu = X3270(visible=True, model=model, save_log_file=True)
         emu.connect_host('localhost', port, tls, mode_3270=False)
 
     while True:
