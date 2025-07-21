@@ -1,10 +1,16 @@
 site_name: Pyx3270
 nav:
-  - Início: index.md
-  - Comandos X3270: comandos.md
-  - Indrodução: introducao.md
-  - Changelog: changelog.md
-  - Estrutura do Projeto: estrutura.md
+  - Docs: index.md
+  - O que é Pyx3270: sobre.md
+  - Primeiros passos: 
+    - Instalação: instalacao.md
+    - Configuração: configuracao.md
+    - Automação: uso_basico.md
+    - CLI: uso_basico.md
+    
+  - Comandos Nativos: comandos.md
+  - Change Log: changelog.md
+  - Contribuindo: contribuindo.md
 
 theme:
   name: material
