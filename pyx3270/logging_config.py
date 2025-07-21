@@ -1,5 +1,3 @@
-import logging.config
-
 LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -27,21 +25,31 @@ LOGGING_CONFIG = {
             'encoding': 'utf-8',
             'formatter': 'default',
         },
+        'offline_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': 'x3270_offline.log',
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 7,
+            'encoding': 'utf-8',
+            'formatter': 'default',
+        },
     },
     'loggers': {
-        'x3270_emulator': {
+        'pyx3270.emulator': {
             'level': 'DEBUG',
             'handlers': ['emulator_file'],
             'propagate': False,
         },
-        'x3270_server': {
+        'pyx3270.server': {
             'level': 'DEBUG',
             'handlers': ['server_file'],
             'propagate': False,
         },
+        'pyx3270.offline': {
+            'level': 'DEBUG',
+            'handlers': ['offline_file'],
+            'propagate': False,
+        },
     },
 }
-
-logging.config.dictConfig(LOGGING_CONFIG)
-emulator_logger = logging.getLogger('x3270_emulator')
-server_logger = logging.getLogger('x3270_server')
