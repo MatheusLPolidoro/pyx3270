@@ -13,7 +13,8 @@ Emulador de terminal 3270
 
 from pyx3270.cli import record, replay
 from pyx3270.emulator import X3270
+from pyx3270.offline import PyX3270Manager
 
 __author__ = 'MatheusLPolidoro'
 __version__ = '0.1.0'
-__all__ = ['X3270', 'replay', 'record']
+__all__ = ['X3270', 'replay', 'record', 'PyX3270Manager']
