@@ -1,4 +1,5 @@
 import errno
+import logging.config
 import math
 import os
 import re
@@ -6,6 +7,7 @@ import socket
 import subprocess
 from contextlib import closing
 from functools import cache, lru_cache
+from logging import getLogger
 from time import sleep, time
 from typing import Literal
 
@@ -22,7 +24,9 @@ from pyx3270.iemulator import (
     AbstractEmulatorCmd,
     AbstractExecutableApp,
 )
-from pyx3270.logging_config import emulator_logger as logger
+from pyx3270.logging_config import LOGGING_CONFIG
+
+logger = getLogger(__name__)
 
 BINARY_FOLDER = f'{os.path.dirname(__file__)}/binary'
 MODEL_TYPE = Literal['2', '3', '4', '5']
@@ -86,15 +90,15 @@ class ExecutableApp(AbstractExecutableApp):
             logger.debug(f'Executando comando: {self.args}')
             self.subprocess = subprocess.Popen(self.args, **kwargs)
             logger.debug(f'Processo iniciado com PID: {self.subprocess.pid}')
-        except Exception as e:
-            logger.error(f'Erro ao iniciar processo: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao iniciar processo')
             raise
 
     def _get_executable_app_args(self, model: MODEL_TYPE) -> list:
         logger.debug(f'Obtendo argumentos para modelo: {model}')
         args = self.__class__.args + [
             '-xrm',
-            f'*model: {model}',
+            f'"*model: {model}"',
             '-localcp',
             'utf8',
             '-utf8',
@@ -122,8 +126,8 @@ class ExecutableApp(AbstractExecutableApp):
             self.subprocess.stdin.write(data)
             self.subprocess.stdin.flush()
             logger.debug('Dados escritos com sucesso')
-        except Exception as e:
-            logger.error(f'Erro ao escrever dados: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao escrever dados')
             raise
 
     def readline(self):
@@ -132,8 +136,8 @@ class ExecutableApp(AbstractExecutableApp):
             line = self.subprocess.stdout.readline()
             logger.debug(f'Linha lida: {line}')
             return line
-        except Exception as e:
-            logger.error(f'Erro ao ler linha: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao ler linha')
             raise
 
 
@@ -164,10 +168,8 @@ class Command(AbstractCommand):
                 logger.debug(f'Dados recebidos: {line}')
                 self.data.append(line[6:].rstrip('\n\r'.encode('utf-8')))
 
-        except Exception as e:
-            logger.error(
-                f'Erro durante execução do comando: {e}', exc_info=True
-            )
+        except Exception:
+            logger.error(f'Erro durante execução do comando: {self.cmdstr}')
             raise
 
     def handle_result(self, result: str) -> bool:
@@ -234,7 +236,7 @@ class Status:
 
 
 class Wc3270App(ExecutableApp):
-    args = ['-xrm', 'wc3270.unlockDelay: False']
+    args = ['-xrm', '"wc3270.unlockDelay: False"']
 
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info(f'Inicializando Wc3270App com modelo: {model}')
@@ -256,8 +258,8 @@ class Wc3270App(ExecutableApp):
                 port = s.getsockname()[1]
                 logger.debug(f'Porta livre obtida: {port}')
                 return port
-        except Exception as e:
-            logger.error(f'Erro ao obter porta livre: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao obter porta livre.')
             raise
 
     @cache
@@ -277,9 +279,7 @@ class Wc3270App(ExecutableApp):
                 break
             except socket.error as e:
                 if e.errno != errno.ECONNREFUSED:
-                    logger.error(
-                        f'Erro de conexão não recuperável: {e}', exc_info=True
-                    )
+                    logger.error('Erro de conexão não recuperável.')
                     raise NotConnectedException
                 logger.warning(
                     f'Conexão recusada, tentando novamente em 1s '
@@ -300,18 +300,19 @@ class Wc3270App(ExecutableApp):
         self.args = [
             'start',
             '/wait',
+            '""',
             f'"{BINARY_FOLDER}/wc3270"',
         ] + self.args
         self.args.extend(['-scriptport', str(self.script_port), host])
         logger.debug(f'Argumentos completos: {self.args}')
 
         try:
-            self._spawn_app(tuple(self.args))
+            self._spawn_app(' '.join(self.args))
             self._make_socket()
             logger.info('Conexão estabelecida com sucesso')
             return True
-        except Exception as e:
-            logger.error(f'Erro ao conectar: {e}', exc_info=True)
+        except Exception:
+            logger.error(f'Erro ao conectar ao host: {host}')
             raise
 
     def close(self) -> None:
@@ -319,8 +320,8 @@ class Wc3270App(ExecutableApp):
         try:
             self.socket.close()
             logger.debug('Socket fechado com sucesso')
-        except Exception as e:
-            logger.error(f'Erro ao fechar socket: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao fechar socket.')
 
     def write(self, data: str) -> None:
         logger.debug(f'Escrevendo dados para socket: {data}')
@@ -332,7 +333,7 @@ class Wc3270App(ExecutableApp):
             self.socket_fh.flush()
             logger.debug('Dados escritos com sucesso')
         except OSError:
-            logger.error('Erro de E/S ao escrever no socket', exc_info=True)
+            logger.error('Erro de E/S ao escrever no socket')
             raise NotConnectedException
 
     def readline(self) -> bytes:
@@ -345,12 +346,12 @@ class Wc3270App(ExecutableApp):
             logger.debug(f'Linha lida: {line}')
             return line
         except Exception:
-            logger.error('Erro ao ler do socket', exc_info=True)
+            logger.error('Erro ao ler do socket')
             raise NotConnectedException
 
 
 class Ws3270App(ExecutableApp):
-    args = [f'"{BINARY_FOLDER}/ws3270"', '-xrm', 'ws3270.unlockDelay: False']
+    args = [f'{BINARY_FOLDER}/ws3270', '-xrm', 'ws3270.unlockDelay: False']
 
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info(f'Inicializando Ws3270App com modelo: {model}')
@@ -453,7 +454,9 @@ class X3270Cmd(AbstractEmulatorCmd):
             logger.debug(f"Resultado: {result} (encontrado: '{found}')")
             return result
         except Exception:
-            logger.error(f'Erro ao verificar {string=}', exc_info=True)
+            logger.error(
+                f'Erro ao verificar {string=}',
+            )
             return False
 
     def delete_field(self) -> None:
@@ -538,7 +541,9 @@ class X3270Cmd(AbstractEmulatorCmd):
             logger.debug(f"String obtida: '{result}'")
             return result
         except Exception:
-            logger.error('Erro ao obter string', exc_info=True)
+            logger.error(
+                'Erro ao obter string',
+            )
             raise
 
     def get_string_area(
@@ -557,8 +562,8 @@ class X3270Cmd(AbstractEmulatorCmd):
             result = self.ascii(yposi, xposi, ypose, xpose)
             logger.debug(f'Área obtida com {len(result)} caracteres')
             return result
-        except Exception as e:
-            logger.error(f'Erro ao obter área de texto: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao obter área de texto')
             raise
 
     def get_full_screen(self, header: bool = True) -> str:
@@ -573,8 +578,10 @@ class X3270Cmd(AbstractEmulatorCmd):
                 logger.debug('Header removido do conteúdo')
             logger.debug(f'Conteúdo obtido com {len(text)} caracteres')
             return text
-        except Exception as e:
-            logger.error(f'Erro ao obter conteúdo da tela: {e}', exc_info=True)
+        except Exception:
+            logger.error(
+                'Erro ao obter conteúdo da tela.',
+            )
             raise
 
     def save_screen(self, file_path: str, file_name: str):
@@ -585,8 +592,10 @@ class X3270Cmd(AbstractEmulatorCmd):
                 os.makedirs(file_path)
             self.printtext('html', 'file', f'{file_path}\\{file_name}.html')
             logger.info('Tela salva com sucesso')
-        except Exception as e:
-            logger.error(f'Erro ao salvar tela: {e}', exc_info=True)
+        except Exception:
+            logger.error(
+                'Erro ao salvar tela.',
+            )
             raise
 
     def check_limits(self, ypos, xpos):
@@ -633,8 +642,8 @@ class X3270Cmd(AbstractEmulatorCmd):
 
             logger.info('Texto não encontrada em nenhuma linha')
             return False
-        except Exception as e:
-            logger.error(f'Erro durante busca de texto: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro durante busca de texto')
             return False
 
     def get_string_positions(
@@ -656,8 +665,8 @@ class X3270Cmd(AbstractEmulatorCmd):
             ]
             logger.info(f'Posições encontradas: {positions}')
             return positions
-        except Exception as e:
-            logger.error(f'Erro ao buscar posições: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao buscar posições')
             return []
 
     def _get_ypos_and_xpos_from_index(self, index):
@@ -673,7 +682,15 @@ class X3270Cmd(AbstractEmulatorCmd):
 
 
 class X3270(AbstractEmulator, X3270Cmd):
-    def __init__(self, visible: bool = False, model: MODEL_TYPE = '2') -> None:
+    def __init__(
+        self,
+        visible: bool = False,
+        model: MODEL_TYPE = '2',
+        save_log_file: bool = False,
+    ) -> None:
+        if save_log_file:
+            logging.config.dictConfig(LOGGING_CONFIG)
+
         logger.info(f'Inicializando X3270 (visible={visible}, model={model})')
         self.model = model
         self.model_dimensions = MODEL_DIMENSIONS[model]
@@ -724,10 +741,8 @@ class X3270(AbstractEmulator, X3270Cmd):
                         f'Comando executado, resultado: {result[:100]}...'
                     )
                     return result
-                except Exception as e:
-                    logger.error(
-                        f'Erro ao executar comando {name}: {e}', exc_info=True
-                    )
+                except Exception:
+                    logger.error(f'Erro ao executar comando {name}')
                     raise
 
             params = {p[0:1] for p in params}
@@ -769,8 +784,8 @@ class X3270(AbstractEmulator, X3270Cmd):
             logger.debug('Criando S3270App (Linux, não visível)')
             return S3270App(self.model)
 
-        except Exception as e:
-            logger.error(f'Erro ao criar aplicativo: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao criar aplicativo.')
             raise
 
     def _exec_command(self, cmdstr: str) -> Command:
@@ -787,11 +802,11 @@ class X3270(AbstractEmulator, X3270Cmd):
                 self.status = Status(cmd.status_line)
                 logger.debug(f'Comando executado, status: {self.status}')
                 return cmd
-            except NotConnectedException as e:
-                logger.error(f'Emulador não conectado: {e}', exc_info=True)
+            except NotConnectedException:
+                logger.error('Emulador não conectado.')
                 raise NotConnectedException
-            except Exception as e:
-                logger.error(f'Erro ao executar comando: {e}', exc_info=True)
+            except Exception:
+                logger.error(f'Erro ao executar comando: {cmdstr}')
                 logger.warning(
                     f'Nova tentativa de exec command: {exec}/{max_loop}'
                 )
@@ -800,8 +815,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                 self.wait(60, 'unlock')
                 self.tab()
         logger.error(
-            f'Erro ao executar comando total de tentativas: {max_loop}',
-            exc_info=True,
+            f'Erro ao executar {cmdstr} total de tentativas: {max_loop}'
         )
         raise CommandError
 
@@ -814,13 +828,11 @@ class X3270(AbstractEmulator, X3270Cmd):
             except BrokenPipeError:
                 logger.warning('BrokenPipeError ao enviar quit, ignorando')
                 self.ignore()
-            except socket.error as e:
-                if e.errno != errno.ECONNRESET:
-                    logger.error(
-                        f'Erro de socket ao terminar: {e}', exc_info=True
-                    )
+            except socket.error as ex:
+                if ex.errno != errno.ECONNRESET:
+                    logger.error('Erro de socket ao terminar')
                     raise ConnectionError
-                logger.warning(f'Erro de conexão resetada: {e}')
+                logger.warning('Erro de conexão resetada')
 
         logger.debug('Fechando aplicativo')
         self.app.close()
@@ -834,8 +846,8 @@ class X3270(AbstractEmulator, X3270Cmd):
             is_connected = self.status.connection_state.startswith(b'C(')
             logger.info(f'Estado de conexão: {is_connected}')
             return is_connected
-        except Exception as e:
-            logger.error(f'Erro ao verificar conexão: {e}', exc_info=True)
+        except Exception:
+            logger.error('Erro ao verificar conexão')
             return False
 
     def connect_host(
@@ -862,10 +874,10 @@ class X3270(AbstractEmulator, X3270Cmd):
                     logger.debug('Aguardando modo 3270')
                     self.wait(5, '3270mode')
                 logger.info('Conexão estabelecida com sucesso')
-        except CommandError as e:
-            logger.warning(f'CommandError durante conexão: {e}')
-        except Exception as e:
-            logger.error(f'Erro ao conectar: {e}', exc_info=True)
+        except CommandError:
+            logger.warning('CommandError durante conexão')
+        except Exception:
+            logger.error('Erro ao conectar')
             raise
 
     def reconnect_host(self) -> 'X3270':
@@ -875,8 +887,8 @@ class X3270(AbstractEmulator, X3270Cmd):
             self.reconnect()
             logger.info('Reconexão bem-sucedida')
             return self
-        except Exception as e:
-            logger.warning(f'Erro durante reconexão: {e}', exc_info=True)
+        except Exception:
+            logger.warning('Erro durante reconexão.')
             logger.debug('Terminando instância atual')
             self.terminate()
         finally:
