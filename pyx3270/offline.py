@@ -1,9 +1,11 @@
 import subprocess
 import sys
+from logging import getLogger
 from time import sleep
 
-from pyx3270.emulator import logger
 from pyx3270.iemulator import AbstractEmulator
+
+logger = getLogger(__name__)
 
 
 class PyX3270Manager:
