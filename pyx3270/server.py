@@ -6,10 +6,12 @@ import socket
 import sys
 import threading
 from dataclasses import dataclass
+from logging import getLogger
 
 from pyx3270 import tn3270
 from pyx3270.emulator import BINARY_FOLDER, X3270
-from pyx3270.logging_config import server_logger as logger
+
+logger = getLogger(__name__)
 
 
 @dataclass
