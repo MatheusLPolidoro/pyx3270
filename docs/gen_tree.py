@@ -13,6 +13,9 @@ IGNORED_NAMES = {
     'requirements',
     'mkdocs',
     'README',
+    'log',
+    'dist',
+    '.egg',
 }
 IGNORED_EXTENSIONS = {'.log', '.git'}
 SVG_PATH = './docs/assets/svgs'

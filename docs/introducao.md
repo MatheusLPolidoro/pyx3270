@@ -1,2 +1,0 @@
-
-## :jigsaw: Diagrama de Classes

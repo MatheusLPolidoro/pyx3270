@@ -556,7 +556,7 @@
     # Conecta ao host mainframe na porta 992 (TLS)
     emulator.connect_host('myhost.example.com', '992')
 
-    emulator.keyboarddisable('lock')
+    emulator.keyboarddisable(True)
     ```
     <p><strong>Observações:</strong> Controle avançado do teclado.</p>
     <br>
