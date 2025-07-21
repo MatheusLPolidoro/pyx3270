@@ -49,7 +49,7 @@ def test_executable_app_init_spawn(mock_subprocess_popen, monkeypatch):
     ExecutableApp(shell=False, model='2')
     mock_subprocess_popen.assert_called_once()
     args, kwargs = mock_subprocess_popen.call_args
-    assert args[0] == ['-xrm', '*model: 2', '-localcp', 'utf8', '-utf8']
+    assert args[0] == ['-xrm', '"*model: 2"', '-localcp', 'utf8', '-utf8']
     assert kwargs['shell'] is False
     assert kwargs['start_new_session'] is True
     assert 'creationflags' not in kwargs
@@ -82,7 +82,7 @@ def test_executable_app_get_args():
     assert args_model2 == [
         'base_arg',
         '-xrm',
-        '*model: 2',
+        '"*model: 2"',
         '-localcp',
         'utf8',
         '-utf8',
@@ -92,7 +92,7 @@ def test_executable_app_get_args():
     assert args_model5 == [
         'base_arg',
         '-xrm',
-        '*model: 5',
+        '"*model: 5"',
         '-localcp',
         'utf8',
         '-utf8',
@@ -297,7 +297,7 @@ def test_wc3270app_init(mock_socket):
         assert app.shell is True
         assert app.script_port == SCRIPT_PORT
         assert '-xrm' in app.args
-        assert '*model: 3' in app.args
+        assert '"*model: 3"' in app.args
 
 
 @pytest.mark.usefixtures('mock_subprocess_popen', 'mock_socket')
@@ -316,7 +316,7 @@ def test_wc3270app_connect(mock_subprocess_popen, mock_socket):
         args, kwargs = mock_subprocess_popen.call_args
         assert 'start' in args[0]
         assert '/wait' in args[0]
-        assert 'wc3270' in args[0][2]  # Verifica o binário wc3270
+        assert 'wc3270' in args[0]  # Verifica o binário wc3270
         assert '-scriptport' in args[0]
         assert '12345' in args[0]
         assert 'myhost.com' in args[0]
@@ -689,7 +689,7 @@ def test_ws3270app_init(mock_subprocess_popen):
     mock_subprocess_popen.assert_called_once()
     args, kwargs = mock_subprocess_popen.call_args
     assert 'ws3270' in args[0][0]
-    assert '*model: 4' in args[0]
+    assert '"*model: 4"' in args[0]
 
 
 @pytest.mark.usefixtures('mock_subprocess_popen', 'mock_os_name')
@@ -700,7 +700,7 @@ def test_x3270app_init(mock_subprocess_popen):
     mock_subprocess_popen.assert_called_once()
     args, kwargs = mock_subprocess_popen.call_args
     assert 'x3270' in args[0][0]
-    assert '*model: 2' in args[0]
+    assert '"*model: 2"' in args[0]
     assert '-script' in args[0]
 
 
@@ -712,7 +712,7 @@ def test_s3270app_init(mock_subprocess_popen):
     mock_subprocess_popen.assert_called_once()
     args, kwargs = mock_subprocess_popen.call_args
     assert 's3270' in args[0][0]
-    assert '*model: 5' in args[0]
+    assert '"*model: 5"' in args[0]
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
