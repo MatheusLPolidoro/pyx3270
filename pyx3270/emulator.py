@@ -375,7 +375,9 @@ class S3270App(ExecutableApp):
 
 
 class X3270Cmd(AbstractEmulatorCmd):
-    time_unlock: int = 60
+    def __init__(self, time_unlock: int = 60) -> None:
+        logger.info(f'Inicializando X3270Cmd com time_unlock: {time_unlock}')
+        self.time_unlock = time_unlock
 
     def clear_screen(self) -> None:
         logger.info('Limpando tela')
@@ -505,9 +507,9 @@ class X3270Cmd(AbstractEmulatorCmd):
         else:
             logger.info(f"Enviando string '{tosend_str}' na posição atual.")
 
-        self.string(tosend)
+        self.string(f'"{tosend}"')
         self.wait(self.time_unlock, 'unlock')
-        logger.debug('String enviada')
+        logger.debug("String '{tosend_str}' enviada para o emulador.")
 
     def send_enter(self) -> None:
         logger.info('Enviando tecla ENTER')
@@ -687,10 +689,11 @@ class X3270(AbstractEmulator, X3270Cmd):
         visible: bool = False,
         model: MODEL_TYPE = '2',
         save_log_file: bool = False,
+        time_unlock: int = 60,
     ) -> None:
         if save_log_file:
             logging.config.dictConfig(LOGGING_CONFIG)
-
+        X3270Cmd.__init__(self, time_unlock=time_unlock)
         logger.info(f'Inicializando X3270 (visible={visible}, model={model})')
         self.model = model
         self.model_dimensions = MODEL_DIMENSIONS[model]
@@ -812,7 +815,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                 )
                 sleep(exec)
                 self.reset()
-                self.wait(60, 'unlock')
+                self.wait(self.time_unlock, 'unlock')
                 self.tab()
         logger.error(
             f'Erro ao executar {cmdstr} total de tentativas: {max_loop}'
