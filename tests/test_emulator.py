@@ -605,7 +605,7 @@ def test_x3270cmd_send_string(x3270_cmd_instance):
         assert len(calls) >= EXPECTED_CALLS
 
         string_command = calls[-2][0][0]
-        expected_string = b'string(test string)'
+        expected_string = b'string("test string")'
         assert string_command == expected_string
 
         wait_command = calls[-1][0][0]
@@ -627,7 +627,7 @@ def test_x3270cmd_send_string_truncate(x3270_cmd_instance):
         x3270_cmd_instance.send_string('long string data')
 
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'string(long string data)'
+        b'string("long string data")'
     )
 
 

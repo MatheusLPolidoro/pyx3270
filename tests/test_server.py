@@ -1,11 +1,12 @@
 import os
 import socket
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, Mock, call, mock_open, patch
 
 import pytest
 
 from pyx3270 import server, tn3270
 from pyx3270.emulator import X3270
+from pyx3270.server import ReplayState, process_command
 
 _real_socket_class = socket.socket
 
@@ -372,3 +373,271 @@ def test_record_handler_connect_fail(mock_connect_serversock):
     )
     # Não deve tentar fechar sockets ou fazer outras operações
     mock_clientsock.close.assert_not_called()
+
+
+def test_load_screens_calls_ensure_dir(monkeypatch, tmp_path):
+    record_dir = str(tmp_path)
+
+    mock_ensure_dir = MagicMock()
+    monkeypatch.setattr(server, 'ensure_dir', mock_ensure_dir)
+    # Forçar que haja arquivos .bin para evitar o fallback
+    monkeypatch.setattr(
+        server.os, 'listdir', MagicMock(return_value=['file.bin'])
+    )
+    monkeypatch.setattr(
+        server.os,
+        'walk',
+        MagicMock(return_value=[(record_dir, [], ['file.bin'])]),
+    )
+    monkeypatch.setattr(
+        server, 'tn3270', MagicMock(IAC=b'\xff', TN_EOR=b'\xef')
+    )
+
+    open_mock = MagicMock()
+    open_mock.return_value.__enter__.return_value.read.return_value = (
+        b'data' + server.tn3270.IAC + server.tn3270.TN_EOR
+    )
+    m = mock_open(read_data=b'data' + server.tn3270.IAC + server.tn3270.TN_EOR)
+    monkeypatch.setattr('builtins.open', m)
+
+    server.load_screens(record_dir)
+
+    mock_ensure_dir.assert_called_once_with(record_dir)
+
+
+def test_load_screens_fallback_to_load_screens_basic(monkeypatch):
+    record_dir = '/fake/dir'
+
+    monkeypatch.setattr(server, 'ensure_dir', MagicMock())
+    monkeypatch.setattr(
+        server.os, 'listdir', MagicMock(return_value=['file.txt', 'other.dat'])
+    )
+    mock_load_basic = MagicMock(return_value={'basic': 'screens'})
+    monkeypatch.setattr(server, 'load_screens_basic', mock_load_basic)
+
+    result = server.load_screens(record_dir)
+
+    mock_load_basic.assert_called_once_with(server.BINARY_FOLDER)
+    assert result == {'basic': 'screens'}
+
+
+def test_load_screens_logs_error_and_returns_empty(monkeypatch):
+    record_dir = '/fake/dir'
+
+    # Forçar ensure_dir sem efeitos
+    monkeypatch.setattr(server, 'ensure_dir', MagicMock())
+
+    # Forçar que listdir lance exceção para simular erro
+    def raise_os_error(_):
+        raise OSError('fail')
+
+    monkeypatch.setattr(server.os, 'listdir', raise_os_error)
+
+    mock_logger = MagicMock()
+    monkeypatch.setattr(server, 'logger', mock_logger)
+
+    result = server.load_screens(record_dir)
+
+    mock_logger.error.assert_called_once_with(
+        f'Falha ao carregar caminho: {record_dir}'
+    )
+    assert result == {}
+
+
+def test_find_directory_finds_match():
+    base_dir = '/fake/base'
+    search_name = 'testdir'
+
+    # Simula listdir retornando vários nomes
+    mock_listdir = ['OtherDir', 'TestDir123', 'anotherdir']
+
+    # Simula isdir para retornar True apenas para 'TestDir123' e 'OtherDir'
+    def mock_isdir(path):
+        return path.endswith('TestDir123') or path.endswith('OtherDir')
+
+    with patch('os.listdir', return_value=mock_listdir), patch(
+        'os.path.isdir', side_effect=mock_isdir
+    ):
+        found = server.find_directory(base_dir, search_name)
+
+    expected_path = os.path.join(base_dir, 'TestDir123')
+    assert found == expected_path
+
+
+def test_find_directory_skips_non_dirs():
+    base_dir = '/fake/base'
+    search_name = 'nomatch'
+
+    mock_listdir = ['file.txt', 'notadir', 'maybeadir']
+
+    # Só 'maybeadir' é diretório
+    def mock_isdir(path):
+        return path.endswith('maybeadir')
+
+    with patch('os.listdir', return_value=mock_listdir), patch(
+        'os.path.isdir', side_effect=mock_isdir
+    ):
+        found = server.find_directory(base_dir, search_name)
+
+    # Não encontrou, deve retornar None
+    assert found is None
+
+
+def test_find_directory_returns_none_when_no_match():
+    base_dir = '/fake/base'
+    search_name = 'absent'
+
+    mock_listdir = ['DirOne', 'DirTwo']
+
+    # Todos são diretórios
+    def mock_isdir(path):
+        return True
+
+    with patch('os.listdir', return_value=mock_listdir), patch(
+        'os.path.isdir', side_effect=mock_isdir
+    ):
+        found = server.find_directory(base_dir, search_name)
+
+    assert found is None
+
+
+def test_handle_set_found():
+    screens = {
+        'SCREEN1': b'data1',
+        'SCREEN2': b'data2',
+        'OTHER': b'data3',
+    }
+    command = 'set screen2'
+
+    result = server.handle_set(command, screens)
+    assert result == 1  # índice de 'SCREEN2'
+
+
+def test_handle_set_not_found():
+    screens = {
+        'SCREEN1': b'data1',
+        'SCREEN2': b'data2',
+    }
+    command = 'set nonexistent'
+
+    result = server.handle_set(command, screens)
+    assert result is None
+
+
+@patch('pyx3270.server.logger')
+def test_handle_add_valid(mock_logger):
+    screens = {}
+    screens_list = []
+
+    # Compose a hex string for simple bytes 'ABC' (hex 41 42 43)
+    hex_data = '414243'
+    command = f'add newscreen {hex_data}'
+
+    server.handle_add(command, screens, screens_list)
+
+    expected_bytes = (
+        tn3270.START_SCREEN
+        + bytes.fromhex(hex_data)
+        + tn3270.IAC
+        + tn3270.TN_EOR
+    )
+
+    # Verifica se a tela foi adicionada no dict e na lista
+    assert 'NEWSCREEN' in screens
+    assert screens['NEWSCREEN'] == expected_bytes
+    assert expected_bytes in screens_list
+
+    # Logger warning não deve ser chamado
+    mock_logger.warning.assert_not_called()
+
+
+@patch('pyx3270.server.logger')
+def test_handle_add_invalid_format(mock_logger):
+    screens = {}
+    screens_list = []
+
+    # Comando com formato inválido (falta argumento)
+    command = 'add invalidcommand'
+
+    server.handle_add(command, screens, screens_list)
+
+    # Nenhuma tela deve ter sido adicionada
+    assert screens == {}
+    assert screens_list == []
+
+    # Logger deve ter sido chamado com warning
+    mock_logger.warning.assert_called_once_with(
+        '[!] Formato inválido ao adicionar tela'
+    )
+
+
+@pytest.mark.parametrize(
+    ('command', 'expected_screen', 'expected_clear', 'should_close'),
+    [
+        ('set TELA', 1, False, False),
+        ('add TELA 00ff', 0, False, False),
+        ('change directory teste', 0, False, False),
+        ('next', 1, False, False),
+        ('prev', 0, False, False),
+        ('clear', 0, True, False),
+        ('q', 0, False, True),
+        ('comando_invalido', 0, False, False),
+    ],
+)
+def test_process_command(
+    command, expected_screen, expected_clear, should_close
+):
+    # Setup mocks e estado
+    mock_socket = Mock()
+
+    mock_screens = {'TELA_PRINCIPAL': b'tela1', 'OUTRA_TELA': b'tela2'}
+    # Dados fictícios para inicialização
+    screens = {'TELA': 'conteúdo fictício'}
+    screens_list = ['TELA']
+    current_screen = 0
+    clear = False
+
+    state = ReplayState(screens, screens_list, current_screen, clear)
+    state.screens = mock_screens
+    state.screens_list = list(mock_screens.values())
+    state.current_screen = 0
+    state.clear = False
+
+    with patch('pyx3270.server.handle_set', return_value=1) as mock_set, patch(
+        'pyx3270.server.handle_add'
+    ) as mock_add, patch(
+        'pyx3270.server.handle_change_directory',
+        return_value=(mock_screens, list(mock_screens.values())),
+    ) as mock_change:
+        result_state = process_command(command, mock_socket, 'base', state)
+
+        # Checagens
+        assert result_state.current_screen == expected_screen
+        assert result_state.clear == expected_clear
+
+        if should_close:
+            mock_socket.close.assert_called_once()
+        else:
+            mock_socket.close.assert_not_called()
+
+        if command == 'clear':
+            mock_socket.sendall.assert_called_once_with(
+                tn3270.CLEAR_SCREEN_BUFFER
+            )
+        else:
+            mock_socket.sendall.assert_not_called()
+
+        if command.startswith('set '):
+            mock_set.assert_called_once()
+        else:
+            mock_set.assert_not_called()
+
+        if command.startswith('add '):
+            mock_add.assert_called_once()
+        else:
+            mock_add.assert_not_called()
+
+        if command.startswith('change directory '):
+            mock_change.assert_called_once()
+        else:
+            mock_change.assert_not_called()

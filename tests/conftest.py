@@ -11,6 +11,25 @@ _real_socket_class = socket.socket
 
 
 @pytest.fixture
+def mock_socket_with_accept():
+    """
+    Retorna uma tupla (mock_socket, mock_clientsock)
+    mock_socket.accept() na primeira chamada retorna (mock_clientsock, addr),
+    na segunda chamada levanta KeyboardInterrupt para parar o loop.
+    """
+    mock_socket = MagicMock()
+    mock_clientsock = MagicMock()
+
+    def accept_side_effect():
+        yield (mock_clientsock, ('127.0.0.1', 12345))
+        while True:
+            raise KeyboardInterrupt('encerrar')
+
+    mock_socket.accept.side_effect = accept_side_effect()
+    return mock_socket, mock_clientsock
+
+
+@pytest.fixture
 def record_mocks():
     with ExitStack() as stack:
         # Patches no módulo 'pyx3270.server'

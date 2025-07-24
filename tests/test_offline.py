@@ -162,3 +162,34 @@ def test_pyX3270_manager_del(x3270_cmd_instance):
     gc.collect()
 
     assert called_flag['called']
+
+
+@patch('subprocess.Popen')
+def test_terminate_kills_process_on_timeout(mock_popen, x3270_cmd_instance):
+    # Mock do processo
+    mock_process = MagicMock()
+    mock_popen.return_value = mock_process
+
+    # Simula que o processo está rodando
+    mock_process.poll.return_value = None
+
+    # Simula o wait lançando TimeoutExpired
+    mock_process.wait.side_effect = subprocess.TimeoutExpired(
+        cmd='testcmd', timeout=5
+    )
+
+    # Instancia o manager
+    manager = PyX3270Manager(x3270_cmd_instance)
+
+    # Mock do emu.terminate
+    manager.emu = MagicMock()
+
+    # Chama o método terminate
+    manager.terminate()
+
+    # Verificações
+    mock_process.poll.assert_called_once()
+    manager.emu.terminate.assert_called_once()
+    mock_process.terminate.assert_called_once()
+    mock_process.wait.assert_called_once_with(timeout=5)
+    mock_process.kill.assert_called_once()
