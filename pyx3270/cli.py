@@ -52,18 +52,21 @@ def replay(
         emu = X3270(visible=True, model=model, save_log_file=True)
         emu.connect_host('localhost', port, tls, mode_3270=False)
 
-    while True:
-        clientsock, addr = tnsock.accept()
-        rich.print(f'[+] Replay de conexões de {addr}')
+    try:
+        while True:
+            clientsock, addr = tnsock.accept()
+            rich.print(f'[+] Replay de conexões de {addr}')
 
-        th = threading.Thread(
-            target=replay_handler,
-            args=(clientsock, screens, emulator, directory),
-        )
-        th.start()
+            th = threading.Thread(
+                target=replay_handler,
+                args=(clientsock, screens, emulator, directory),
+            )
+            th.start()
 
-        if emulator:
-            start_new_amulator(th, emu)
+            if emulator:
+                start_new_amulator(th, emu)
+    except KeyboardInterrupt:
+        rich.print('[x] Interrompido pelo usuário.')
 
 
 @app.command()
