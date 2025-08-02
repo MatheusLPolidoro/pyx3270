@@ -15,6 +15,7 @@ from pyx3270.command_config import command_map
 from pyx3270.exceptions import (
     CommandError,
     FieldTruncateError,
+    KeyboardStateError,
     NotConnectedException,
     TerminatedError,
 )
@@ -199,6 +200,11 @@ class Command(AbstractCommand):
         if self.data:
             msg = ''.encode('utf-8').join(self.data).rstrip()
         error_msg = msg.decode('utf-8')
+
+        if 'keyboard locked' in error_msg.lower():
+            logger.error(f'Teclado travado detectado: {error_msg}')
+            raise KeyboardStateError(error_msg)
+
         logger.error(f'Comando falhou: {error_msg}')
         raise CommandError(error_msg)
 
@@ -797,8 +803,8 @@ class X3270(AbstractEmulator, X3270Cmd):
             error_msg = 'Tentativa de executar comando em emulador terminado'
             logger.error(error_msg)
             raise TerminatedError
-        max_loop = 5
-        for exec in range(max_loop):
+        max_loop = 3
+        for exec in range(1, max_loop):
             try:
                 cmd = Command(self.app, cmdstr)
                 cmd.execute()
@@ -808,12 +814,10 @@ class X3270(AbstractEmulator, X3270Cmd):
             except NotConnectedException:
                 logger.error('Emulador não conectado.')
                 raise NotConnectedException
-            except Exception:
-                logger.error(f'Erro ao executar comando: {cmdstr}')
+            except KeyboardStateError:
                 logger.warning(
-                    f'Nova tentativa de exec command: {exec}/{max_loop}'
+                    f'Nova tentativa de exec command:{cmdstr} {exec}/{max_loop}'
                 )
-                sleep(exec)
                 self.reset()
                 self.wait(self.time_unlock, 'unlock')
                 self.tab()
