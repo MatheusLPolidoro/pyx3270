@@ -9,7 +9,7 @@ nav:
     - CLI: uso_basico.md
     
   - Comandos Nativos: comandos.md
-  - Change Log: changelog.md
+  - Alterações: changelog.md
   - Contribuindo: contribuindo.md
 
 theme:
