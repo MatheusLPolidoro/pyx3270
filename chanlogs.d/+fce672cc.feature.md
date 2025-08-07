@@ -1,1 +1,1 @@
-Adicionar funcionalidade set_screen e add para server record.
+Adicione funcionalidade set_screen e add para server record.
