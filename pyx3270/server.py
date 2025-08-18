@@ -106,7 +106,7 @@ def find_directory(base_dir: str, search_name: str) -> str | None:
     return None  # Retorna None se não encontrar um diretório correspondente
 
 
-def convert_s(hex_string: str):
+def convert_s(hex_string: str) -> str:
     pattern = r'SF\((.*?)\)'
 
     def replace_match(match):
@@ -256,7 +256,7 @@ def backend_3270(
     return dict(current_screen=current_screen, clear=clear)
 
 
-def listen_for_commands():
+def listen_for_commands() -> None:
     while True:
         command = input('Digite um comando: ')
         if command.lower() == 'q':
@@ -274,7 +274,7 @@ def handle_set(command: str, screens: dict) -> int | None:
     return None
 
 
-def handle_add(command: str, screens: dict, screens_list: list):
+def handle_add(command: str, screens: dict, screens_list: list) -> None:
     try:
         screen_name, screen_data = command.split(' ', 2)[1:]
         screen_name = screen_name.upper()
@@ -288,15 +288,17 @@ def handle_add(command: str, screens: dict, screens_list: list):
         logger.warning('[!] Formato inválido ao adicionar tela')
 
 
-def handle_change_directory(command: str, base_directory: str):
+def handle_change_directory(
+    command: str, base_directory: str
+) -> tuple[dict, list]:
     new_dir = find_directory(base_directory, command.split(' ', 2)[2].strip())
-    if os.path.isdir(new_dir):
+    if new_dir and os.path.isdir(new_dir):
         new_screens = load_screens_basic(new_dir)
         logger.info(f'[+] Mudando para o diretório de telas: {new_dir}')
         return new_screens, list(new_screens.values())
     else:
         logger.info(f'[!] Diretório inválido: {new_dir}')
-        return {}, []
+        return dict(), list()
 
 
 def process_command(

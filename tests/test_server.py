@@ -375,6 +375,47 @@ def test_record_handler_connect_fail(mock_connect_serversock):
     mock_clientsock.close.assert_not_called()
 
 
+def test_record_handler_not_is_screen_tn3270():
+    fake_client_sock = MagicMock(spec=socket.socket)
+    fake_server_sock = MagicMock(spec=socket.socket)
+
+    # Simula dados vindos do servidor com terminador TN_EOR
+    tn_eor = b'\xff\xef'  # IAC + TN_EOR
+    fake_data = b'nao eh tn3270' + tn_eor
+
+    # recv() devolve os dados na primeira chamada e depois vazio
+    fake_server_sock.recv.side_effect = [fake_data, b'']
+    fake_client_sock.recv.side_effect = [
+        b'',
+        b'',
+    ]  # Não recebe nada do cliente
+
+    # select retorna sockets prontos para leitura
+    def fake_select(rlist, _, __, ___):
+        if fake_server_sock in rlist:
+            return ([fake_server_sock], [], [])
+        return ([], [], [])
+
+    with patch(
+        'pyx3270.server.is_screen_tn3270', return_value=False
+    ) as mock_is_screen, patch(
+        'pyx3270.server.connect_serversock', return_value=fake_server_sock
+    ), patch('select.select', side_effect=fake_select):
+        emu = MagicMock(spec=X3270)
+        emu.tls = False
+
+        server.record_handler(
+            emu=emu,
+            clientsock=fake_client_sock,
+            address='127.0.0.1',
+            record_dir='/screens',
+            delay=0.01,
+        )
+
+        # Garante que is_screen_tn3270 foi chamado
+        assert mock_is_screen.called
+
+
 def test_load_screens_calls_ensure_dir(monkeypatch, tmp_path):
     record_dir = str(tmp_path)
 
@@ -641,3 +682,16 @@ def test_process_command(
             mock_change.assert_called_once()
         else:
             mock_change.assert_not_called()
+
+
+def test_invalid_handle_change_directory():
+    """Testa handle_change_directory com diretório inválido."""
+    command = 'change directory /invalid/path'
+
+    with patch('pyx3270.server.logger'):
+        screens_result, screens_list = server.handle_change_directory(
+            command, './screens'
+        )
+
+        assert screens_result == dict()
+        assert screens_list == list()

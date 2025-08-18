@@ -6,9 +6,7 @@ from pyx3270.exceptions import (
     FieldTruncateError,
     KeyboardStateError,
     NotConnectedException,
-    ReconnectException,
     TerminatedError,
-    TimeoutWaitError,
 )
 
 
@@ -42,13 +40,3 @@ def test_not_connected_exception():
         NotConnectedException, match='Test NotConnectedException'
     ):
         raise NotConnectedException('Test NotConnectedException')
-
-
-def test_reconnect_exception():
-    with pytest.raises(ReconnectException, match='Test ReconnectException'):
-        raise ReconnectException('Test ReconnectException')
-
-
-def test_timeout_wait_error():
-    with pytest.raises(TimeoutWaitError, match='Test TimeoutWaitError'):
-        raise TimeoutWaitError('Test TimeoutWaitError')

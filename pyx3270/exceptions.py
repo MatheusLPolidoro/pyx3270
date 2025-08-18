@@ -20,11 +20,3 @@ class FieldTruncateError(Exception):
 
 class NotConnectedException(Exception):
     """Não foi possivel conectar com o TerminalClient."""
-
-
-class ReconnectException(Exception):
-    """Não foi possivel reconectar com o TerminalClient."""
-
-
-class TimeoutWaitError(Exception):
-    """Tempo limite com o TerminalClient atingido."""

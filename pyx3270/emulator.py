@@ -816,7 +816,8 @@ class X3270(AbstractEmulator, X3270Cmd):
                 raise NotConnectedException
             except KeyboardStateError:
                 logger.warning(
-                    f'Nova tentativa de exec command:{cmdstr} {exec}/{max_loop}'
+                    f'Nova tentativa de exec command:'
+                    f'{cmdstr} {exec}/{max_loop}'
                 )
                 self.reset()
                 self.wait(self.time_unlock, 'unlock')

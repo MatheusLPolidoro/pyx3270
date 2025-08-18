@@ -126,6 +126,26 @@ def x3270_emulator_instance(mock_executable_app_instance):
 
 
 @pytest.fixture
+def x3270_real_exec_instance(mock_executable_app_instance):
+    """Instância de X3270 com app mockado e Command mockado."""
+    with patch.object(X3270, '_create_app', return_value=None):
+        emulator = X3270(
+            visible=False,
+            model='3',
+        )
+        # Atribui manualmente o app mockado (já que _create_app está mockado)
+        emulator.app = mock_executable_app_instance
+
+        # Patch de Command no namespace do módulo pyx3270.emulator
+        with patch('pyx3270.emulator.Command') as mock_command_class:
+            mock_instance = MagicMock()
+            mock_instance.execute.return_value = True
+            mock_command_class.return_value = mock_instance
+
+            yield emulator
+
+
+@pytest.fixture
 def x3270_cmd_instance(x3270_emulator_instance):
     """Fixture para uma instância de X3270Cmd associada a um X3270 mockado."""
     # Reseta o mock para cada teste
