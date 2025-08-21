@@ -7,18 +7,16 @@ readme = "README.md"
 requires-python = ">=3.8"
 
 dependencies = [
-    "typer",
-    "pynput",
-    "click",
-    "colorama",
-    "markdown-it-py",
-    "mdurl",
-    "Pygments",
-    "rich",
-    "shellingham",
-    "typing_extensions"
+    "click==8.1.8",
+    "colorama==0.4.6",
+    "Pygments==2.19.1",
+    "rich==14.0.0",
+    "shellingham==1.5.4",
+    "typer==0.15.3",
+    "typing_extensions==4.13.2",
+    "pynput==1.8.1",
+    "six==1.17.0"
 ]
-
 
 [project.scripts]
 pyx3270 = "pyx3270.__main__:app"

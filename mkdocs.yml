@@ -2,14 +2,14 @@ site_name: Pyx3270
 nav:
   - Docs: index.md
   - O que é Pyx3270: sobre.md
-  - Primeiros passos: 
-    - Instalação: instalacao.md
-    - Configuração: configuracao.md
-    - Automação: uso_basico.md
-    - CLI: uso_basico.md
-    
+  - Primeiros passos:
+      - Introdução: primeiros_passos.md
+      - Instalação: instalacao.md
+      - Tutorial: tutorial.md
+      - Automação: automacao.md
   - Comandos Nativos: comandos.md
   - Alterações: changelog.md
+  - Estrutura: estrutura.md
   - Contribuindo: contribuindo.md
 
 theme:
@@ -21,8 +21,8 @@ theme:
   features:
     - content.code.annotate
     - content.tabs.link
-    - navigation.sections
     - content.code.copy
+    - navigation.footer
   palette:
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
@@ -52,9 +52,12 @@ plugins:
 
 extra_css:
   - assets/css/extra.css
+  - assets/css/termynal.css
 
 extra_javascript:
   - assets/js/filetree.js
+  - assets/js/termynal-init.js
+  - assets/js/termynal.js
 
 markdown_extensions:
   - pymdownx.highlight
