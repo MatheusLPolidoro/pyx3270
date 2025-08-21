@@ -10,6 +10,7 @@ from logging import getLogger
 
 from pyx3270 import tn3270
 from pyx3270.emulator import BINARY_FOLDER, X3270
+from pyx3270.exceptions import NotConnectedException
 
 logger = getLogger(__name__)
 
@@ -211,7 +212,7 @@ def record_handler(
                 screens.append(buffer)
                 record_data(full_block)
 
-    except (ConnectionResetError, OSError):
+    except (ConnectionResetError, OSError, NotConnectedException):
         for sock in socks:
             sock.close()
 
