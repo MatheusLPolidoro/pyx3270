@@ -5,14 +5,11 @@ import mkdocs_gen_files
 # --- Configurações ---
 IGNORED_NAMES = {
     'venv',
-    'chanlogs.d',
     'htmlcov',
     '__pycache__',
     'site',
     'docs',
-    'requirements',
     'mkdocs',
-    'README',
     'log',
     'dist',
     '.egg',
