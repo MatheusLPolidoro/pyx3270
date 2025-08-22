@@ -6,12 +6,11 @@ import re
 import socket
 import subprocess
 from contextlib import closing
-from functools import cache, lru_cache
+from functools import cache
 from logging import getLogger
 from time import sleep, time
 from typing import Literal
 
-from pyx3270.command_config import command_map
 from pyx3270.exceptions import (
     CommandError,
     FieldTruncateError,
@@ -29,7 +28,7 @@ from pyx3270.logging_config import LOGGING_CONFIG
 
 logger = getLogger(__name__)
 
-BINARY_FOLDER = f'{os.path.dirname(__file__)}/binary'
+BINARY_FOLDER = os.path.join(os.path.dirname(__file__), 'bin')
 MODEL_TYPE = Literal['2', '3', '4', '5']
 MODEL_DIMENSIONS = {
     '2': {
@@ -55,15 +54,12 @@ class ExecutableApp(AbstractExecutableApp):
     args = list()
 
     def __init__(self, shell: bool = False, model: MODEL_TYPE = '2') -> None:
-        logger.debug(
-            f'Inicializando ExecutableApp (shell={shell}, model={model})'
-        )
+        logger.debug(f'Inicializando ExecutableApp ({shell=}, {model=})')
         self.shell = shell
         self.subprocess = None
         self.args = self._get_executable_app_args(model)
         self._spawn_app()
 
-    @lru_cache
     def _spawn_app(self, args=None) -> None:
         logger.debug('Iniciando processo do aplicativo')
         kwargs = {
@@ -99,9 +95,7 @@ class ExecutableApp(AbstractExecutableApp):
         logger.debug(f'Obtendo argumentos para modelo: {model}')
         args = self.__class__.args + [
             '-xrm',
-            f'"*model: {model}"',
-            '-localcp',
-            'utf8',
+            f'*model:{model}',
             '-utf8',
         ]
         logger.debug(f'Argumentos completos: {args}')
@@ -131,9 +125,9 @@ class ExecutableApp(AbstractExecutableApp):
             logger.error('Erro ao escrever dados')
             raise
 
-    def readline(self):
-        logger.debug('Lendo linha da saída do processo')
+    def readline(self, timeout=5) -> bytes:
         try:
+            logger.debug('Aguardando dados no buffer do processo')
             line = self.subprocess.stdout.readline()
             logger.debug(f'Linha lida: {line}')
             return line
@@ -247,7 +241,6 @@ class Wc3270App(ExecutableApp):
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info(f'Inicializando Wc3270App com modelo: {model}')
         self.args = self._get_executable_app_args(model)
-        self.shell = True
         self.script_port = Wc3270App._get_free_port()
         logger.debug(f'Porta de script alocada: {self.script_port}')
         super().__init__(shell=True, model=model)
@@ -307,7 +300,7 @@ class Wc3270App(ExecutableApp):
             'start',
             '/wait',
             '""',
-            f'"{BINARY_FOLDER}/wc3270"',
+            f'"{os.path.join(BINARY_FOLDER, "windows/wc3270")}"',
         ] + self.args
         self.args.extend(['-scriptport', str(self.script_port), host])
         logger.debug(f'Argumentos completos: {self.args}')
@@ -357,7 +350,11 @@ class Wc3270App(ExecutableApp):
 
 
 class Ws3270App(ExecutableApp):
-    args = [f'{BINARY_FOLDER}/ws3270', '-xrm', 'ws3270.unlockDelay: False']
+    args = [
+        os.path.join(BINARY_FOLDER, 'windows/ws3270'),
+        '-xrm',
+        'ws3270.unlockDelay:False',
+    ]
 
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info(f'Inicializando Ws3270App com modelo: {model}')
@@ -365,7 +362,13 @@ class Ws3270App(ExecutableApp):
 
 
 class X3270App(ExecutableApp):
-    args = ['x3270', '-xrm', 'x3270.unlockDelay: False', '-script']
+    args = [
+        os.path.join(BINARY_FOLDER, 'linux/x3270'),
+        # 'x3270',
+        '-xrm',
+        'x3270.unlockDelay:False',
+        '-script',
+    ]
 
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info(f'Inicializando X3270App com modelo: {model}')
@@ -373,11 +376,15 @@ class X3270App(ExecutableApp):
 
 
 class S3270App(ExecutableApp):
-    args = ['s3270', '-xrm', 's3270.unlockDelay: False']
+    args = [
+        os.path.join(BINARY_FOLDER, 'linux/s3270'),
+        '-xrm',
+        's3270.unlockDelay:False',
+    ]
 
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info(f'Inicializando S3270App com modelo: {model}')
-        super().__init__(shell=False, model=model)
+        super().__init__(shell=True, model=model)
 
 
 class X3270Cmd(AbstractEmulatorCmd):
@@ -479,8 +486,7 @@ class X3270Cmd(AbstractEmulatorCmd):
 
     def send_pf(self, value: int) -> None:
         logger.info(f'Enviando tecla PF{value}')
-        self.PF(value)
-        self.wait(self.time_unlock, 'unlock')
+        self.pf(value)
         logger.debug(f'PF{value} enviado e tela desbloqueada')
 
     def send_string(
@@ -711,71 +717,6 @@ class X3270(AbstractEmulator, X3270Cmd):
         self.tls = None
         self.mode_3270 = None
         logger.debug('X3270 inicializado')
-
-    def __getattr__(self, name):
-        logger.debug(f'Acessando atributo dinâmico: {name}')
-        # Mapeamento de comandos com parâmetros e descrições
-        if name and name in command_map:
-            logger.debug(f'Comando encontrado no command_map: {name}')
-            params, description = command_map[name]
-
-            def command_func(*args, **kwargs):
-                logger.debug(
-                    f'Executando comando {name} com {args=}, {kwargs=}'
-                )
-                if len(args) + len(kwargs) < len(params):
-                    error_msg = (
-                        f'Comando {name} espera {len(params)} parâmetro(s).'
-                    )
-                    logger.error(error_msg)
-                    raise CommandError(error_msg)
-
-                all_args = ', '.join(
-                    list(map(str, args))
-                    + [f'{k}={repr(v)}' for k, v in kwargs.items()]
-                )
-                logger.debug(f'Comando formatado: {name}({all_args})')
-
-                try:
-                    cmd = self._exec_command(
-                        f'{name}({all_args})'.encode('utf8')
-                    )
-                    try:
-                        text = [text.decode('utf8') for text in cmd.data[0:]]
-                        result = ''.join(text)
-                    except AttributeError:
-                        result = [val for val in cmd.data[0:]]
-
-                    logger.debug(
-                        f'Comando executado, resultado: {result[:100]}...'
-                    )
-                    return result
-                except Exception:
-                    logger.error(f'Erro ao executar comando {name}')
-                    raise
-
-            params = {p[0:1] for p in params}
-            command_func.__doc__ = (
-                f'{name}: {description} parâmetros esperados: {params}'
-            )
-
-            return command_func
-        elif 'send_pf' in name:
-            logger.debug(f'Comando PF detectado: {name}')
-
-            def command_func(value: int | None = None):
-                if not value:
-                    value = int(name[-1])
-                logger.info(f'Enviando tecla PF{value}')
-                self._exec_command(f'PF({value})')
-                self.wait(self.time_unlock, 'unlock')
-                logger.debug(f'PF{value} enviado e tela desbloqueada')
-
-            return command_func
-        else:
-            error_msg = f'Comando {name} não encontrado.'
-            logger.error(error_msg)
-            raise CommandError(error_msg)
 
     def _create_app(self) -> None:
         logger.info('Criando aplicativo emulador')

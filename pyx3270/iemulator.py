@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from pyx3270.x3270_commands import X3270Commands
+
 
 class AbstractExecutableApp(ABC):
     """Representa uma aplicação responsavel por emular um terminal tn3270."""
@@ -34,7 +36,7 @@ class AbstractCommand(ABC):
     def handle_result(self, result: str) -> bool: ...
 
 
-class AbstractEmulatorCmd(ABC):
+class AbstractEmulatorCmd(ABC, X3270Commands):
     @abstractmethod
     def clear_screen(self) -> None: ...
 
@@ -95,7 +97,7 @@ class AbstractEmulatorCmd(ABC):
     def _get_ypos_and_xpos_from_index(self, index: int) -> tuple[int, int]: ...
 
 
-class AbstractEmulator(ABC):
+class AbstractEmulator(AbstractEmulatorCmd):
     """
     Representa um subprocesso do emulador x/s3270,
     fornece uma API para interagir com ele.

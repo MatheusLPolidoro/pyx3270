@@ -1,13 +1,21 @@
+import os
 import socket
-import sys
 import threading
+from time import sleep
+from typing import Callable
 
 import rich
 import typer
-from pynput import keyboard
 
+from pyx3270 import state
 from pyx3270.emulator import X3270
-from pyx3270.server import load_screens, record_handler, replay_handler
+from pyx3270.server import (
+    load_screens,
+    record_handler,
+    replay_handler,
+    server_stop,
+    start_command_process,
+)
 
 app = typer.Typer()
 
@@ -15,22 +23,61 @@ app = typer.Typer()
 def start_sock(port: int) -> socket.socket:
     tnsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tnsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    if os.name == 'posix':
+        tnsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     tnsock.bind(('', port))
     tnsock.listen(5)
     return tnsock
 
 
-def start_new_amulator(th: threading.Thread, emu: X3270) -> None:
-    th.join()
-    rich.print('[?] Digite "ESC" para sair ou "ENTER" para continuar: ')
-    with keyboard.Events() as events:
-        for event in events:
-            if event.key == keyboard.Key.esc:
-                sys.exit(0)
-            elif event.key == keyboard.Key.enter:
-                break
-    rich.print('[+] Escutando localhost...')
-    emu.reconnect_host()
+def start_server_thread(
+    port: int,
+    handler: Callable,
+    handler_args: tuple | list | None = None,
+    label: str = 'Servidor',
+) -> threading.Thread:
+    def server_loop():
+        tnsock = start_sock(port)
+        rich.print(f'[+] {label} escutando na porta {port}')
+        while True:
+            clientsock, addr = tnsock.accept()
+            rich.print(f'[+] Cliente conectado: {addr}')
+
+            th = threading.Thread(
+                target=handler, args=(clientsock, *handler_args), daemon=True
+            )
+            th.start()
+
+    th = threading.Thread(target=server_loop, daemon=True)
+    th.start()
+    return th
+
+
+def control_replay(th: threading.Thread) -> None:
+    # Aguarda encerramento da thread ou falha do servidor
+    while th.is_alive():
+        if server_stop.is_set():
+            rich.print('[x] Conexão encerrada.')
+            if state.command_process:
+                state.command_process.terminate()
+            server_stop.clear()
+            break
+        sleep(1)
+
+    while True:
+        rich.print('[?] Digite "Q" para sair ou "S" para continuar: ', end='')
+        op = input().strip().upper()
+        if op == 'Q':
+            rich.print('[*] Encerrando aplicação...')
+            os._exit(0)
+        elif op != 'S':
+            rich.print('[!] Opção inválida. Continuando...')
+        else:
+            rich.print('[*] Reiniciando...')
+            break
+        sleep(1)
+
+    rich.print('[+] Escutando localhost')
 
 
 @app.command()
@@ -42,31 +89,28 @@ def replay(
     emulator: bool = typer.Option(default=True),
 ):
     screens = load_screens(directory)
-
     rich.print(f'[+] REPLAY do caminho: {directory}')
-    tnsock = start_sock(port)
-
-    rich.print(f'[+] Escutando localhost, porta {port}')
-
-    if emulator:
-        emu = X3270(visible=True, model=model, save_log_file=True)
-        emu.connect_host('localhost', port, tls, mode_3270=False)
 
     try:
         while True:
-            clientsock, addr = tnsock.accept()
-            rich.print(f'[+] Replay de conexões de {addr}')
-
-            th = threading.Thread(
-                target=replay_handler,
-                args=(clientsock, screens, emulator, directory),
+            server_thread = start_server_thread(
+                port,
+                replay_handler,
+                handler_args=(screens, emulator, directory),
+                label='Servidor de replay',
             )
-            th.start()
 
             if emulator:
-                start_new_amulator(th, emu)
+                emu = X3270(visible=True, model=model, save_log_file=True)
+                emu.connect_host('localhost', port, tls, mode_3270=False)
+                sleep(2)
+
+            start_command_process()
+            control_replay(server_thread)
     except KeyboardInterrupt:
-        rich.print('[x] Interrompido pelo usuário.')
+        rich.print('\n[x] Interrompido pelo usuário.')
+        state.command_process.terminate()
+        os._exit(0)
 
 
 @app.command()
@@ -81,24 +125,30 @@ def record(
     port = int(*port) if port else 3270
 
     rich.print(f'[+] RECORD na porta {port}')
-    tnsock = start_sock(port)
 
-    rich.print(f'[+] Escutando localhost, origem {host= } {port=}')
-    if emulator:
-        emu = X3270(visible=True, model=model, save_log_file=True)
-        emu.connect_host('localhost', port, tls, mode_3270=False)
+    try:
+        while True:
+            if emulator:
+                emu = X3270(visible=True, model=model, save_log_file=True)
+            else:
+                emu = None
 
-    while True:
-        clientsock, addr = tnsock.accept()
-        rich.print('[+] Conexão recebida de:', addr)
+            server_thread = start_server_thread(
+                port=port,
+                handler=record_handler,
+                handler_args=(emu, address, directory, 0.01),
+                label='Servidor de gravação',
+            )
 
-        th = threading.Thread(
-            target=record_handler, args=(emu, clientsock, address, directory)
-        )
-        th.start()
+            if emulator:
+                rich.print('[+] Conectando ao emulador...')
+                emu.connect_host('localhost', port, tls, mode_3270=False)
 
-        if emulator:
-            start_new_amulator(th, emu)
+            rich.print(f'[+] Escutando localhost, origem {host=} {port=}')
+            control_replay(server_thread)
+    except KeyboardInterrupt:
+        rich.print('\n[x] Interrompido pelo usuário.')
+        os._exit(0)
 
 
 if __name__ == '__main__':

@@ -39,7 +39,7 @@ class PyX3270Manager:
         logger.info(f'[+] Enviando comando offline: {command}')
         self.process.stdin.write(f'{command}\n')
         self.process.stdin.flush()
-        self.emu.PF(1)
+        self.emu.pf(1)
         sleep(0.1)
 
     def next(self):
@@ -68,7 +68,7 @@ class PyX3270Manager:
     def change_directory(self, directory: str):
         """Troca o diretório de carregamento das telas."""
         self._exec(f'change directory {directory}')
-        self.emu.PF(1)
+        self.emu.pf(1)
 
     def terminate(self):
         """Finaliza corretamente o processo e evita que fique travado."""

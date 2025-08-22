@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import queue
 import re
@@ -8,11 +9,13 @@ import threading
 from dataclasses import dataclass
 from logging import getLogger
 
-from pyx3270 import tn3270
+from pyx3270 import state, tn3270
 from pyx3270.emulator import BINARY_FOLDER, X3270
 from pyx3270.exceptions import NotConnectedException
 
 logger = getLogger(__name__)
+server_stop = threading.Event()
+command_queue = multiprocessing.Queue()
 
 
 @dataclass
@@ -23,11 +26,9 @@ class ReplayState:
     clear: bool
 
 
-command_queue = queue.Queue()
-
-
 def ensure_dir(path: str | None) -> None:
     if path and not os.path.isdir(path):
+        logger.info(f'[+] Criando diretório: {path}')
         os.makedirs(path)
 
 
@@ -137,15 +138,17 @@ def connect_serversock(
 
 
 def record_handler(
-    emu: X3270,
     clientsock: socket.socket,
+    emu: X3270,
     address: str,
     record_dir=None,
     delay=0.01,
 ) -> None:
+    logger.info(f'Iniciando gravação para {clientsock.getpeername()}')
     serversock = connect_serversock(clientsock, address)
 
     if not serversock:
+        logger.error('[!] Falha ao conectar ao servidor.')
         return
 
     ensure_dir(record_dir)
@@ -156,9 +159,11 @@ def record_handler(
         nonlocal counter
 
         if not is_screen_tn3270(data_block):
+            logger.warning('[!] Dados recebidos não são uma tela TN3270.')
             return
         fn = os.path.join(record_dir, f'{counter:03}.bin')
         with open(fn, 'wb') as f:
+            logger.info(f'[+] Gravação de tela: {fn}')
             f.write(data_block)
         counter += 1
 
@@ -213,8 +218,10 @@ def record_handler(
                 record_data(full_block)
 
     except (ConnectionResetError, OSError, NotConnectedException):
+        logger.info('[!] Conexão encerrada pelo servidor ou erro de rede.')
         for sock in socks:
             sock.close()
+        server_stop.set()
 
 
 def backend_3270(
@@ -257,20 +264,27 @@ def backend_3270(
     return dict(current_screen=current_screen, clear=clear)
 
 
-def listen_for_commands() -> None:
-    while True:
-        command = input('Digite um comando: ')
-        if command.lower() == 'q':
-            logger.info('[!] Comando "quit" recebido, encerrando...')
-            sys.exit(0)
-        command_queue.put(command)
+def listen_for_commands(command_queue):
+    logger.info('[*] Aguardando comandos...')
+    sys.stdin = open(0, mode='r', encoding='utf-8')
+    try:
+        while True:
+            command = input('[?] Digite um comando: ').strip().lower()
+            if command == 'q':
+                print("[*] Comando 'quit' recebido, encerrando...")
+                break
+            command_queue.put(command)
+    except OSError as e:
+        logger.warning(f'[*] stdin para comandos fechado: {e}')
+    finally:
+        logger.warning('[*] Encerrando processo de escuta.')
 
 
 def handle_set(command: str, screens: dict) -> int | None:
     screen_name = command.split(' ', 1)[1].upper()
     for i, key in enumerate(screens.keys()):
         if screen_name in key:
-            print(f'[+] Mudando para a tela: {screen_name}')
+            print(f'\n[+] Mudando para a tela: {screen_name}\n')
             return i
     return None
 
@@ -351,6 +365,24 @@ def process_command(
     return state
 
 
+def start_command_process():
+    if state.command_process and state.command_process.is_alive():
+        logger.warning('[!] Processo de comando já está em execução.')
+        return
+
+    if not multiprocessing.get_start_method(allow_none=True):
+        if os.name == 'posix':
+            multiprocessing.set_start_method('fork')
+        else:
+            multiprocessing.set_start_method('spawn')
+
+    logger.info('[+] Iniciando processo de comando...')
+    state.command_process = multiprocessing.Process(
+        target=listen_for_commands, args=(command_queue,)
+    )
+    state.command_process.start()
+
+
 def replay_handler(
     clientsock: socket.socket,
     screens: dict,
@@ -363,9 +395,6 @@ def replay_handler(
         current_screen=0,
         clear=False,
     )
-
-    command_thread = threading.Thread(target=listen_for_commands, daemon=True)
-    command_thread.start()
 
     try:
         peer_name = clientsock.getpeername()
@@ -401,5 +430,7 @@ def replay_handler(
 
     except Exception as e:
         logger.error(f'[!] Erro fora do esperado: {str(e)}')
+        server_stop.set()
     finally:
         clientsock.close()
+        server_stop.set()
