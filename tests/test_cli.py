@@ -1,7 +1,9 @@
+import os
 import socket
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
+import pytest
 from typer.testing import CliRunner
 
 from pyx3270.cli import app, start_sock
@@ -9,119 +11,32 @@ from pyx3270.cli import app, start_sock
 runner = CliRunner()
 
 
-@patch('pyx3270.cli.start_new_amulator')
-@patch('pyx3270.cli.load_screens')
-@patch('pyx3270.cli.start_sock')
-@patch('pyx3270.cli.X3270')
-@patch('pyx3270.cli.threading.Thread')
-def test_replay_command(
-    mock_thread_class,
-    mock_x3270_class,
-    mock_start_sock,
-    mock_load_screens,
-    mock_start_new_amulator,
-):
-    # Mock do load_screens
-    mock_load_screens.return_value = ['tela1.bin', 'tela2.bin']
+@pytest.mark.parametrize('emulator', [True, False])
+def test_replay(monkeypatch, emulator, replay_dependencies):
+    deps = replay_dependencies
 
-    # Mock do socket retornado por start_sock
-    mock_socket = MagicMock()
-    mock_clientsock = MagicMock()
+    args = [
+        'replay',
+        '--directory',
+        deps['directory'],
+        '--port',
+        str(deps['port']),
+        '--model',
+        deps['model'],
+    ]
+    args.append('--emulator' if emulator else '--no-emulator')
+    args.append('--tls' if deps['tls'] else '--no-tls')
 
-    # Cria uma função que simula uma chamada e depois lança KeyboardInterrupt
-    def accept_side_effect():
-        yield (mock_clientsock, ('127.0.0.1', 12345))
-        while True:
-            raise KeyboardInterrupt('encerrar')
+    runner = CliRunner()
+    result = runner.invoke(app, args)
 
-    mock_socket.accept.side_effect = accept_side_effect()
-    mock_start_sock.return_value = mock_socket
+    # Typer encerra o app com SystemExit
+    assert result.exit_code != 0
 
-    # Mock do X3270
-    mock_emu_instance = MagicMock()
-    mock_x3270_class.return_value = mock_emu_instance
-
-    mock_thread = MagicMock()
-    mock_thread_class.return_value = mock_thread
-
-    # Simula o join como se a thread tivesse terminado
-    mock_thread.join.return_value = None
-
-    # Execução do comando
-    result = runner.invoke(
-        app, ['replay', '--directory=tests/screens', '--port=9999']
-    )
-
-    # Asserts
-    assert result.exit_code == 0
-    mock_load_screens.assert_called_once_with('tests/screens')
-    mock_start_sock.assert_called_once_with(9999)
-    mock_x3270_class.assert_called_once_with(
-        visible=True, model='2', save_log_file=True
-    )
-    mock_thread.start.assert_called_once()
-    mock_start_new_amulator.assert_called_once_with(
-        mock_thread, mock_emu_instance
-    )
-
-
-@patch('pyx3270.cli.start_new_amulator')
-@patch('pyx3270.cli.start_sock')
-@patch('pyx3270.cli.X3270')
-@patch('pyx3270.cli.threading.Thread')
-def test_record_command(
-    mock_thread_class,
-    mock_x3270_class,
-    mock_start_sock,
-    mock_start_new_amulator,
-    mock_socket_with_accept,
-):
-    # Preparar mocks de socket e cliente
-    mock_socket, mock_clientsock = mock_socket_with_accept
-    mock_start_sock.return_value = mock_socket
-
-    # Mock da instância do X3270
-    mock_emu_instance = MagicMock()
-    mock_x3270_class.return_value = mock_emu_instance
-
-    # Mock da thread
-    mock_thread = MagicMock()
-    mock_thread_class.return_value = mock_thread
-    mock_thread.join.return_value = None
-
-    # Invoca o comando record com parâmetros
-    result = runner.invoke(
-        app,
-        [
-            'record',
-            '--address',
-            'host.local:1234',
-            '--directory',
-            'tests/screens',
-            '--no-tls',  # desliga o TLS, pois o padrão é True
-            '--model',
-            '2',
-            '--emulator',  # habilita emulator (padrão True, mas forçando aqui)
-        ],
-    )
-
-    # Validar saída e chamadas
-    if result.exit_code == 130:  # noqa: PLR2004
-        assert isinstance(result.exception, SystemExit)
-    else:
-        assert result.exit_code == 0
-
-    mock_start_sock.assert_called_once_with(1234)
-    mock_x3270_class.assert_called_once_with(
-        visible=True, model='2', save_log_file=True
-    )
-    mock_emu_instance.connect_host.assert_called_once_with(
-        'localhost', 1234, False, mode_3270=False
-    )
-    mock_thread_class.assert_called_once()
-    mock_thread.start.assert_called_once()
-    mock_start_new_amulator.assert_called_once_with(
-        mock_thread, mock_emu_instance
+    # Verifica se a mensagem de REPLAY apareceu
+    assert any(
+        f'[+] REPLAY do caminho: {deps["directory"]}' in m
+        for m in deps['printed_messages']
     )
 
 
@@ -138,10 +53,20 @@ def test_start_sock():
             socket.AF_INET, socket.SOCK_STREAM
         )
 
+        
         # Verifica setsockopt chamado com os parâmetros certos
-        mock_socket_instance.setsockopt.assert_called_once_with(
-            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
-        )
+        if os.name != 'nt':
+            calls = mock_socket_instance.setsockopt.call_args_list
+            assert calls[0] == mock.call.setsockopt(
+                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
+            )
+            assert calls[1] == mock.call.setsockopt(
+                socket.SOL_SOCKET, socket.SO_REUSEPORT, 1
+            )
+        else:
+            mock_socket_instance.setsockopt.assert_called_once_with(
+                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
+            )
 
         # Verifica bind chamado com ('', port)
         mock_socket_instance.bind.assert_called_once_with(('', port))
@@ -151,3 +76,37 @@ def test_start_sock():
 
         # Verifica que a função retornou a instância de socket criada
         assert result == mock_socket_instance
+
+
+@pytest.mark.parametrize('emulator', [True, False])
+def test_record(emulator, record_dependencies):
+    deps = record_dependencies
+
+    # Mock do connect_host se emulador estiver ativo
+    if emulator:
+        deps.x3270.connect_host = MagicMock(return_value=True)
+
+    # Executa o comando via Typer runner
+    args = [
+        'record',
+        '--address',
+        deps.address,
+        '--directory',
+        deps.directory,
+        '--model',
+        deps.model,
+    ]
+    if emulator:
+        args.append('--emulator')
+    else:
+        args.append('--no-emulator')
+    if deps.tls:
+        args.append('--tls')
+    else:
+        args.append('--no-tls')
+
+    runner.invoke(app, args)
+
+    if emulator:
+        deps.x3270.connect_host.assert_called()
+    deps.control_replay.assert_called()

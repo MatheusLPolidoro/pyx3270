@@ -1,13 +1,23 @@
 import socket
+import os
+import threading
 from contextlib import ExitStack
 from types import SimpleNamespace
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
+from pyx3270 import cli, server
 from pyx3270.emulator import X3270, ExecutableApp
 
 _real_socket_class = socket.socket
+
+
+@pytest.fixture(autouse=True)
+def no_os_exit(monkeypatch):
+    def fake_exit(code=0):
+        raise SystemExit(code)  # deixa o pytest lidar normalmente
+    monkeypatch.setattr(os, "_exit", fake_exit)
 
 
 @pytest.fixture
@@ -152,3 +162,80 @@ def x3270_cmd_instance(x3270_emulator_instance):
     x3270_emulator_instance._exec_command.reset_mock()
     # Retorna a instância do emulador que também é o Cmd
     return x3270_emulator_instance
+
+
+@pytest.fixture
+def record_dependencies():
+    deps = SimpleNamespace(
+        x3270=MagicMock(),
+        server_thread=MagicMock(),
+        address='localhost:3270',
+        directory='./screens',
+        tls=True,
+        model='2',
+        rich_print=MagicMock(),
+        sys_exit=MagicMock(),
+        control_replay=MagicMock(side_effect=KeyboardInterrupt),
+    )
+
+    # Patches globais dentro da fixture
+    with patch('pyx3270.cli.X3270', return_value=deps.x3270), patch(
+        'pyx3270.cli.start_server_thread', return_value=deps.server_thread
+    ), patch('pyx3270.cli.control_replay', deps.control_replay), patch(
+        'rich.print', deps.rich_print
+    ):
+        yield deps
+
+
+@pytest.fixture
+def replay_dependencies(tmp_path, monkeypatch):
+    # Cria diretório e arquivo de teste para screens
+    screens_dir = tmp_path / 'screens'
+    screens_dir.mkdir()
+    (screens_dir / '001.bin').write_bytes(
+        b'\x11' * 200 + server.tn3270.IAC + server.tn3270.TN_EOR
+    )
+
+    # Configura valores padrões
+    directory = str(screens_dir)
+    port = 12345
+    model = '2'
+    tls = False
+
+    # Mocks
+    x3270_mock = type(
+        'X3270Mock', (), {'connect_host': lambda self, *a, **kw: None}
+    )()
+
+    def control_replay_mock(th):
+        # levanta KeyboardInterrupt quando chamado
+        raise KeyboardInterrupt
+
+    # Monkeypatch no módulo
+    monkeypatch.setattr(cli, 'X3270', lambda *a, **kw: x3270_mock)
+    monkeypatch.setattr(cli, 'start_command_process', lambda: None)
+    monkeypatch.setattr(cli, 'control_replay', control_replay_mock)
+
+    # Monkeypatch para não abrir socket de verdade
+    def fake_start_server_thread(*args, **kwargs):
+        thread = threading.Thread(target=lambda: None, daemon=True)
+        thread.start()
+        return thread
+
+    monkeypatch.setattr(cli, 'start_server_thread', fake_start_server_thread)
+
+    # Monkeypatch do rich.print para capturar chamadas
+    printed_messages = []
+    monkeypatch.setattr(
+        cli.rich, 'print', lambda msg, **kwargs: printed_messages.append(msg)
+    )
+
+    # Retorna todos os valores úteis para o teste
+    return dict(
+        directory=directory,
+        port=port,
+        model=model,
+        tls=tls,
+        printed_messages=printed_messages,
+        x3270_mock=x3270_mock,
+    )

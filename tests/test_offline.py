@@ -56,7 +56,7 @@ def test_pyx3270_manager_exec(mock_logger, mock_popen, x3270_cmd_instance):
     )
     mock_process.stdin.write.assert_called_once_with(f'{command}\n')
     mock_process.stdin.flush.assert_called_once()
-    manager.emu.PF.assert_called_once_with(1)
+    manager.emu.pf.assert_called_once_with(1)
 
 
 @patch('subprocess.Popen')
@@ -143,7 +143,7 @@ def test_pyx3270_manager_change_directory(x3270_cmd_instance):
     directory_name = 'new_directory'
     manager.change_directory(directory_name)
     manager._exec.assert_called_once_with(f'change directory {directory_name}')
-    manager.emu.PF.assert_called_once_with(1)
+    manager.emu.pf.assert_called_once_with(1)
 
 
 def test_pyX3270_manager_del(x3270_cmd_instance):

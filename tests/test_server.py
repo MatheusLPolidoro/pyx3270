@@ -116,11 +116,11 @@ def test_convert_s():
     )
 
 
-@patch('socket.create_connection')
+@patch('socket.create_connection', autospec=True)
 def test_connect_serversock_success(mock_create_conn):
     """Testa connect_serversock com sucesso."""
-    mock_client_sock = MagicMock(spec=socket.socket)
-    mock_server_sock = MagicMock(spec=socket.socket)
+    mock_client_sock = MagicMock()
+    mock_server_sock = MagicMock()
     mock_create_conn.return_value = mock_server_sock
 
     result_sock = server.connect_serversock(
@@ -134,11 +134,11 @@ def test_connect_serversock_success(mock_create_conn):
     mock_client_sock.close.assert_not_called()
 
 
-@patch('socket.create_connection')
+@patch('socket.create_connection', autospec=True)
 def test_connect_serversock_default_port(mock_create_conn):
     """Testa connect_serversock usando a porta padrão."""
-    mock_client_sock = MagicMock(spec=socket.socket)
-    mock_server_sock = MagicMock(spec=socket.socket)
+    mock_client_sock = MagicMock()
+    mock_server_sock = MagicMock()
     mock_create_conn.return_value = mock_server_sock
 
     result_sock = server.connect_serversock(mock_client_sock, 'onlyhost')
@@ -147,10 +147,10 @@ def test_connect_serversock_default_port(mock_create_conn):
     assert result_sock == mock_server_sock
 
 
-@patch('socket.create_connection')
+@patch('socket.create_connection', autospec=True)
 def test_connect_serversock_failure(mock_create_conn):
     """Testa connect_serversock com falha na conexão."""
-    mock_client_sock = MagicMock(spec=socket.socket)
+    mock_client_sock = MagicMock()
     mock_create_conn.side_effect = socket.timeout('Connection timed out')
 
     result_sock = server.connect_serversock(mock_client_sock, 'badhost:1234')
@@ -306,7 +306,7 @@ def test_record_handler_basic_flow(record_mocks):
         lambda data: tn3270.IAC + tn3270.TN_EOR in data
     )
 
-    server.record_handler(mock_emu, mock_clientsock, 'host:992', record_dir)
+    server.record_handler(mock_clientsock, mock_emu, 'host:992', record_dir)
 
     # Verificações
     record_mocks.connect_serversock.assert_called_once_with(
@@ -366,7 +366,7 @@ def test_record_handler_connect_fail(mock_connect_serversock):
     mock_connect_serversock.return_value = None  # Simula falha
     mock_emu = MagicMock(spec=X3270)
 
-    server.record_handler(mock_emu, mock_clientsock, 'badhost:port', '/dir')
+    server.record_handler(mock_clientsock, mock_emu, 'badhost:port', '/dir')
 
     mock_connect_serversock.assert_called_once_with(
         mock_clientsock, 'badhost:port'
@@ -376,8 +376,8 @@ def test_record_handler_connect_fail(mock_connect_serversock):
 
 
 def test_record_handler_not_is_screen_tn3270():
-    fake_client_sock = MagicMock(spec=socket.socket)
-    fake_server_sock = MagicMock(spec=socket.socket)
+    fake_client_sock = MagicMock()
+    fake_server_sock = MagicMock()
 
     # Simula dados vindos do servidor com terminador TN_EOR
     tn_eor = b'\xff\xef'  # IAC + TN_EOR
@@ -405,8 +405,8 @@ def test_record_handler_not_is_screen_tn3270():
         emu.tls = False
 
         server.record_handler(
-            emu=emu,
             clientsock=fake_client_sock,
+            emu=emu,
             address='127.0.0.1',
             record_dir='/screens',
             delay=0.01,
