@@ -1284,7 +1284,7 @@
     # Conecta ao host mainframe na porta 992 (TLS)
     emulator.connect_host('myhost.example.com', '992')
 
-    emulator.PF(12) # envia PF12
+    emulator.pf(12) # envia PF12
     ```
     <p><strong>Observações:</strong> Comandos padrão em terminais 3270.</p>
     <br>

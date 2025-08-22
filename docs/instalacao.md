@@ -2,7 +2,6 @@
 
 - Python 3.8+
 - [typer](https://typer.tiangolo.com/)
-- [pynput](https://pynput.readthedocs.io/en/latest/)
 
 Crie e ative um ambiente virtual, e então instale o Pyx3270:
 

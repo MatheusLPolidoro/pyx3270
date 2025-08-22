@@ -14,8 +14,6 @@ dependencies = [
     "shellingham==1.5.4",
     "typer==0.15.3",
     "typing_extensions==4.13.2",
-    "pynput==1.8.1",
-    "six==1.17.0"
 ]
 
 [project.scripts]
@@ -43,11 +41,14 @@ format = "ruff format ."
 test = "python -m pytest . -s -x --cov=pyx3270 -vv"
 post_test = "python -m coverage html"
 
+[tool.ruff.lint.per-file-ignores]
+"pyx3270/x3270_commands.py" = ["PLR0904"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 
 [tool.setuptools.package-data]
-pyx3270 = ["binary/*", "py.typed"]
+pyx3270 = ["bin/**/*", "py.typed"]
 
 [build-system]
 requires = ["setuptools>=61.0,<70"]
