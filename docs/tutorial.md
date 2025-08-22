@@ -24,7 +24,7 @@ Aqui você irá aprender sobre a ferramenta CLI <span class='aqua'>'*Comand Line
     --emulator / --no-emulator  [padrão: emulator]
     --help                      Demonstra essa mensagem e saí.
 <details>
-  <summary>Endereço (<span class='aqua'>'address'</span>) <span class='deeppink'>[OBRIGAÓRIO]</span></summary>
+  <summary>Endereço (<span class='aqua'>'address'</span>) <span class='deeppink'>[OBRIGATÓRIO]</span></summary>
   <p><strong>Descrição:</strong> IP/Hostname e porta do sistema mainframe.</p>
   ```shell
   pyx3270 record --address 177.139.188.25:3270 --no-tls
