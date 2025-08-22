@@ -1,5 +1,5 @@
-import socket
 import os
+import socket
 import threading
 from contextlib import ExitStack
 from types import SimpleNamespace
@@ -17,7 +17,8 @@ _real_socket_class = socket.socket
 def no_os_exit(monkeypatch):
     def fake_exit(code=0):
         raise SystemExit(code)  # deixa o pytest lidar normalmente
-    monkeypatch.setattr(os, "_exit", fake_exit)
+
+    monkeypatch.setattr(os, '_exit', fake_exit)
 
 
 @pytest.fixture

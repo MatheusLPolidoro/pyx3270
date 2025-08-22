@@ -137,6 +137,17 @@ def connect_serversock(
     return serversock
 
 
+def record_data(data_block, record_dir: str, counter: int) -> int:
+    if not is_screen_tn3270(data_block):
+        logger.warning('[!] Dados recebidos não são uma tela TN3270.')
+        return 0
+    fn = os.path.join(record_dir, f'{counter:03}.bin')
+    with open(fn, 'wb') as f:
+        logger.info(f'[+] Gravação de tela: {fn}')
+        f.write(data_block)
+    return 1
+
+
 def record_handler(
     clientsock: socket.socket,
     emu: X3270,
@@ -154,18 +165,6 @@ def record_handler(
     ensure_dir(record_dir)
 
     counter = 0
-
-    def record_data(data_block):
-        nonlocal counter
-
-        if not is_screen_tn3270(data_block):
-            logger.warning('[!] Dados recebidos não são uma tela TN3270.')
-            return
-        fn = os.path.join(record_dir, f'{counter:03}.bin')
-        with open(fn, 'wb') as f:
-            logger.info(f'[+] Gravação de tela: {fn}')
-            f.write(data_block)
-        counter += 1
 
     socks = [clientsock, serversock]
     channel = {clientsock: serversock, serversock: clientsock}
@@ -193,7 +192,7 @@ def record_handler(
                             tn3270.IAC + tn3270.TN_EOR
                         )
                         full_block = block + tn3270.IAC + tn3270.TN_EOR
-                        record_data(full_block)
+                        counter += record_data(full_block, record_dir, counter)
                         buffers[s] = rest
                 channel[s].sendall(data)
 

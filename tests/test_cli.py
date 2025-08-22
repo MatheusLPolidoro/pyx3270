@@ -53,7 +53,6 @@ def test_start_sock():
             socket.AF_INET, socket.SOCK_STREAM
         )
 
-        
         # Verifica setsockopt chamado com os parâmetros certos
         if os.name != 'nt':
             calls = mock_socket_instance.setsockopt.call_args_list
