@@ -118,7 +118,7 @@ Aqui você irá aprender sobre a ferramenta CLI <span class='aqua'>'*Comand Line
   <div class="termynal" data-termynal data-termynal-startDelay="400" style="min-height: 300px;">
     <span data-ty="input">pyx3270 replay</span>
     <span data-ty data-ty-delay="800">[+] REPLAY do caminho: <span class='deeppink'>./screens</span></span>
-    <span data-ty data-ty-delay="825">[+] Servidor de replay escutando na porta <span class='aqua'>992</span></span>
+    <span data-ty data-ty-delay="825">[+] Servidor de replay escutando na porta <span class='aqua'>3270</span></span>
     <span data-ty data-ty-delay="935">[+] Conexão recebida de: (<span class='lawngreen'>'127.0.0.1'</span>, <span class='aqua'>123456)</span>
     <span data-ty data-ty-delay="955">[?] Digite um comando:</span>
   </div>
@@ -126,7 +126,7 @@ Aqui você irá aprender sobre a ferramenta CLI <span class='aqua'>'*Comand Line
 
 ### <span class="gold">Opções</span>
     --directory TEXT            [padrão: ./screens]
-    --port INTEGER              [padrão: 992]
+    --port INTEGER              [padrão: 3270]
     --tls / --no-tls            [padrão: tls]
     --model TEXT                [padrão: 2]
     --emulator / --no-emulator  [padrão: emulator]
@@ -141,7 +141,7 @@ Aqui você irá aprender sobre a ferramenta CLI <span class='aqua'>'*Comand Line
 </details> 
 
  <details>
-  <summary>Porta (<span class='aqua'>'port'</span>) <span class='gold'>[PADRÃO: 992]</span></summary>
+  <summary>Porta (<span class='aqua'>'port'</span>) <span class='gold'>[PADRÃO: 3270]</span></summary>
   <p><strong>Descrição:</strong> Porta TCP onde o servidor de replay irá escutar conexões.</p>
   ```shell
   pyx3270 replay --port 12345

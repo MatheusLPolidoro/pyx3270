@@ -306,7 +306,7 @@ def test_record_handler_basic_flow(record_mocks):
         lambda data: tn3270.IAC + tn3270.TN_EOR in data
     )
 
-    server.record_handler(mock_clientsock, mock_emu, 'host:992', record_dir)
+    server.record_handler(mock_clientsock, mock_emu, 'host:3270', record_dir)
 
     # Verificações
     record_mocks.connect_serversock.assert_called_once_with(

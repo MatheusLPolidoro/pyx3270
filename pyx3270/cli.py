@@ -83,7 +83,7 @@ def control_replay(th: threading.Thread) -> None:
 @app.command()
 def replay(
     directory: str = typer.Option(default='./screens'),
-    port: int = typer.Option(default=992),
+    port: int = typer.Option(default=3270),
     tls: bool = typer.Option(default=False),
     model: str = typer.Option(default='2'),
     emulator: bool = typer.Option(default=True),

@@ -581,7 +581,7 @@
 
 <details>
     <summary>Keypad - Mostra teclado 3270</summary>
-    <p><strong>Descrição:</strong> Mostra o teclado virtual 3270 na tela.</p>
+    <p><strong>Descrição:</strong> Mostra o teclado virtual 3270 na tela (somente funciona para Windows).</p>
     <p><strong>Exemplo:</strong></p>
     ```python
     from x3270 import x3270
@@ -649,7 +649,7 @@
 
 <details>
     <summary>Menu - Exibe menu de comandos</summary>
-    <p><strong>Descrição:</strong> Exibe o menu de comandos do terminal.</p>
+    <p><strong>Descrição:</strong> Exibe o menu de comandos do terminal (somente funciona para Windows).</p>
     <p><strong>Exemplo:</strong></p>
     ```python
     from x3270 import x3270
@@ -661,6 +661,7 @@
     emulator.menu()
     ```
     <p><strong>Observações:</strong> Navegação via menu.</p>
+    <img src="/assets/img/menu.png" alt="menu" width="500px">
     <br>
 </details> 
 
@@ -831,6 +832,57 @@
     emulator.set()
     ```
     <p><strong>Observações:</strong> Configurações avançadas.</p>
+    <ul>
+        <li>acceptHostname:</li>
+        <li>aidWait: true</li>
+        <li>altCursor: false</li>
+        <li>alwaysInsert: false</li>
+        <li>bindLimit: true</li>
+        <li>blankFill: true</li>
+        <li>clientCert:</li>
+        <li>codePage: bracket</li>
+        <li>crosshair: false</li>
+        <li>cursorBlink: false</li>
+        <li>ftBufferSize: 16384</li>
+        <li>httpd:</li>
+        <li>insertMode: false</li>
+        <li>lineMode: true</li>
+        <li>lineWrap: false</li>
+        <li>loginMacro:</li>
+        <li>marginedPaste: false</li>
+        <li>model: 3279-4-E</li>
+        <li>monoCase: false</li>
+        <li>noTelnetInputMode: line</li>
+        <li>nopSeconds: 0</li>
+        <li>oerrLock: true</li>
+        <li>overlayPaste: true</li>
+        <li>oversize:</li>
+        <li>preferIpv4: false</li>
+        <li>preferIpv6: false</li>
+        <li>printer.codepage:</li>
+        <li>printer.name:</li>
+        <li>printer.options:</li>
+        <li>printerLu:</li>
+        <li>proxy:</li>
+        <li>reconnect: false</li>
+        <li>retry: false</li>
+        <li>reverseInputMode: false</li>
+        <li>rightToLeftMode: false</li>
+        <li>saveLines: 4096</li>
+        <li>screenTrace: false</li>
+        <li>scriptPort:</li>
+        <li>selectUrl: true</li>
+        <li>showTiming: false</li>
+        <li>startTls: true</li>
+        <li>termName:</li>
+        <li>trace: false</li>
+        <li>typeahead: true</li>
+        <li>underscore: true</li>
+        <li>unlockDelay: false</li>
+        <li>unlockDelayMs: 350</li>
+        <li>verifyHostCert: true</li>
+        <li>visibleControl: false</li>
+    </ul>
     <br>
 </details> 
 
@@ -848,6 +900,7 @@
     emulator.show()
     ```
     <p><strong>Observações:</strong> Útil para diagnóstico.</p>
+
     <br>
 </details> 
 
