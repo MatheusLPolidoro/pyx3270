@@ -310,7 +310,7 @@ def test_record_handler_basic_flow(record_mocks):
 
     # Verificações
     record_mocks.connect_serversock.assert_called_once_with(
-        mock_clientsock, 'host:992'
+        mock_clientsock, 'host:3270'
     )
 
     record_mocks.ensure_dir.assert_called_once_with(record_dir)
