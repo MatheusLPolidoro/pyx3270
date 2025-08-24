@@ -9,6 +9,8 @@ import threading
 from dataclasses import dataclass
 from logging import getLogger
 
+import rich
+
 from pyx3270 import state, tn3270
 from pyx3270.emulator import BINARY_FOLDER, X3270
 from pyx3270.exceptions import NotConnectedException
@@ -270,7 +272,7 @@ def listen_for_commands(command_queue):
         while True:
             command = input('[?] Digite um comando: ').strip().lower()
             if command == 'q':
-                print("[*] Comando 'quit' recebido, encerrando...")
+                rich.print("[*] Comando 'quit' recebido, encerrando...")
                 break
             command_queue.put(command)
     except OSError as e:
@@ -283,7 +285,7 @@ def handle_set(command: str, screens: dict) -> int | None:
     screen_name = command.split(' ', 1)[1].upper()
     for i, key in enumerate(screens.keys()):
         if screen_name in key:
-            print(f'\n[+] Mudando para a tela: {screen_name}\n')
+            rich.print(f'\n[+] Mudando para a tela: {screen_name}\n')
             return i
     return None
 

@@ -16,7 +16,6 @@ def _wrap_method(method):
 
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
-        print(f'Método chamado: {method.__name__}')
         return x3270_command(self, method.__name__, *args, **kwargs)
 
     return wrapper
