@@ -195,7 +195,10 @@ class Command(AbstractCommand):
             msg = ''.encode('utf-8').join(self.data).rstrip()
         error_msg = msg.decode('utf-8')
 
-        if 'keyboard locked' in error_msg.lower():
+        if (
+            'keyboard locked' in error_msg.lower() 
+            or 'canceled' in error_msg.lower()
+        ):
             logger.error(f'Teclado travado detectado: {error_msg}')
             raise KeyboardStateError(error_msg)
 
@@ -308,7 +311,6 @@ class Wc3270App(ExecutableApp):
         try:
             self._spawn_app(' '.join(self.args))
             self._make_socket()
-            logger.info('Conexão estabelecida com sucesso')
             return True
         except Exception:
             logger.error(f'Erro ao conectar ao host: {host}')
@@ -750,7 +752,7 @@ class X3270(AbstractEmulator, X3270Cmd):
             logger.error(error_msg)
             raise TerminatedError
         max_loop = 3
-        for exec in range(1, max_loop):
+        for exec in range(max_loop):
             try:
                 cmd = Command(self.app, cmdstr)
                 cmd.execute()
@@ -761,9 +763,10 @@ class X3270(AbstractEmulator, X3270Cmd):
                 logger.error('Emulador não conectado.')
                 raise NotConnectedException
             except KeyboardStateError:
+                sleep(1)
                 logger.warning(
                     f'Nova tentativa de exec command:'
-                    f'{cmdstr} {exec}/{max_loop}'
+                    f'{cmdstr} {exec + 1}/{max_loop}'
                 )
                 self.reset()
                 self.wait(self.time_unlock, 'unlock')

@@ -25,8 +25,10 @@ class PyX3270Manager:
         self.process = subprocess.Popen(
             self.command,
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             text=True,
+            bufsize=0
         )
 
     def _exec(self, command: str) -> None:
@@ -37,8 +39,13 @@ class PyX3270Manager:
             return
 
         logger.info(f'[+] Enviando comando offline: {command}')
-        self.process.stdin.write(f'{command}\n')
-        self.process.stdin.flush()
+        try:
+            self.process.stdin.write(f"{command}\n")
+            self.process.stdin.flush()
+            sleep(0.05)
+        except Exception as e:
+            logger.error(f"Erro ao enviar comando: {e}")
+            return
         self.emu.pf(1)
         sleep(0.1)
 
@@ -52,7 +59,7 @@ class PyX3270Manager:
 
     def clear(self):
         """Define a tela específica e aguarda processamento corretamente."""
-        self._exec('clear')
+        self.emu.pf(12)
 
     def send_pf(self, val: int):
         if val in {4, 8}:

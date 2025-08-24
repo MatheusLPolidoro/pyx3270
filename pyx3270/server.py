@@ -257,7 +257,7 @@ def backend_3270(
     ):
         logger.info('[!] Comando de paginação/confirmação recebido.')
         current_screen = min(len(screens) - 1, current_screen + 1)
-    elif aid == tn3270.CLEAR and key_press and emulator:
+    elif aid == tn3270.CLEAR and key_press and emulator or aid == tn3270.PF12:
         logger.info('[!] Comando CLEAR recebido.')
         clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
         clear = True
@@ -275,7 +275,7 @@ def listen_for_commands(command_queue):
                 rich.print("[*] Comando 'quit' recebido, encerrando...")
                 break
             command_queue.put(command)
-    except OSError as e:
+    except (OSError, EOFError) as e:
         logger.warning(f'[*] stdin para comandos fechado: {e}')
     finally:
         logger.warning('[*] Encerrando processo de escuta.')
@@ -285,7 +285,7 @@ def handle_set(command: str, screens: dict) -> int | None:
     screen_name = command.split(' ', 1)[1].upper()
     for i, key in enumerate(screens.keys()):
         if screen_name in key:
-            rich.print(f'\n[+] Mudando para a tela: {screen_name}\n')
+            rich.print(f'[+] Mudando para a tela: {screen_name}')
             return i
     return None
 
