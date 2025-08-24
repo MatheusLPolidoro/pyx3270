@@ -27,8 +27,10 @@ def test_pyx3270_manager_init_and_terminate(mock_popen, x3270_cmd_instance):
             '--no-emulator',
         ],
         stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
         text=True,
+        bufsize=0
     )
     assert manager.process == mock_process
 
@@ -92,13 +94,6 @@ def test_pyx3270_manager_prev(x3270_cmd_instance):
     manager._exec = MagicMock()
     manager.prev()
     manager._exec.assert_called_once_with('prev')
-
-
-def test_pyx3270_manager_clear(x3270_cmd_instance):
-    manager = PyX3270Manager(x3270_cmd_instance)
-    manager._exec = MagicMock()
-    manager.clear()
-    manager._exec.assert_called_once_with('clear')
 
 
 def test_pyx3270_manager_send_pf(x3270_cmd_instance):

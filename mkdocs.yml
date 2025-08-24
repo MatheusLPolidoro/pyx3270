@@ -6,11 +6,11 @@ nav:
       - Introdução: primeiros_passos.md
       - Instalação: instalacao.md
       - Tutorial: tutorial.md
-      - Automação: automacao.md
+      # - Automação: automacao.md
   - Comandos Nativos: comandos.md
   - Alterações: changelog.md
   - Estrutura: estrutura.md
-  - Contribuindo: contribuindo.md
+  # - Contribuindo: contribuindo.md
 
 theme:
   name: material
@@ -58,6 +58,7 @@ extra_javascript:
   - assets/js/filetree.js
   - assets/js/termynal-init.js
   - assets/js/termynal.js
+  - assets/js/LogoAnimation.js
 
 markdown_extensions:
   - pymdownx.highlight

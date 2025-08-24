@@ -1,10 +1,12 @@
 # Pyx3270 — Automação para Mainframes com Python
 
+<svg id="LogoAnimation" width="650px" viewBox="0 0 1920 1080"></svg>
+<script src="assets/js/LogoAnimation.js"></script>
+
 ![PyPI - Version](https://img.shields.io/pypi/v/pyx3270)
 ![Python](https://img.shields.io/badge/language-Python-blue?logo=python)
-![Cobertura de Testes](https://img.shields.io/badge/cobertura-100%25-brightgreen?logo=pytest)
+![Cobertura de Testes](https://img.shields.io/badge/cobertura-97%25-brightgreen?logo=pytest)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/fastapi.svg?color=%2334D058)](https://pypi.org/project/fastapi)
-
 
 Pyx3270 é uma biblioteca Python voltada para interação com emuladores de [terminais 3270](https://www.ibm.com/docs/api/v1/content/zosbasics%2Fcom.ibm.zos.znetwork%2Fznetwork_261.htm?parsebody=true&lang=en){:target="_blank" rel="noopener"} usados em sistemas mainframe.Com ela, você pode gravar sessões, reproduzi-las offline e automatizar processos complexos com simplicidade e controle.
 
@@ -27,8 +29,8 @@ Aprenda como instalar, configurar e começar a usar a biblioteca. Veja os princi
 ## [Tutorial](tutorial.md)  
 Siga um passo a passo prático para automatizar uma sessão real, gravar interações e reproduzi-las offline.
 
-## [Automação](automacao.md)  
-Aprenda como criar um processo automatico em um sistema Mainframe, as melhores praticas para desenvolvimento de novas bibliotecas.
+<!-- ## [Automação](automacao.md)  
+Aprenda como criar um processo automatico em um sistema Mainframe, as melhores praticas para desenvolvimento de novas bibliotecas. -->
 
 ## [Comandos Nativos](comandos.md)  
 Explore os comandos disponíveis para interagir com o terminal 3270 e como usá-los em scripts Python.
