@@ -41,6 +41,13 @@ format = "ruff format ."
 test = "python -m pytest . -s -x --cov=pyx3270 -vv"
 post_test = "python -m coverage html"
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+    "ignore:function ham\\(\\) is deprecated:DeprecationWarning"
+]
+
 [tool.ruff.lint.per-file-ignores]
 "pyx3270/x3270_commands.py" = ["PLR0904"]
 

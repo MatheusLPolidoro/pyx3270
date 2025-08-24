@@ -10,7 +10,7 @@ from functools import cache
 from logging import getLogger
 from time import sleep, time
 from typing import Literal
-
+from pyx3270.x3270_commands import x3270_command
 from pyx3270.exceptions import (
     CommandError,
     FieldTruncateError,
@@ -391,6 +391,11 @@ class X3270Cmd(AbstractEmulatorCmd):
     def __init__(self, time_unlock: int = 60) -> None:
         logger.info(f'Inicializando X3270Cmd com time_unlock: {time_unlock}')
         self.time_unlock = time_unlock
+
+    def __getattr__(self, name):
+        def x3270_builtin_func(*args, **kwargs):
+            return x3270_command(self, name, *args, **kwargs)
+        return x3270_builtin_func
 
     def clear_screen(self) -> None:
         logger.info('Limpando tela')
@@ -800,7 +805,11 @@ class X3270(AbstractEmulator, X3270Cmd):
             return False
 
     def connect_host(
-        self, host: str, port: str, tls: bool = True, mode_3270: bool = True
+        self,
+        host: str,
+        port: int | str,
+        tls: bool = True,
+        mode_3270: bool = True
     ) -> None:
         logger.info(f'Conectando ao host: {host}:{port} (tls={tls})')
         self.host = host

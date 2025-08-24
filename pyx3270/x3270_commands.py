@@ -1,6 +1,6 @@
 import functools
 from typing import Any
-
+import warnings
 
 def x3270_builtins_class(cls):
     """Decorador de classe que aplica x3270_builtins a todos os métodos."""
@@ -17,21 +17,30 @@ def _wrap_method(method):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         return x3270_command(self, method.__name__, *args, **kwargs)
-
     return wrapper
 
 
 def x3270_command(em, func, *args, **kwargs):
-    all_args = ', '.join(
+    all_args_str = ', '.join(
         list(map(str, args)) + [f'{k}={repr(v)}' for k, v in kwargs.items()]
     )
 
     if 'send_pf' in func or func == 'pf':
-        em._exec_command(f'PF({all_args})'.encode('utf8'))
+        if not all_args_str:
+            warnings.warn(
+                f'`{func}` foi descontinuada, use `send_pf` com argumento.',
+                DeprecationWarning
+            )
+            all_args_str = func[-1]
+
+        em._exec_command(f'PF({all_args_str})'.encode('utf8'))
         em.wait(em.time_unlock, 'unlock')
 
+    if func == 'connect' and (len(args) + len(kwargs)) > 1:
+        return em.connect_host(*args, **kwargs)
+        
     try:
-        cmd = em._exec_command(f'{func}({all_args})'.encode('utf8'))
+        cmd = em._exec_command(f'{func}({all_args_str})'.encode('utf8'))
         try:
             text = [text.decode('utf8') for text in cmd.data[0:]]
             result = ''.join(text)
@@ -65,7 +74,7 @@ class X3270Commands:
     def compose(
         self,
     ) -> Any: ...  # Interpreta as próximas duas teclas conforme o mapa.
-    def connect(self, host: str) -> Any: ...  # Conecta ao host.
+    def connect(self, host: str, port: str | None = None) -> Any: ...  # Conecta ao host.
     def cursorselect(
         self,
     ) -> Any: ...  # Seleciona local do cursor como caneta luminosa.

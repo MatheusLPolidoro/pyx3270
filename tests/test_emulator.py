@@ -759,6 +759,30 @@ def test_x3270cmd_move_to(x3270_cmd_instance):
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
+def test_x3270cmd_send_pf3(x3270_cmd_instance: X3270Cmd):
+    # Mock _exec_command's return
+    x3270_cmd_instance._exec_command.return_value = MagicMock(
+        status_line=b'ok'
+    )
+    EXPECTED_CALLS = 1
+    with patch.object(x3270_cmd_instance, '_exec_command') as mock_exec:
+        x3270_cmd_instance.send_pf3()
+
+        calls = mock_exec.call_args_list
+        assert len(calls) >= EXPECTED_CALLS
+
+        pf_command = calls[0][0][0]
+        expected_pf = b'PF(3)'
+        assert pf_command == expected_pf
+
+        wait_command = calls[1][0][0]
+        expected_wait = (
+            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
+        )
+        assert wait_command == expected_wait
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_send_pf(x3270_cmd_instance: X3270Cmd):
     # Mock _exec_command's return
     x3270_cmd_instance._exec_command.return_value = MagicMock(
@@ -766,7 +790,7 @@ def test_x3270cmd_send_pf(x3270_cmd_instance: X3270Cmd):
     )
     EXPECTED_CALLS = 1
     with patch.object(x3270_cmd_instance, '_exec_command') as mock_exec:
-        x3270_cmd_instance.send_pf('3')
+        x3270_cmd_instance.send_pf(3)
 
         calls = mock_exec.call_args_list
         assert len(calls) >= EXPECTED_CALLS
