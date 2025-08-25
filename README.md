@@ -1,6 +1,7 @@
 # Pyx3270 — Automação para Mainframes com Python
 
-<img src="./docs/assets/logo.svg" width="180px">
+<img src="https://raw.githubusercontent.com/matheusLPolidoro/pyx3270/master/docs/assets/logo.svg" width="180px">
+
 
 ![PyPI - Version](https://img.shields.io/pypi/v/pyx3270)
 ![Python](https://img.shields.io/badge/language-Python-blue?logo=python)
@@ -19,23 +20,23 @@ Aqui está o aviso oficial de direitos autorais para x3270, c3270, wc3270, s3270
 
 ## Explore os principais tópicos da biblioteca:
 
-## [O que é o Pyx3270?](./docs/sobre.md)  
+## [O que é o Pyx3270?](https://github.com/matheusLPolidoro/pyx3270/blob/master/docs/sobre.md)  
 Entenda o contexto dos sistemas mainframe, o que são sessões 3270 e como o Pyx3270 resolve desafios comuns de automação.
 
-## [Primeiros passos](./docs/primeiros_passos.md)  
+## [Primeiros passos](https://github.com/matheusLPolidoro/pyx3270/blob/master/docs/primeiros_passos.md)  
 Aprenda como instalar, configurar e começar a usar a biblioteca. Veja os principais módulos: Automação, Gravação e Reprodução.
 
-## [Tutorial](./docs/tutorial.md)  
+## [Tutorial](https://github.com/matheusLPolidoro/pyx3270/blob/master/docs/tutorial.md)  
 Siga um passo a passo prático para automatizar uma sessão real, gravar interações e reproduzi-las offline.
 
-## [Comandos Nativos](./docs/comandos.md)  
+## [Comandos Nativos](https://github.com/matheusLPolidoro/pyx3270/blob/master/docs/comandos.md)  
 Explore os comandos disponíveis para interagir com o terminal 3270 e como usá-los em scripts Python.
 
-## [Alterações](./docs/changelog.md)  
+## [Alterações](https://github.com/matheusLPolidoro/pyx3270/blob/master/docs/changelog.md)  
 Acompanhe as atualizações da biblioteca, correções de bugs e novas funcionalidades por versão.
 
-## [Estrutura](./docs/estrutura.md)  
+## [Estrutura](https://github.com/matheusLPolidoro/pyx3270/blob/master/docs/estrutura.md)  
 Explore a estrutura do projeto.
 
-## [Contribuindo](./docs/contribuindo.md)  
+## [Contribuindo](https://github.com/matheusLPolidoro/pyx3270/blob/master/docs/contribuindo.md)  
 Veja como colaborar com o projeto, enviar melhorias e participar da comunidade Pyx3270.
