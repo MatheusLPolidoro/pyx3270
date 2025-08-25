@@ -50,6 +50,10 @@ plugins:
       scripts:
         - docs/gen_tree.py
 
+extra:
+  version:
+    provider: mike
+    
 extra_css:
   - assets/css/extra.css
   - assets/css/termynal.css
