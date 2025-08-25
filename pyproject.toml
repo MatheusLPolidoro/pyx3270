@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Uma interface comum utilizada para automações de terminais 3270 da IBM."
 authors = [{name = "MatheusLPolidoro", email = "mattpolidoro4@gmail.com"}]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<=3.13"
 
 dependencies = [
     "click==8.1.8",
@@ -69,7 +69,7 @@ filename = "CHANGELOG.md"
 directory = "chanlogs.d"
 underlines = ["=", "-", "~"]
 title_format = "Versão {version} ({project_date})"
-issue_format = "[#{issue}](https://github.com/seu_usuario/seu_repo/issues/{issue})"
+issue_format = "[#{issue}](https://github.com/MatheusLPolidoro/pyx3270/issues/{issue})"
 
 [[tool.towncrier.type]]
 directory = "breaking"
