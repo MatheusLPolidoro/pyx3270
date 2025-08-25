@@ -28,9 +28,6 @@ Aprenda como instalar, configurar e começar a usar a biblioteca. Veja os princi
 ## [Tutorial](./docs/tutorial.md)  
 Siga um passo a passo prático para automatizar uma sessão real, gravar interações e reproduzi-las offline.
 
-<!-- ## [Automação](automacao.md)  
-Aprenda como criar um processo automatico em um sistema Mainframe, as melhores praticas para desenvolvimento de novas bibliotecas. -->
-
 ## [Comandos Nativos](./docs/comandos.md)  
 Explore os comandos disponíveis para interagir com o terminal 3270 e como usá-los em scripts Python.
 
