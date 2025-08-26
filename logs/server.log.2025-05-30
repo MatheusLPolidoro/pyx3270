@@ -1,0 +1,35 @@
+2025-05-30 08:18:25,536 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:19:00,778 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:25:54,022 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:25:54,090 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2026697094352'>
+2025-05-30 08:25:54,091 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 08:27:02,628 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:27:02,692 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='1906409270848'>
+2025-05-30 08:27:02,693 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 08:29:39,028 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:29:39,062 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2642533737072'>
+2025-05-30 08:29:39,063 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 08:30:16,549 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:30:16,566 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2326139166000'>
+2025-05-30 08:30:16,567 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 08:31:23,432 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:31:23,456 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2281922812896'>
+2025-05-30 08:31:23,457 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 08:32:31,615 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 08:32:31,633 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2115500832624'>
+2025-05-30 08:32:31,634 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 13:07:45,668 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 13:07:45,714 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2186811421232'>
+2025-05-30 13:07:45,715 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 13:09:35,259 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 13:09:35,268 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2410196050544'>
+2025-05-30 13:09:35,268 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 13:10:26,865 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 13:10:26,877 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2425948367776'>
+2025-05-30 13:10:26,878 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 13:11:58,594 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 13:11:58,616 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='1889281143344'>
+2025-05-30 13:11:58,618 - server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-05-30 14:31:28,807 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-05-30 14:31:28,829 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2201572579312'>
+2025-05-30 14:31:28,830 - server - ERROR - [!] Erro fora do esperado: Simulate loop break

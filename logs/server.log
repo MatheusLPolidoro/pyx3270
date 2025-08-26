@@ -1,0 +1,3 @@
+2025-06-20 15:37:56,451 - server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-06-20 15:37:56,492 - server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='1380933835408'>
+2025-06-20 15:37:56,494 - server - ERROR - [!] Erro fora do esperado: Simulate loop break

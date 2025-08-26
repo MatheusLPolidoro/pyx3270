@@ -1,0 +1,150 @@
+2025-10-30 15:08:39,255 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,265 - pyx3270.emulator - INFO - Inicializando X3270 (visible=True, model=2)
+2025-10-30 15:08:39,265 - pyx3270.emulator - INFO - Criando aplicativo emulador
+2025-10-30 15:08:39,267 - pyx3270.emulator - DEBUG - Criando Wc3270App (Windows, visível)
+2025-10-30 15:08:39,267 - pyx3270.emulator - INFO - Inicializando Wc3270App com modelo: 2
+2025-10-30 15:08:39,267 - pyx3270.emulator - DEBUG - Obtendo argumentos para modelo: 2
+2025-10-30 15:08:39,267 - pyx3270.emulator - DEBUG - Argumentos completos: ['-xrm', '"wc3270.unlockDelay: False"', '-xrm', '*model:2', '-utf8']
+2025-10-30 15:08:39,268 - pyx3270.emulator - DEBUG - Obtendo porta livre para comunicação
+2025-10-30 15:08:39,271 - pyx3270.emulator - DEBUG - Porta livre obtida: 54321
+2025-10-30 15:08:39,271 - pyx3270.emulator - DEBUG - Porta de script alocada: 54321
+2025-10-30 15:08:39,271 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=True, model='2')
+2025-10-30 15:08:39,271 - pyx3270.emulator - DEBUG - Obtendo argumentos para modelo: 2
+2025-10-30 15:08:39,271 - pyx3270.emulator - DEBUG - Argumentos completos: ['-xrm', '"wc3270.unlockDelay: False"', '-xrm', '*model:2', '-utf8']
+2025-10-30 15:08:39,271 - pyx3270.emulator - DEBUG - Iniciando processo do aplicativo
+2025-10-30 15:08:39,272 - pyx3270.emulator - DEBUG - Detectado sistema Windows, configurando flags específicos
+2025-10-30 15:08:39,272 - pyx3270.emulator - DEBUG - Executando comando: ['-xrm', '"wc3270.unlockDelay: False"', '-xrm', '*model:2', '-utf8']
+2025-10-30 15:08:39,296 - pyx3270.emulator - DEBUG - Processo iniciado com PID: 32640
+2025-10-30 15:08:39,296 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,319 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,319 - pyx3270.emulator - INFO - Inicializando X3270 (visible=True, model=2)
+2025-10-30 15:08:39,319 - pyx3270.emulator - INFO - Criando aplicativo emulador
+2025-10-30 15:08:39,319 - pyx3270.emulator - DEBUG - Criando Wc3270App (Windows, visível)
+2025-10-30 15:08:39,320 - pyx3270.emulator - INFO - Inicializando Wc3270App com modelo: 2
+2025-10-30 15:08:39,320 - pyx3270.emulator - DEBUG - Obtendo argumentos para modelo: 2
+2025-10-30 15:08:39,320 - pyx3270.emulator - DEBUG - Argumentos completos: ['-xrm', '"wc3270.unlockDelay: False"', '-xrm', '*model:2', '-utf8']
+2025-10-30 15:08:39,320 - pyx3270.emulator - DEBUG - Obtendo porta livre para comunicação
+2025-10-30 15:08:39,320 - pyx3270.emulator - DEBUG - Porta livre obtida: 54321
+2025-10-30 15:08:39,321 - pyx3270.emulator - DEBUG - Porta de script alocada: 54321
+2025-10-30 15:08:39,321 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=True, model='2')
+2025-10-30 15:08:39,321 - pyx3270.emulator - DEBUG - Obtendo argumentos para modelo: 2
+2025-10-30 15:08:39,321 - pyx3270.emulator - DEBUG - Argumentos completos: ['-xrm', '"wc3270.unlockDelay: False"', '-xrm', '*model:2', '-utf8']
+2025-10-30 15:08:39,321 - pyx3270.emulator - DEBUG - Iniciando processo do aplicativo
+2025-10-30 15:08:39,321 - pyx3270.emulator - DEBUG - Detectado sistema Windows, configurando flags específicos
+2025-10-30 15:08:39,321 - pyx3270.emulator - DEBUG - Executando comando: ['-xrm', '"wc3270.unlockDelay: False"', '-xrm', '*model:2', '-utf8']
+2025-10-30 15:08:39,348 - pyx3270.emulator - DEBUG - Processo iniciado com PID: 31028
+2025-10-30 15:08:39,348 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,348 - pyx3270.emulator - DEBUG - Executando comando: b'test'
+2025-10-30 15:08:39,349 - pyx3270.emulator - ERROR - Tentativa de executar comando em emulador terminado
+2025-10-30 15:08:39,356 - pyx3270.emulator - DEBUG - Inicializando Status com linha: b'U F U C(host) I N 3279-4 80 43 20 10 0x1 0.1'
+2025-10-30 15:08:39,357 - pyx3270.emulator - DEBUG - Status: self.connection_state=b'C(host)', self.emulator_mode=b'I'
+2025-10-30 15:08:39,381 - pyx3270.emulator - DEBUG - Método connect chamado com args: ('arg1', 'arg2')
+2025-10-30 15:08:39,418 - pyx3270.emulator - DEBUG - Inicializando Command com comando: TestCmd
+2025-10-30 15:08:39,421 - pyx3270.emulator - DEBUG - Executando comando: b'TestCmd'
+2025-10-30 15:08:39,421 - pyx3270.emulator - ERROR - Erro durante execução do comando: b'TestCmd'
+2025-10-30 15:08:39,443 - pyx3270.emulator - DEBUG - Inicializando Command com comando: NotQuit
+2025-10-30 15:08:39,445 - pyx3270.emulator - DEBUG - Processando resultado: 
+2025-10-30 15:08:39,445 - pyx3270.emulator - WARNING - "erro" esperado, mas recebido: .
+2025-10-30 15:08:39,445 - pyx3270.emulator - WARNING - Tentativa 1/5 falhou, aguardando 1s
+2025-10-30 15:08:39,446 - pyx3270.emulator - WARNING - "erro" esperado, mas recebido: .
+2025-10-30 15:08:39,446 - pyx3270.emulator - WARNING - Tentativa 2/5 falhou, aguardando 1s
+2025-10-30 15:08:39,449 - pyx3270.emulator - WARNING - "erro" esperado, mas recebido: .
+2025-10-30 15:08:39,450 - pyx3270.emulator - WARNING - Tentativa 3/5 falhou, aguardando 1s
+2025-10-30 15:08:39,451 - pyx3270.emulator - WARNING - "erro" esperado, mas recebido: .
+2025-10-30 15:08:39,451 - pyx3270.emulator - WARNING - Tentativa 4/5 falhou, aguardando 1s
+2025-10-30 15:08:39,452 - pyx3270.emulator - WARNING - "erro" esperado, mas recebido: .
+2025-10-30 15:08:39,452 - pyx3270.emulator - WARNING - Tentativa 5/5 falhou, aguardando 1s
+2025-10-30 15:08:39,452 - pyx3270.emulator - ERROR - Comando falhou: [sem mensagem de erro]
+2025-10-30 15:08:39,504 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 30
+2025-10-30 15:08:39,567 - pyx3270.emulator - DEBUG - Inicializando Status com linha: None
+2025-10-30 15:08:39,567 - pyx3270.emulator - DEBUG - Status line vazia, usando padrão
+2025-10-30 15:08:39,568 - pyx3270.emulator - DEBUG - Status: self.connection_state=None, self.emulator_mode=None
+2025-10-30 15:08:39,575 - pyx3270.emulator - DEBUG - Inicializando Command com comando: DataCmd
+2025-10-30 15:08:39,575 - pyx3270.emulator - DEBUG - Executando comando: b'DataCmd'
+2025-10-30 15:08:39,584 - pyx3270.emulator - DEBUG - Dados recebidos: b'data: first line\n'
+2025-10-30 15:08:39,585 - pyx3270.emulator - DEBUG - Dados recebidos: b'data: second line\r\n'
+2025-10-30 15:08:39,585 - pyx3270.emulator - DEBUG - Status line: b'status line'
+2025-10-30 15:08:39,585 - pyx3270.emulator - DEBUG - Resultado: b'ok'
+2025-10-30 15:08:39,586 - pyx3270.emulator - DEBUG - Processando resultado: ok
+2025-10-30 15:08:39,586 - pyx3270.emulator - DEBUG - Comando executado com sucesso (OK)
+2025-10-30 15:08:39,669 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:39,670 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,670 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:39,670 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,675 - pyx3270.emulator - INFO - Terminando emulador
+2025-10-30 15:08:39,675 - pyx3270.emulator - DEBUG - Enviando comando quit
+2025-10-30 15:08:39,680 - pyx3270.emulator - DEBUG - Fechando aplicativo
+2025-10-30 15:08:39,682 - pyx3270.emulator - INFO - Fechando aplicativo
+2025-10-30 15:08:39,683 - pyx3270.emulator - DEBUG - Terminando processo em execução
+2025-10-30 15:08:39,685 - pyx3270.emulator - INFO - Aplicativo fechado com código de retorno: <MagicMock name='Popen().returncode' id='1763203709792'>
+2025-10-30 15:08:39,685 - pyx3270.emulator - INFO - Emulador terminado com sucesso
+2025-10-30 15:08:39,686 - pyx3270.emulator - INFO - Terminando emulador
+2025-10-30 15:08:39,686 - pyx3270.emulator - DEBUG - Fechando aplicativo
+2025-10-30 15:08:39,686 - pyx3270.emulator - INFO - Fechando aplicativo
+2025-10-30 15:08:39,686 - pyx3270.emulator - DEBUG - Terminando processo em execução
+2025-10-30 15:08:39,687 - pyx3270.emulator - INFO - Aplicativo fechado com código de retorno: <MagicMock name='Popen().returncode' id='1763203709792'>
+2025-10-30 15:08:39,687 - pyx3270.emulator - INFO - Emulador terminado com sucesso
+2025-10-30 15:08:39,700 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:39,701 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,701 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:39,701 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,872 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:39,876 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,877 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:39,877 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,887 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:39,894 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,895 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:39,895 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,897 - pyx3270.emulator - INFO - Terminando emulador
+2025-10-30 15:08:39,898 - pyx3270.emulator - DEBUG - Enviando comando quit
+2025-10-30 15:08:39,901 - pyx3270.emulator - DEBUG - Fechando aplicativo
+2025-10-30 15:08:39,901 - pyx3270.emulator - INFO - Fechando aplicativo
+2025-10-30 15:08:39,902 - pyx3270.emulator - DEBUG - Terminando processo em execução
+2025-10-30 15:08:39,912 - pyx3270.emulator - INFO - Aplicativo fechado com código de retorno: <MagicMock name='Popen().returncode' id='1763397003184'>
+2025-10-30 15:08:39,912 - pyx3270.emulator - INFO - Emulador terminado com sucesso
+2025-10-30 15:08:39,926 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:39,927 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,927 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:39,928 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,933 - pyx3270.emulator - INFO - Terminando emulador
+2025-10-30 15:08:39,933 - pyx3270.emulator - DEBUG - Enviando comando quit
+2025-10-30 15:08:39,937 - pyx3270.emulator - DEBUG - Fechando aplicativo
+2025-10-30 15:08:39,937 - pyx3270.emulator - INFO - Fechando aplicativo
+2025-10-30 15:08:39,938 - pyx3270.emulator - DEBUG - Terminando processo em execução
+2025-10-30 15:08:39,940 - pyx3270.emulator - INFO - Aplicativo fechado com código de retorno: <MagicMock name='Popen().returncode' id='1763397463280'>
+2025-10-30 15:08:39,941 - pyx3270.emulator - INFO - Emulador terminado com sucesso
+2025-10-30 15:08:39,955 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:39,957 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,957 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:39,957 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:39,965 - pyx3270.emulator - INFO - Terminando emulador
+2025-10-30 15:08:39,965 - pyx3270.emulator - DEBUG - Enviando comando quit
+2025-10-30 15:08:39,967 - pyx3270.emulator - DEBUG - Fechando aplicativo
+2025-10-30 15:08:39,967 - pyx3270.emulator - INFO - Fechando aplicativo
+2025-10-30 15:08:39,968 - pyx3270.emulator - DEBUG - Terminando processo em execução
+2025-10-30 15:08:39,969 - pyx3270.emulator - INFO - Aplicativo fechado com código de retorno: <MagicMock name='Popen().returncode' id='1763500561072'>
+2025-10-30 15:08:39,970 - pyx3270.emulator - INFO - Emulador terminado com sucesso
+2025-10-30 15:08:39,988 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:39,991 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:39,991 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:39,992 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:40,002 - pyx3270.emulator - INFO - Terminando emulador
+2025-10-30 15:08:40,002 - pyx3270.emulator - DEBUG - Enviando comando quit
+2025-10-30 15:08:40,005 - pyx3270.emulator - DEBUG - Fechando aplicativo
+2025-10-30 15:08:40,005 - pyx3270.emulator - INFO - Fechando aplicativo
+2025-10-30 15:08:40,006 - pyx3270.emulator - DEBUG - Terminando processo em execução
+2025-10-30 15:08:40,008 - pyx3270.emulator - INFO - Aplicativo fechado com código de retorno: <MagicMock name='Popen().returncode' id='1763500569808'>
+2025-10-30 15:08:40,008 - pyx3270.emulator - INFO - Emulador terminado com sucesso
+2025-10-30 15:08:40,022 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:40,024 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:40,024 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:40,024 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:40,062 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:40,064 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:40,064 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:40,064 - pyx3270.emulator - DEBUG - X3270 inicializado
+2025-10-30 15:08:40,515 - pyx3270.emulator - DEBUG - Inicializando ExecutableApp (shell=False, model='2')
+2025-10-30 15:08:40,516 - pyx3270.emulator - INFO - Inicializando X3270Cmd com time_unlock: 60
+2025-10-30 15:08:40,517 - pyx3270.emulator - INFO - Inicializando X3270 (visible=False, model=3)
+2025-10-30 15:08:40,517 - pyx3270.emulator - DEBUG - X3270 inicializado

@@ -1,0 +1,31 @@
+2025-10-29 16:21:18,955 - pyx3270.server - INFO - [+] Criando diretório: /path/to/new_dir
+2025-10-29 16:21:19,460 - pyx3270.server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-10-29 16:21:19,470 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-10-29 16:21:19,471 - pyx3270.server - INFO - [!] Comando de retorno recebido.
+2025-10-29 16:21:19,471 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-10-29 16:21:19,471 - pyx3270.server - INFO - [!] Comando CLEAR recebido.
+2025-10-29 16:21:19,472 - pyx3270.server - INFO - [!] Comando de retorno recebido.
+2025-10-29 16:21:19,472 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-10-29 16:21:19,540 - pyx3270.server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='1542868140112'>
+2025-10-29 16:21:19,544 - pyx3270.server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-10-29 16:21:19,588 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='1542875717248'>
+2025-10-29 16:21:19,601 - pyx3270.server - INFO - [+] Gravação de tela: \fake\dir\000.bin
+2025-10-29 16:21:19,605 - pyx3270.server - INFO - [+] Gravação de tela: \fake\dir\001.bin
+2025-10-29 16:21:19,606 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-10-29 16:21:19,625 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='1542865093696'>
+2025-10-29 16:21:19,627 - pyx3270.server - ERROR - [!] Falha ao conectar ao servidor.
+2025-10-29 16:21:19,652 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='1542865101760'>
+2025-10-29 16:21:19,660 - pyx3270.server - WARNING - [!] Dados recebidos não são uma tela TN3270.
+2025-10-29 16:21:19,662 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-10-29 16:21:19,814 - pyx3270.server - INFO - Comando recebido: set TELA
+2025-10-29 16:21:19,824 - pyx3270.server - INFO - Comando recebido: add TELA
+2025-10-29 16:21:19,835 - pyx3270.server - INFO - Comando recebido: change directory teste
+2025-10-29 16:21:19,844 - pyx3270.server - INFO - Comando recebido: next
+2025-10-29 16:21:19,845 - pyx3270.server - INFO - [!] Comando 'next' enviado: 1
+2025-10-29 16:21:19,856 - pyx3270.server - INFO - Comando recebido: prev
+2025-10-29 16:21:19,857 - pyx3270.server - INFO - [!] Comando 'prev' enviado: 0
+2025-10-29 16:21:19,864 - pyx3270.server - INFO - Comando recebido: clear
+2025-10-29 16:21:19,865 - pyx3270.server - INFO - [!] Comando 'clear' enviado: 0
+2025-10-29 16:21:19,876 - pyx3270.server - INFO - Comando recebido: q
+2025-10-29 16:21:19,877 - pyx3270.server - INFO - [!] Comando 'quit' enviado.
+2025-10-29 16:21:19,888 - pyx3270.server - INFO - Comando recebido: comando_invalido

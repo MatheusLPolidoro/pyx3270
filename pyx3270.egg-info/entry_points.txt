@@ -1,0 +1,5 @@
+[console_scripts]
+pyx3270 = pyx3270.__main__:app
+
+[pyinstaller40]
+hook-dirs = pyx3270.hook:get_hook_dirs

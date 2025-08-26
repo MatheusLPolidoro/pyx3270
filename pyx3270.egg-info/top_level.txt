@@ -1,0 +1,9 @@
+dist
+docs
+htmlcov
+logs
+path_test
+pyx3270
+screens
+site
+tests

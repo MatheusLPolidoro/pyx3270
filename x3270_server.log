@@ -1,0 +1,117 @@
+2025-12-23 11:43:29,818 - pyx3270.server - INFO - Iniciando replay para ('127.0.0.1', 62194)
+2025-12-23 11:43:29,937 - pyx3270.server - INFO - [+] Iniciando processo de comando...
+2025-12-23 11:43:50,333 - pyx3270.server - ERROR - [!] Erro fora do esperado: Terminal fechado.
+2025-12-23 11:43:57,176 - pyx3270.server - INFO - [+] Iniciando processo de comando...
+2025-12-23 11:43:57,240 - pyx3270.server - INFO - Iniciando replay para ('127.0.0.1', 62226)
+2025-12-23 11:43:58,441 - pyx3270.server - ERROR - [!] Erro fora do esperado: Terminal fechado.
+2025-12-23 11:44:40,214 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 62358)
+2025-12-23 11:44:40,577 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 11:44:43,088 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 11:44:47,172 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 62566)
+2025-12-23 11:44:47,255 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:31:05,608 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 51352)
+2025-12-23 12:31:05,662 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:34:13,935 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 51523)
+2025-12-23 12:34:14,360 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:34:16,175 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:34:21,469 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 61102)
+2025-12-23 12:34:21,526 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:35:47,171 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 50318)
+2025-12-23 12:35:47,464 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:35:48,477 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:35:55,364 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 50334)
+2025-12-23 12:35:55,405 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:37:28,008 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 63842)
+2025-12-23 12:37:28,402 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:37:35,659 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:38:24,262 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 63898)
+2025-12-23 12:38:24,676 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:38:26,017 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:40:17,858 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64603)
+2025-12-23 12:40:18,302 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:40:18,821 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:40:39,026 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64631)
+2025-12-23 12:40:39,613 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:40:39,992 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:40:46,777 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64638)
+2025-12-23 12:40:47,321 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:40:47,997 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:41:34,213 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64686)
+2025-12-23 12:41:34,703 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:41:35,152 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:42:08,263 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64709)
+2025-12-23 12:42:08,815 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:42:15,045 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:42:21,616 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64723)
+2025-12-23 12:42:22,060 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:43:07,435 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 12:43:19,261 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64344)
+2025-12-23 12:43:19,593 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:43:36,810 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 64368)
+2025-12-23 12:43:37,149 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:45:04,686 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 63126)
+2025-12-23 12:45:05,009 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 12:46:52,244 - pyx3270.server - INFO - Iniciando gravação para ('127.0.0.1', 63221)
+2025-12-23 12:46:52,641 - pyx3270.server - INFO - [+] Gravação de tela: ./screens\000.bin
+2025-12-23 13:03:56,222 - pyx3270.server - INFO - [+] Criando diretório: /path/to/new_dir
+2025-12-23 13:03:56,359 - pyx3270.server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-12-23 13:03:56,363 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-12-23 13:03:56,363 - pyx3270.server - INFO - [!] Comando de retorno recebido.
+2025-12-23 13:03:56,364 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-12-23 13:03:56,364 - pyx3270.server - INFO - [!] Comando CLEAR recebido.
+2025-12-23 13:03:56,364 - pyx3270.server - INFO - [!] Comando de retorno recebido.
+2025-12-23 13:03:56,365 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-12-23 13:03:56,377 - pyx3270.server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='2026804148416'>
+2025-12-23 13:03:56,378 - pyx3270.server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-12-23 13:03:56,410 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='2026808172832'>
+2025-12-23 13:03:56,424 - pyx3270.server - INFO - [+] Gravação de tela: \fake\dir\000.bin
+2025-12-23 13:03:56,429 - pyx3270.server - INFO - [+] Gravação de tela: \fake\dir\001.bin
+2025-12-23 13:03:56,429 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 13:03:56,472 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='2027009178800'>
+2025-12-23 13:03:56,473 - pyx3270.server - ERROR - [!] Falha ao conectar ao servidor.
+2025-12-23 13:03:56,487 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='2027009168720'>
+2025-12-23 13:03:56,494 - pyx3270.server - WARNING - [!] Dados recebidos não são uma tela TN3270.
+2025-12-23 13:03:56,495 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 13:03:56,605 - pyx3270.server - INFO - Comando recebido: set TELA
+2025-12-23 13:03:56,614 - pyx3270.server - INFO - Comando recebido: add TELA
+2025-12-23 13:03:56,622 - pyx3270.server - INFO - Comando recebido: change directory teste
+2025-12-23 13:03:56,630 - pyx3270.server - INFO - Comando recebido: next
+2025-12-23 13:03:56,631 - pyx3270.server - INFO - [!] Comando 'next' enviado: 1
+2025-12-23 13:03:56,638 - pyx3270.server - INFO - Comando recebido: prev
+2025-12-23 13:03:56,638 - pyx3270.server - INFO - [!] Comando 'prev' enviado: 0
+2025-12-23 13:03:56,646 - pyx3270.server - INFO - Comando recebido: clear
+2025-12-23 13:03:56,646 - pyx3270.server - INFO - [!] Comando 'clear' enviado: 0
+2025-12-23 13:03:56,654 - pyx3270.server - INFO - Comando recebido: q
+2025-12-23 13:03:56,655 - pyx3270.server - INFO - [!] Comando 'quit' enviado.
+2025-12-23 13:03:56,663 - pyx3270.server - INFO - Comando recebido: comando_invalido
+2025-12-23 14:44:03,996 - pyx3270.server - INFO - [+] Criando diretório: /path/to/new_dir
+2025-12-23 14:44:04,098 - pyx3270.server - ERROR - [!] Proxy -> MF Falha de conexão: Connection timed out
+2025-12-23 14:44:04,113 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-12-23 14:44:04,113 - pyx3270.server - INFO - [!] Comando de retorno recebido.
+2025-12-23 14:44:04,114 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-12-23 14:44:04,114 - pyx3270.server - INFO - [!] Comando CLEAR recebido.
+2025-12-23 14:44:04,115 - pyx3270.server - INFO - [!] Comando de retorno recebido.
+2025-12-23 14:44:04,115 - pyx3270.server - INFO - [!] Comando de paginação/confirmação recebido.
+2025-12-23 14:44:04,188 - pyx3270.server - INFO - Iniciando replay para <MagicMock name='mock.getpeername()' id='1955230283632'>
+2025-12-23 14:44:04,197 - pyx3270.server - ERROR - [!] Erro fora do esperado: Simulate loop break
+2025-12-23 14:44:04,231 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='1955230269520'>
+2025-12-23 14:44:04,236 - pyx3270.server - INFO - [+] Gravação de tela: \fake\dir\000.bin
+2025-12-23 14:44:04,238 - pyx3270.server - INFO - [+] Gravação de tela: \fake\dir\001.bin
+2025-12-23 14:44:04,239 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 14:44:04,263 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='1954829710544'>
+2025-12-23 14:44:04,264 - pyx3270.server - ERROR - [!] Falha ao conectar ao servidor.
+2025-12-23 14:44:04,282 - pyx3270.server - INFO - Iniciando gravação para <MagicMock name='mock.getpeername()' id='1954829703824'>
+2025-12-23 14:44:04,287 - pyx3270.server - WARNING - [!] Dados recebidos não são uma tela TN3270.
+2025-12-23 14:44:04,288 - pyx3270.server - INFO - [!] Conexão encerrada pelo servidor ou erro de rede.
+2025-12-23 14:44:04,456 - pyx3270.server - INFO - Comando recebido: set TELA
+2025-12-23 14:44:04,468 - pyx3270.server - INFO - Comando recebido: add TELA
+2025-12-23 14:44:04,476 - pyx3270.server - INFO - Comando recebido: change directory teste
+2025-12-23 14:44:04,486 - pyx3270.server - INFO - Comando recebido: next
+2025-12-23 14:44:04,486 - pyx3270.server - INFO - [!] Comando 'next' enviado: 1
+2025-12-23 14:44:04,497 - pyx3270.server - INFO - Comando recebido: prev
+2025-12-23 14:44:04,498 - pyx3270.server - INFO - [!] Comando 'prev' enviado: 0
+2025-12-23 14:44:04,504 - pyx3270.server - INFO - Comando recebido: clear
+2025-12-23 14:44:04,505 - pyx3270.server - INFO - [!] Comando 'clear' enviado: 0
+2025-12-23 14:44:04,516 - pyx3270.server - INFO - Comando recebido: q
+2025-12-23 14:44:04,516 - pyx3270.server - INFO - [!] Comando 'quit' enviado.
+2025-12-23 14:44:04,523 - pyx3270.server - INFO - Comando recebido: comando_invalido
