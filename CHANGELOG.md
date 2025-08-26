@@ -1,3 +1,26 @@
+Versão 0.1.1 (2025-08-25)
+
+### :bug: CORREÇÕES
+
+- Inclua join por espaço em get_full_string para adequação com versão anterior a LIB.
+
+### :wastebasket: OBSOLETOS
+
+- Inclua comandos depreciados da versão antiga utilizada antes da criação da LIB.
+
+### :open_file_folder: DOCUMENTAÇÃO
+
+- Inclua titulos para os comandos builtins do x3270.
+
+### :test_tube: TESTES
+
+- Ajuste os testes para comportar alteração de join com espaço.
+
+### :classical_building: INFRAESTRUTURA
+
+- Altere versão limite do python para <3.14.
+
+
 Versão 0.1.0 (2025-08-24)
 
 ### :zap: NOVAS FUNCIONALIDADES

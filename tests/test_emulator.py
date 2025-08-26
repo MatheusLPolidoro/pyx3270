@@ -909,7 +909,7 @@ def test_x3270cmd_get_full_screen(x3270_cmd_instance):
 
     result = x3270_cmd_instance.get_full_screen()
 
-    expected_result = ''.join([f'line {i}' for i in range(24)])
+    expected_result = ' '.join([f'line {i}' for i in range(24)])
     assert result == expected_result
     x3270_cmd_instance._exec_command.assert_called_once_with(b'ascii()')
 
@@ -1159,7 +1159,7 @@ def test_x3270cmd_get_string_area(x3270_cmd_instance):
 
     result = x3270_cmd_instance.get_string_area(1, 5, 3, 15)  # y1, x1, y2, x2
 
-    expected_result = 'row1 datarow2 datarow3 data'
+    expected_result = 'row1 data row2 data row3 data'
     assert result == expected_result
     # Verifica o comando Ascii com coordenadas de área
     x3270_cmd_instance._exec_command.assert_called_once_with(
@@ -1280,9 +1280,9 @@ def test_x3270cmd_search_string_ignore_case(x3270_cmd_instance):
 def test_x3270cmd_get_string_positions(x3270_cmd_instance):
     """Testa get_string_positions."""
     screen_data = [
-        b'abc target 123'.ljust(80),  # row 0
-        b'456 target abc'.ljust(80),  # row 1
-        b'target end.'.ljust(80),  # row 2
+        b'abc target 123'.ljust(79),  # row 0
+        b'456 target abc'.ljust(79),  # row 1
+        b'target end.'.ljust(79),  # row 2
     ]
     x3270_cmd_instance._exec_command.return_value = MagicMock(data=screen_data)
     x3270_cmd_instance.rows = 3
@@ -1327,8 +1327,8 @@ def test_get_ypos_and_xpos_from_index_remainder_zero(x3270_cmd_instance):
 def test_x3270cmd_get_string_positions_ignore_case(x3270_cmd_instance):
     """Testa get_string_positions com ignore_case=True."""
     screen_data = [
-        b'Find Me'.ljust(80),
-        b'find me too'.ljust(80),
+        b'Find Me'.ljust(79),
+        b'find me too'.ljust(79),
     ]  # row 0, row 1
     x3270_cmd_instance._exec_command.return_value = MagicMock(data=screen_data)
     x3270_cmd_instance.rows = 2

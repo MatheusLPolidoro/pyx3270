@@ -25,6 +25,14 @@ def x3270_command(em, func, *args, **kwargs):
         list(map(str, args)) + [f'{k}={repr(v)}' for k, v in kwargs.items()]
     )
 
+    if func == 'send_string_not_log':
+        warnings.warn(
+            f'`{func}` foi descontinuada, use `send_string`'
+            f' com argumento `password=True`.',
+            DeprecationWarning
+        )
+        return em.send_string(*args, **kwargs, password=True)
+
     if 'send_pf' in func or func == 'pf':
         if not all_args_str:
             warnings.warn(
@@ -35,6 +43,7 @@ def x3270_command(em, func, *args, **kwargs):
 
         em._exec_command(f'PF({all_args_str})'.encode('utf8'))
         em.wait(em.time_unlock, 'unlock')
+        return
 
     if func == 'connect' and (len(args) + len(kwargs)) > 1:
         return em.connect_host(*args, **kwargs)
@@ -43,7 +52,7 @@ def x3270_command(em, func, *args, **kwargs):
         cmd = em._exec_command(f'{func}({all_args_str})'.encode('utf8'))
         try:
             text = [text.decode('utf8') for text in cmd.data[0:]]
-            result = ''.join(text)
+            result = ' '.join(text)
         except AttributeError:
             result = [val for val in cmd.data[0:]]
 

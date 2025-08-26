@@ -1,6 +1,7 @@
 # Comandos do X3270
 
 ## Entrada e Controle
+### Abort - Aborta scripts e macros pendentes
 <details>
     <summary>Abort - Aborta scripts e macros pendentes</summary>
     <p><strong>Descrição:</strong> Aborta scripts e macros pendentes.</p>
@@ -19,6 +20,7 @@
     <br>
 </details> 
 
+### Attn - Atenção
 <details>
     <summary>Attn - Atenção</summary>
     <p><strong>Descrição:</strong> Envia a sequência ATTN do 3270, equivalente ao comando TELNET IP. Usado para
@@ -37,6 +39,7 @@
     <br>
 </details> 
 
+### Backspace - Voltar cursor uma posição
 <details>
     <summary>Backspace - Voltar cursor uma posição</summary>
     <p><strong>Descrição:</strong> Move o cursor uma posição para a esquerda (sem apagar o caractere).</p>
@@ -54,6 +57,7 @@
     <br>
 </details> 
 
+### Backtab - Voltar para campo anterior
 <details>
     <summary>Backtab - Voltar para campo anterior</summary>
     <p><strong>Descrição:</strong> Move o cursor para o campo anterior no formulário.</p>
@@ -71,6 +75,7 @@
     <br>
 </details> 
 
+### Bell - Toca sino
 <details>
     <summary>Bell - Toca sino</summary>
     <p><strong>Descrição:</strong> Toca o sino do terminal para alertar o usuário.</p>
@@ -88,6 +93,7 @@
     <br>
 </details> 
 
+### CircumNot - Envia ~ ou ¬
 <details>
     <summary>CircumNot - Envia ~ ou ¬</summary>
     <p><strong>Descrição:</strong> Envia o caractere ~ em modo NVT (terminal padrão) ou ¬ em modo 3270.</p>
@@ -105,6 +111,7 @@
     <br>
 </details> 
 
+### Clear - Limpa tela
 <details>
     <summary>Clear - Limpa tela</summary>
     <p><strong>Descrição:</strong> Envia o comando CLEAR para limpar a tela no terminal 3270.</p>
@@ -122,6 +129,7 @@
     <br>
 </details> 
 
+### Close - Fecha conexão
 <details>
     <summary>Close - Fecha conexão</summary>
     <p><strong>Descrição:</strong> Alias para disconnect, fecha a conexão com o host.</p>
@@ -139,6 +147,7 @@
     <br>
 </details> 
 
+### Closescript - Encerra script em execução
 <details>
     <summary>Closescript - Encerra script em execução</summary>
     <p><strong>Descrição:</strong> Encerra o script em execução no terminal.</p>
@@ -156,6 +165,7 @@
     <br>
 </details> 
 
+### Compose - Interpreta próximas teclas
 <details>
     <summary>Compose - Interpreta próximas teclas</summary>
     <p><strong>Descrição:</strong> Interpreta as próximas duas teclas conforme o mapa de composição.</p>
@@ -173,6 +183,7 @@
     <br>
 </details> 
 
+### Connect - Conecta ao host
 <details>
     <summary>Connect - Conecta ao host</summary>
     <p><strong>Descrição:</strong> Estabelece conexão com o host mainframe.</p>
@@ -188,6 +199,7 @@
     <br>
 </details> 
 
+### CursorSelect - Seleciona local do cursor (light pen)
 <details>
     <summary>CursorSelect - Seleciona local do cursor (light pen)</summary>
     <p><strong>Descrição:</strong> Emula o clique com a caneta luminosa no local atual do cursor.</p>
@@ -205,6 +217,7 @@
     <br>
 </details> 
 
+### Delete - Apaga caractere na posição do cursor
 <details>
     <summary>Delete - Apaga caractere na posição do cursor</summary>
     <p><strong>Descrição:</strong> Apaga o caractere na posição atual do cursor.</p>
@@ -222,6 +235,7 @@
     <br>
 </details> 
 
+### DeleteField - Apaga conteúdo do campo atual
 <details>
     <summary>DeleteField - Apaga conteúdo do campo atual</summary>
     <p><strong>Descrição:</strong> Apaga todo o conteúdo do campo em que o cursor está.</p>
@@ -239,6 +253,7 @@
     <br>
 </details> 
 
+### DeleteWord - Apaga palavra anterior ao cursor
 <details>
     <summary>DeleteWord - Apaga palavra anterior ao cursor</summary>
     <p><strong>Descrição:</strong> Apaga a palavra antes da posição atual do cursor.</p>
@@ -256,6 +271,7 @@
     <br>
 </details> 
 
+### Disconnect - Fecha conexão com host
 <details>
     <summary>Disconnect - Fecha conexão com host</summary>
     <p><strong>Descrição:</strong> Fecha a conexão ativa com o host mainframe.</p>
@@ -273,6 +289,7 @@
     <br>
 </details> 
 
+### Erase - Backspace destrutivo
 <details>
     <summary>Erase - Backspace destrutivo</summary>
     <p><strong>Descrição:</strong> Apaga o caractere anterior ao cursor (backspace destrutivo).</p>
@@ -290,6 +307,7 @@
     <br>
 </details> 
 
+### EraseEOF - Apaga até o fim do campo
 <details>
     <summary>EraseEOF - Apaga até o fim do campo</summary>
     <p><strong>Descrição:</strong> Apaga do cursor até o final do campo.</p>
@@ -307,6 +325,7 @@
     <br>
 </details> 
 
+### EraseInput - Apaga todos campos de entrada
 <details>
     <summary>EraseInput - Apaga todos campos de entrada</summary>
     <p><strong>Descrição:</strong> Apaga todos os campos de entrada da tela.</p>
@@ -324,6 +343,7 @@
     <br>
 </details> 
 
+### Execute - Executa comando no shell
 <details>
     <summary>Execute - Executa comando no shell</summary>
     <p><strong>Descrição:</strong> Executa um comando no shell do sistema.</p>
@@ -341,6 +361,7 @@
     <br>
 </details> 
 
+### Enter - Envia comando ENTER
 <details>
     <summary>Enter - Envia comando ENTER</summary>
     <p><strong>Descrição:</strong> Envia o comando ENTER para o terminal 3270.</p>
@@ -358,6 +379,7 @@
     <br>
 </details> 
 
+### Escape - Abre prompt c3270
 <details>
     <summary>Escape - Abre prompt c3270</summary>
     <p><strong>Descrição:</strong> Abre prompt c3270 para comandos manuais.</p>
@@ -375,6 +397,7 @@
     <br>
 </details> 
 
+### FieldEnd - Move cursor ao fim do campo
 <details>
     <summary>FieldEnd - Move cursor ao fim do campo</summary>
     <p><strong>Descrição:</strong> Move o cursor para o final do campo atual.</p>
@@ -392,6 +415,7 @@
     <br>
 </details> 
 
+### FieldMark - Envia tecla FIELD MARK
 <details>
     <summary>FieldMark - Envia tecla FIELD MARK</summary>
     <p><strong>Descrição:</strong> Envia a tecla FIELD MARK (marca visual usada em terminais 3270).</p>
@@ -409,6 +433,7 @@
     <br>
 </details> 
 
+### Flip - Inverte tela (espelho)
 <details>
     <summary>Flip - Inverte tela (espelho)</summary>
     <p><strong>Descrição:</strong> Inverte a tela da direita para a esquerda.</p>
@@ -426,6 +451,7 @@
     <br>
 </details> 
 
+### Help - Exibe ajuda
 <details>
     <summary>Help - Exibe ajuda</summary>
     <p><strong>Descrição:</strong> Exibe ajuda para um tópico.</p>
@@ -443,6 +469,7 @@
     <br>
 </details> 
 
+### HexString - Envia dados hexadecimais
 <details>
     <summary>HexString - Envia dados hexadecimais</summary>
     <p><strong>Descrição:</strong> Envia sequência de dados codificados em hexadecimal diretamente para o campo.</p>
@@ -460,6 +487,7 @@
     <br>
 </details> 
 
+### Home - Move cursor para início
 <details>
     <summary>Home - Move cursor para início</summary>
     <p><strong>Descrição:</strong> Move o cursor para o primeiro campo da tela.</p>
@@ -477,6 +505,7 @@
     <br>
 </details> 
 
+### Ignore - Não faz nada
 <details>
     <summary>Ignore - Não faz nada</summary>
     <p><strong>Descrição:</strong> Não faz nada. Pode ser usado para desabilitar uma tecla.</p>
@@ -494,6 +523,7 @@
     <br>
 </details> 
 
+### Insert - Ativa modo inserção
 <details>
     <summary>Insert - Ativa modo inserção</summary>
     <p><strong>Descrição:</strong> Ativa o modo de inserção do terminal 3270.</p>
@@ -511,6 +541,7 @@
     <br>
 </details> 
 
+### Interrupt - Envia comando TELNET IAC IP
 <details>
     <summary>Interrupt - Envia comando TELNET IAC IP</summary>
     <p><strong>Descrição:</strong> Envia o comando TELNET IAC IP para interrupção (modo NVT).</p>
@@ -528,6 +559,7 @@
     <br>
 </details> 
 
+### Key - Envia caractere específico
 <details>
     <summary>Key - Envia caractere específico</summary>
     <p><strong>Descrição:</strong> Envia um caractere específico, por nome ou valor hexadecimal.</p>
@@ -545,6 +577,7 @@
     <br>
 </details> 
 
+### KeyboardDisable - Modifica bloqueio automático
 <details>
     <summary>KeyboardDisable - Modifica bloqueio automático</summary>
     <p><strong>Descrição:</strong> Modifica o bloqueio automático do teclado.</p>
@@ -562,6 +595,7 @@
     <br>
 </details> 
 
+### Keymap - Ativa keymap temporário
 <details>
     <summary>Keymap - Ativa keymap temporário</summary>
     <p><strong>Descrição:</strong> Ativa um keymap temporário para mapeamento de teclas.</p>
@@ -579,6 +613,7 @@
     <br>
 </details> 
 
+### Keypad - Mostra teclado 3270
 <details>
     <summary>Keypad - Mostra teclado 3270</summary>
     <p><strong>Descrição:</strong> Mostra o teclado virtual 3270 na tela (somente funciona para Windows).</p>
@@ -596,6 +631,7 @@
     <br>
 </details> 
 
+### Left - Move cursor 1 coluna à esquerda
 <details>
     <summary>Left - Move cursor 1 coluna à esquerda</summary>
     <p><strong>Descrição:</strong> Move o cursor uma coluna para a esquerda.</p>
@@ -613,6 +649,7 @@
     <br>
 </details> 
 
+### Left2 - Move cursor 2 colunas à esquerda
 <details>
     <summary>Left2 - Move cursor 2 colunas à esquerda</summary>
     <p><strong>Descrição:</strong> Move o cursor duas colunas para a esquerda.</p>
@@ -630,6 +667,7 @@
     <br>
 </details> 
 
+### Macro - Executa macro definido
 <details>
     <summary>Macro - Executa macro definido</summary>
     <p><strong>Descrição:</strong> Executa um macro previamente definido.</p>
@@ -647,6 +685,7 @@
     <br>
 </details> 
 
+### Menu - Exibe menu de comandos
 <details>
     <summary>Menu - Exibe menu de comandos</summary>
     <p><strong>Descrição:</strong> Exibe o menu de comandos do terminal (somente funciona para Windows).</p>
@@ -665,6 +704,7 @@
     <br>
 </details> 
 
+### Movecursor - Move cursor linha e coluna (origem 0)
 <details>
     <summary>Movecursor - Move cursor linha e coluna (origem 0)</summary>
     <p><strong>Descrição:</strong> Move o cursor para linha e coluna específicas (origem 0).</p>
@@ -682,6 +722,7 @@
     <br>
 </details> 
 
+### Movecursor1 - Move cursor linha e coluna (origem 1)
 <details>
     <summary>Movecursor1 - Move cursor linha e coluna (origem 1)</summary>
     <p><strong>Descrição:</strong> Move o cursor para linha e coluna específicas (origem 1).</p>
@@ -699,6 +740,7 @@
     <br>
 </details> 
 
+### Movecursoroffset - Move cursor por offset
 <details>
     <summary>Movecursoroffset - Move cursor por offset</summary>
     <p><strong>Descrição:</strong> Move o cursor para uma posição de offset na memória da tela.</p>
@@ -716,6 +758,7 @@
     <br>
 </details> 
 
+### Newline - Move cursor para próxima linha
 <details>
     <summary>Newline - Move cursor para próxima linha</summary>
     <p><strong>Descrição:</strong> Move o cursor para o primeiro campo da próxima linha.</p>
@@ -733,6 +776,7 @@
     <br>
 </details> 
 
+### Nextword - Move cursor para próxima palavra
 <details>
     <summary>Nextword - Move cursor para próxima palavra</summary>
     <p><strong>Descrição:</strong> Move o cursor para a próxima palavra.</p>
@@ -750,6 +794,7 @@
     <br>
 </details> 
 
+### Previousword - Move cursor para palavra anterior
 <details>
     <summary>Previousword - Move cursor para palavra anterior</summary>
     <p><strong>Descrição:</strong> Move o cursor para a palavra anterior.</p>
@@ -767,6 +812,7 @@
     <br>
 </details> 
 
+### Pause - Espera 350ms
 <details>
     <summary>Pause - Espera 350ms</summary>
     <p><strong>Descrição:</strong> Aguarda por 350 milissegundos.</p>
@@ -784,6 +830,7 @@
     <br>
 </details> 
 
+### Prompt - Abre prompt externo
 <details>
     <summary>Prompt - Abre prompt externo</summary>
     <p><strong>Descrição:</strong> Abre prompt externo com nome da aplicação.</p>
@@ -801,6 +848,7 @@
     <br>
 </details> 
 
+### Quit - Sai do terminal
 <details>
     <summary>Quit - Sai do terminal</summary>
     <p><strong>Descrição:</strong> Sai do terminal 3270.</p>
@@ -818,6 +866,7 @@
     <br>
 </details> 
 
+### Set - Altera ou exibe configurações
 <details>
     <summary>Set - Altera ou exibe configurações</summary>
     <p><strong>Descrição:</strong> Altera ou exibe configurações do terminal.</p>
@@ -886,6 +935,7 @@
     <br>
 </details> 
 
+### Show - Exibe status e configurações
 <details>
     <summary>Show - Exibe status e configurações</summary>
     <p><strong>Descrição:</strong> Exibe status e configurações do terminal.</p>
@@ -904,6 +954,7 @@
     <br>
 </details> 
 
+### String - Envia texto
 <details>
     <summary>String - Envia texto</summary>
     <p><strong>Descrição:</strong> Envia uma string diretamente para o campo atual.</p>
@@ -921,6 +972,7 @@
     <br>
 </details> 
 
+### Temporarycomposemap - Define mapa de composição temporário
 <details>
     <summary>Temporarycomposemap - Define mapa de composição temporário</summary>
     <p><strong>Descrição:</strong> Define um mapa temporário de composição para teclas.</p>
@@ -938,6 +990,7 @@
     <br>
 </details> 
 
+### Temporarykeymap - Alias para Keymap
 <details>
     <summary>Temporarykeymap - Alias para Keymap</summary>
     <p><strong>Descrição:</strong> Alias para ativar keymap temporário.</p>
@@ -955,6 +1008,7 @@
     <br>
 </details> 
 
+### Toggle - Alterna configuração
 <details>
     <summary>Toggle - Alterna configuração</summary>
     <p><strong>Descrição:</strong> Alterna uma configuração específica para ligado/desligado.</p>
@@ -972,6 +1026,7 @@
     <br>
 </details> 
 
+### Toggleinsert - Ativa/desativa modo inserção
 <details>
     <summary>Toggleinsert - Ativa/desativa modo inserção</summary>
     <p><strong>Descrição:</strong> Alterna o modo inserção ligado/desligado.</p>
@@ -989,6 +1044,7 @@
     <br>
 </details> 
 
+### Togglereverse - Ativa/desativa modo reverso
 <details>
     <summary>Togglereverse - Ativa/desativa modo reverso</summary>
     <p><strong>Descrição:</strong> Alterna o modo reverso de entrada.</p>
@@ -1006,6 +1062,7 @@
     <br>
 </details> 
 
+### Transfer - Transferência de arquivos IND$FILE
 <details>
     <summary>Transfer - Transferência de arquivos IND$FILE</summary>
     <p><strong>Descrição:</strong> Transferência de arquivos via IND$FILE entre host e cliente.</p>
@@ -1023,6 +1080,7 @@
     <br>
 </details> 
 
+### Up - Move cursor para cima
 <details>
     <summary>Up - Move cursor para cima</summary>
     <p><strong>Descrição:</strong> Move o cursor para a linha acima.</p>
@@ -1040,6 +1098,7 @@
     <br>
 </details> 
 
+### Wait - Aguarda eventos do host
 <details>
     <summary>Wait - Aguarda eventos do host</summary>
     <p><strong>Descrição:</strong> Aguarda por eventos do host, com parâmetros flexíveis.</p>
@@ -1138,6 +1197,7 @@
 
 ## Navegação com o Cursor
 
+### Down - Move cursor para baixo
 <details>
     <summary>Down - Move cursor para baixo</summary>
     <p><strong>Descrição:</strong> Move o cursor para a linha de baixo.</p>
@@ -1155,6 +1215,7 @@
     <br>
 </details> 
 
+### Left - Move cursor para esquerda
 <details>
     <summary>Left - Move cursor para esquerda</summary>
     <p><strong>Descrição:</strong> Move o cursor uma coluna para a esquerda.</p>
@@ -1172,6 +1233,7 @@
     <br>
 </details> 
 
+### Left2 - Move cursor 2 colunas para esquerda
 <details>
     <summary>Left2 - Move cursor 2 colunas para esquerda</summary>
     <p><strong>Descrição:</strong> Move o cursor duas colunas para a esquerda.</p>
@@ -1189,6 +1251,7 @@
     <br>
 </details> 
 
+### Right - Move cursor para direita
 <details>
     <summary>Right - Move cursor para direita</summary>
     <p><strong>Descrição:</strong> Move o cursor uma coluna para a direita.</p>
@@ -1206,6 +1269,7 @@
     <br>
 </details> 
 
+### Right2 - Move cursor 2 colunas para direita
 <details>
     <summary>Right2 - Move cursor 2 colunas para direita</summary>
     <p><strong>Descrição:</strong> Move o cursor duas colunas para a direita.</p>
@@ -1223,6 +1287,7 @@
     <br>
 </details> 
 
+### Up - Move cursor para cima
 <details>
     <summary>Up - Move cursor para cima</summary>
     <p><strong>Descrição:</strong> Move o cursor para a linha de cima.</p>
@@ -1240,6 +1305,7 @@
     <br>
 </details> 
 
+### Tab - Move cursor para próximo campo
 <details>
     <summary>Tab - Move cursor para próximo campo</summary>
     <p><strong>Descrição:</strong> Move o cursor para o próximo campo de entrada.</p>
@@ -1257,6 +1323,7 @@
     <br>
 </details> 
 
+### Newline - Move cursor para próximo campo da linha seguinte
 <details>
     <summary>Newline - Move cursor para próximo campo da linha seguinte</summary>
     <p><strong>Descrição:</strong> Move o cursor para o primeiro campo da próxima linha.</p>
@@ -1274,6 +1341,7 @@
     <br>
 </details> 
 
+### Nextword - Move cursor para próxima palavra
 <details>
     <summary>Nextword - Move cursor para próxima palavra</summary>
     <p><strong>Descrição:</strong> Move o cursor para a próxima palavra.</p>
@@ -1291,6 +1359,7 @@
     <br>
 </details> 
 
+### Previousword - Move cursor para palavra anterior
 <details>
     <summary>Previousword - Move cursor para palavra anterior</summary>
     <p><strong>Descrição:</strong> Move o cursor para a palavra anterior.</p>
@@ -1309,6 +1378,7 @@
 
 ## Comandos Específicos de Mainframe
 
+### PA - Atenção de Programa
 <details>
     <summary>PA - Atenção de Programa</summary>
     <p><strong>Descrição:</strong> Envia a tecla de atenção de programa PA1, PA2, etc.</p>
@@ -1326,6 +1396,7 @@
     <br>
 </details> 
 
+### PF - Função Programada
 <details>
     <summary>PF - Função Programada</summary>
     <p><strong>Descrição:</strong> Envia tecla de função PF1 a PF24, equivalente às teclas F1-F24.</p>
@@ -1343,6 +1414,7 @@
     <br>
 </details> 
 
+### Printer - Impressora 3287 iniciar/parar
 <details>
     <summary>Printer - Impressora 3287 iniciar/parar</summary>
     <p><strong>Descrição:</strong> Inicia ou para uma sessão de impressão associada a uma LU (Logical Unit).</p>
@@ -1360,6 +1432,7 @@
     <br>
 </details> 
 
+### SysReq - Requisição de sistema
 <details>
     <summary>SysReq - Requisição de sistema</summary>
     <p><strong>Descrição:</strong> Envia a tecla System Request (SysReq), usada para alternar sessões LU ou invocar
@@ -1379,6 +1452,7 @@
 
 ## Utilitários
 
+### Paste - Colar
 <details>
     <summary>Paste - Colar</summary>
     <p><strong>Descrição:</strong> Cola o conteúdo do clipboard no terminal.</p>
@@ -1396,6 +1470,7 @@
     <br>
 </details> 
 
+### Redraw - Redesenhar
 <details>
     <summary>Redraw - Redesenhar</summary>
     <p><strong>Descrição:</strong> Atualiza (força a reexibição) da tela do terminal.</p>
@@ -1413,6 +1488,7 @@
     <br>
 </details> 
 
+### Reset - Resetar teclado travado
 <details>
     <summary>Reset - Resetar teclado travado</summary>
     <p><strong>Descrição:</strong> Libera o teclado se estiver travado (como na mensagem "X SYSTEM").</p>
