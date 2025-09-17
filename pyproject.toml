@@ -1,6 +1,6 @@
 [project]
 name = "pyx3270"
-version = "0.1.1"
+version = "0.1.2"
 description = "Uma interface comum utilizada para automações de terminais 3270 da IBM."
 authors = [{name = "MatheusLPolidoro", email = "mattpolidoro4@gmail.com"}]
 readme = "README.md"
