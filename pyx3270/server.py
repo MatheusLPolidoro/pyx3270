@@ -216,7 +216,7 @@ def record_handler(
                 )
                 save = False
                 screens.append(buffer)
-                record_data(full_block, record_dir, counter)
+                counter += record_data(full_block, record_dir, counter)
 
     except (ConnectionResetError, OSError, NotConnectedException):
         logger.info('[!] Conexão encerrada pelo servidor ou erro de rede.')

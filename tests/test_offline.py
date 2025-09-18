@@ -30,7 +30,7 @@ def test_pyx3270_manager_init_and_terminate(mock_popen, x3270_cmd_instance):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         text=True,
-        bufsize=0
+        bufsize=0,
     )
     assert manager.process == mock_process
 
