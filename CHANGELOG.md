@@ -1,3 +1,10 @@
+Versão 0.1.4 (2025-09-18)
+
+### :bug: CORREÇÕES
+
+- Corrija caminho completo de WS3270.exe
+
+
 Versão 0.1.3 (2025-09-18)
 
 ### :zap: NOVAS FUNCIONALIDADES
