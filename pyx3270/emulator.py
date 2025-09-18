@@ -370,7 +370,7 @@ class Wc3270App(ExecutableApp):
 
 class Ws3270App(ExecutableApp):
     args = [
-        f'"{get_binary_path("windows", "ws3270")}"',
+        get_binary_path("windows", "ws3270"),
         '-xrm',
         'ws3270.unlockDelay:False',
     ]
