@@ -1127,7 +1127,7 @@
     emulator.wait('unlock')
 
     # Espera por 3 segundos
-    emulator.wait('seconds', 3)
+    emulator.wait(3, 'seconds')
 
     # Aguarda até ser desconectado
     emulator.wait('disconnect')

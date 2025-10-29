@@ -5,12 +5,14 @@ import os
 import re
 import socket
 import subprocess
+import sys
 from contextlib import closing
 from functools import cache
+from importlib.resources import files
 from logging import getLogger
 from time import sleep, time
 from typing import Literal
-from pyx3270.x3270_commands import x3270_command
+
 from pyx3270.exceptions import (
     CommandError,
     FieldTruncateError,
@@ -25,10 +27,25 @@ from pyx3270.iemulator import (
     AbstractExecutableApp,
 )
 from pyx3270.logging_config import LOGGING_CONFIG
+from pyx3270.x3270_commands import x3270_command
 
 logger = getLogger(__name__)
 
-BINARY_FOLDER = os.path.join(os.path.dirname(__file__), 'bin')
+
+def get_binary_path(*parts):
+    # Se estiver rodando como executável PyInstaller
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, 'pyx3270', 'bin', *parts)
+
+    # Se estiver rodando como pacote instalado normalmente
+    try:
+        bin_dir = files('pyx3270').joinpath('bin')
+        return str(bin_dir.joinpath(*parts))
+    except Exception as e:
+        raise FileNotFoundError(f'Não foi possível localizar o binário: {e}')
+
+
+BINARY_FOLDER = get_binary_path()
 MODEL_TYPE = Literal['2', '3', '4', '5']
 MODEL_DIMENSIONS = {
     '2': {
@@ -196,7 +213,7 @@ class Command(AbstractCommand):
         error_msg = msg.decode('utf-8')
 
         if (
-            'keyboard locked' in error_msg.lower() 
+            'keyboard locked' in error_msg.lower()
             or 'canceled' in error_msg.lower()
         ):
             logger.error(f'Teclado travado detectado: {error_msg}')
@@ -303,7 +320,7 @@ class Wc3270App(ExecutableApp):
             'start',
             '/wait',
             '""',
-            f'"{os.path.join(BINARY_FOLDER, "windows/wc3270")}"',
+            f'"{get_binary_path("windows", "wc3270")}"',
         ] + self.args
         self.args.extend(['-scriptport', str(self.script_port), host])
         logger.debug(f'Argumentos completos: {self.args}')
@@ -353,7 +370,7 @@ class Wc3270App(ExecutableApp):
 
 class Ws3270App(ExecutableApp):
     args = [
-        os.path.join(BINARY_FOLDER, 'windows/ws3270'),
+        get_binary_path("windows", "ws3270"),
         '-xrm',
         'ws3270.unlockDelay:False',
     ]
@@ -365,8 +382,7 @@ class Ws3270App(ExecutableApp):
 
 class X3270App(ExecutableApp):
     args = [
-        os.path.join(BINARY_FOLDER, 'linux/x3270'),
-        # 'x3270',
+        get_binary_path('linux', 'x3270'),
         '-xrm',
         'x3270.unlockDelay:False',
         '-script',
@@ -379,7 +395,7 @@ class X3270App(ExecutableApp):
 
 class S3270App(ExecutableApp):
     args = [
-        os.path.join(BINARY_FOLDER, 'linux/s3270'),
+        get_binary_path('linux', 's3270'),
         '-xrm',
         's3270.unlockDelay:False',
     ]
@@ -397,6 +413,7 @@ class X3270Cmd(AbstractEmulatorCmd):
     def __getattr__(self, name):
         def x3270_builtin_func(*args, **kwargs):
             return x3270_command(self, name, *args, **kwargs)
+
         return x3270_builtin_func
 
     def clear_screen(self) -> None:
@@ -812,7 +829,7 @@ class X3270(AbstractEmulator, X3270Cmd):
         host: str,
         port: int | str,
         tls: bool = True,
-        mode_3270: bool = True
+        mode_3270: bool = True,
     ) -> None:
         logger.info(f'Conectando ao host: {host}:{port} (tls={tls})')
         self.host = host

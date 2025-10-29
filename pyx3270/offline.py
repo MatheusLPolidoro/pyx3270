@@ -28,7 +28,7 @@ class PyX3270Manager:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             text=True,
-            bufsize=0
+            bufsize=0,
         )
 
     def _exec(self, command: str) -> None:
@@ -40,11 +40,11 @@ class PyX3270Manager:
 
         logger.info(f'[+] Enviando comando offline: {command}')
         try:
-            self.process.stdin.write(f"{command}\n")
+            self.process.stdin.write(f'{command}\n')
             self.process.stdin.flush()
             sleep(0.05)
         except Exception as e:
-            logger.error(f"Erro ao enviar comando: {e}")
+            logger.error(f'Erro ao enviar comando: {e}')
             return
         self.emu.pf(1)
         sleep(0.1)

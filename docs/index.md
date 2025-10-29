@@ -5,7 +5,7 @@
 
 ![PyPI - Version](https://img.shields.io/pypi/v/pyx3270)
 ![Python](https://img.shields.io/badge/language-Python-blue?logo=python)
-![Cobertura de Testes](https://img.shields.io/badge/cobertura-97%25-brightgreen?logo=pytest)
+![Cobertura de Testes](https://img.shields.io/badge/cobertura-96%25-brightgreen?logo=pytest)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/fastapi.svg?color=%2334D058)](https://pypi.org/project/fastapi)
 
 Pyx3270 é uma biblioteca Python voltada para interação com emuladores de [terminais 3270](https://www.ibm.com/docs/api/v1/content/zosbasics%2Fcom.ibm.zos.znetwork%2Fznetwork_261.htm?parsebody=true&lang=en){:target="_blank" rel="noopener"} usados em sistemas mainframe.Com ela, você pode gravar sessões, reproduzi-las offline e automatizar processos complexos com simplicidade e controle.

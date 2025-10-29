@@ -1,3 +1,24 @@
+Versão 0.1.4 (2025-09-18)
+
+### :bug: CORREÇÕES
+
+- Corrija caminho completo de WS3270.exe
+
+
+Versão 0.1.3 (2025-09-18)
+
+### :zap: NOVAS FUNCIONALIDADES
+
+- Inclua hook para passar pasta com emulador ao gerar executável com pyinstaller.
+
+
+Versão 0.1.2 (2025-09-17)
+
+### :bug: CORREÇÕES
+
+- Corrija gravação de tela com TLS ativa.
+
+
 Versão 0.1.1 (2025-08-25)
 
 ### :bug: CORREÇÕES

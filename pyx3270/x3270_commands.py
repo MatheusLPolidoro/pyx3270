@@ -1,6 +1,7 @@
 import functools
-from typing import Any
 import warnings
+from typing import Any
+
 
 def x3270_builtins_class(cls):
     """Decorador de classe que aplica x3270_builtins a todos os métodos."""
@@ -17,6 +18,7 @@ def _wrap_method(method):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         return x3270_command(self, method.__name__, *args, **kwargs)
+
     return wrapper
 
 
@@ -29,7 +31,7 @@ def x3270_command(em, func, *args, **kwargs):
         warnings.warn(
             f'`{func}` foi descontinuada, use `send_string`'
             f' com argumento `password=True`.',
-            DeprecationWarning
+            DeprecationWarning,
         )
         return em.send_string(*args, **kwargs, password=True)
 
@@ -37,7 +39,7 @@ def x3270_command(em, func, *args, **kwargs):
         if not all_args_str:
             warnings.warn(
                 f'`{func}` foi descontinuada, use `send_pf` com argumento.',
-                DeprecationWarning
+                DeprecationWarning,
             )
             all_args_str = func[-1]
 
@@ -47,7 +49,7 @@ def x3270_command(em, func, *args, **kwargs):
 
     if func == 'connect' and (len(args) + len(kwargs)) > 1:
         return em.connect_host(*args, **kwargs)
-        
+
     try:
         cmd = em._exec_command(f'{func}({all_args_str})'.encode('utf8'))
         try:
@@ -83,7 +85,9 @@ class X3270Commands:
     def compose(
         self,
     ) -> Any: ...  # Interpreta as próximas duas teclas conforme o mapa.
-    def connect(self, host: str, port: str | None = None) -> Any: ...  # Conecta ao host.
+    def connect(
+        self, host: str, port: str | None = None
+    ) -> Any: ...  # Conecta ao host.
     def cursorselect(
         self,
     ) -> Any: ...  # Seleciona local do cursor como caneta luminosa.
