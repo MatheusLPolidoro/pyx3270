@@ -740,6 +740,7 @@ class X3270(AbstractEmulator, X3270Cmd):
         self.port = None
         self.tls = None
         self.mode_3270 = None
+        self.last_command_time = None
         logger.debug('X3270 inicializado')
 
     def _create_app(self) -> None:
@@ -774,6 +775,7 @@ class X3270(AbstractEmulator, X3270Cmd):
                 cmd = Command(self.app, cmdstr)
                 cmd.execute()
                 self.status = Status(cmd.status_line)
+                self.last_command_time = time()
                 logger.debug(f'Comando executado, status: {self.status}')
                 return cmd
             except NotConnectedException:
@@ -812,10 +814,20 @@ class X3270(AbstractEmulator, X3270Cmd):
         self.app.close()
         self.is_terminated = True
         logger.info('Emulador terminado com sucesso')
-
+       
     def is_connected(self) -> bool:
         logger.debug('Verificando estado de conexão')
         try:
+            # Verifica tempo desde o último comando
+            if self.last_command_time:
+                elapsed = time() - self.last_command_time
+                if elapsed > 600:
+                    logger.warning(
+                        f'Tempo de inatividade excedido: '
+                        f'{elapsed:.2f} segundos'
+                    )
+                    return False
+
             self.query('ConnectionState')
             is_connected = self.status.connection_state.startswith(b'C(')
             logger.info(f'Estado de conexão: {is_connected}')
