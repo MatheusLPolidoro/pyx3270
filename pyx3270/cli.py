@@ -1,5 +1,6 @@
 import os
 import socket
+import sys
 import threading
 from time import sleep
 from typing import Callable
@@ -110,7 +111,9 @@ def replay(
     except KeyboardInterrupt:
         rich.print('\n[x] Interrompido pelo usuário.')
         state.command_process.terminate()
-        os._exit(0)
+        if emulator:
+            emu.terminate()
+        sys.exit(0)
 
 
 @app.command()
@@ -125,12 +128,12 @@ def record(
     port = int(*port) if port else 3270
 
     rich.print(f'[+] RECORD na porta {port}')
-
+    reconnect = False
     try:
         while True:
-            if emulator:
+            if emulator and not reconnect:
                 emu = X3270(visible=True, model=model, save_log_file=True)
-            else:
+            elif not reconnect:
                 emu = None
 
             server_thread = start_server_thread(
@@ -142,13 +145,19 @@ def record(
 
             if emulator:
                 rich.print('[+] Conectando ao emulador...')
-                emu.connect_host('localhost', port, tls, mode_3270=False)
+                if reconnect:
+                    emu.reconnect_host()
+                else:
+                    emu.connect_host('localhost', port, tls, mode_3270=False)
 
             rich.print(f'[+] Escutando localhost, origem {host=} {port=}')
             control_replay(server_thread)
+            reconnect = True
     except KeyboardInterrupt:
         rich.print('\n[x] Interrompido pelo usuário.')
-        os._exit(0)
+        if emulator:
+            emu.terminate()
+        sys.exit(0)
 
 
 if __name__ == '__main__':

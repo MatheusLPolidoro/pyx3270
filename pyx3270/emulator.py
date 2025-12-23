@@ -370,7 +370,7 @@ class Wc3270App(ExecutableApp):
 
 class Ws3270App(ExecutableApp):
     args = [
-        get_binary_path("windows", "ws3270"),
+        get_binary_path('windows', 'ws3270'),
         '-xrm',
         'ws3270.unlockDelay:False',
     ]
@@ -814,14 +814,15 @@ class X3270(AbstractEmulator, X3270Cmd):
         self.app.close()
         self.is_terminated = True
         logger.info('Emulador terminado com sucesso')
-       
+
     def is_connected(self) -> bool:
         logger.debug('Verificando estado de conexão')
         try:
             # Verifica tempo desde o último comando
+            elapsed_max = 600
             if self.last_command_time:
                 elapsed = time() - self.last_command_time
-                if elapsed > 600:
+                if elapsed > elapsed_max:
                     logger.warning(
                         f'Tempo de inatividade excedido: '
                         f'{elapsed:.2f} segundos'

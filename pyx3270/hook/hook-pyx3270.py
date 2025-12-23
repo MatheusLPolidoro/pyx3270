@@ -1,4 +1,5 @@
 import os
+
 from PyInstaller.utils.hooks import get_package_paths
 
 # Caminho do pacote instalado
@@ -16,7 +17,9 @@ if os.path.isdir(bin_dir):
             # Caminho relativo a partir da pasta bin (ex: windows/wc3270.exe)
             rel_path = os.path.relpath(full_path, bin_dir)
             # Corrige o destino para ser uma pasta, não um arquivo
-            target_dir = os.path.join('pyx3270', 'bin', os.path.dirname(rel_path))
+            target_dir = os.path.join(
+                'pyx3270', 'bin', os.path.dirname(rel_path)
+            )
             datas.append((full_path, target_dir))
 
 __all__ = ['datas']

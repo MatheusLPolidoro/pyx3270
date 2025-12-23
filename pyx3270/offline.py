@@ -1,5 +1,4 @@
 import subprocess
-import sys
 from logging import getLogger
 from time import sleep
 
@@ -11,8 +10,6 @@ logger = getLogger(__name__)
 class PyX3270Manager:
     def __init__(self, emu: AbstractEmulator, directory='./screens'):
         self.command = [
-            sys.executable,
-            '-m',
             'pyx3270',
             'replay',
             '--directory',
@@ -48,6 +45,7 @@ class PyX3270Manager:
             return
         self.emu.pf(1)
         sleep(0.1)
+        self.emu.pf(1)
 
     def next(self):
         """Define a tela específica e aguarda processamento corretamente."""
@@ -75,6 +73,7 @@ class PyX3270Manager:
     def change_directory(self, directory: str):
         """Troca o diretório de carregamento das telas."""
         self._exec(f'change directory {directory}')
+        sleep(1)
         self.emu.pf(1)
 
     def terminate(self):

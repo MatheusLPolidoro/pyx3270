@@ -2,7 +2,7 @@ import gc
 import subprocess
 import sys
 import weakref
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 
 from pyx3270.offline import PyX3270Manager
 
@@ -17,8 +17,6 @@ def test_pyx3270_manager_init_and_terminate(mock_popen, x3270_cmd_instance):
 
     mock_popen.assert_called_once_with(
         [
-            sys.executable,
-            '-m',
             'pyx3270',
             'replay',
             '--directory',
@@ -58,7 +56,8 @@ def test_pyx3270_manager_exec(mock_logger, mock_popen, x3270_cmd_instance):
     )
     mock_process.stdin.write.assert_called_once_with(f'{command}\n')
     mock_process.stdin.flush.assert_called_once()
-    manager.emu.pf.assert_called_once_with(1)
+    assert manager.emu.pf.call_count == 2
+    manager.emu.pf.assert_has_calls([call(1), call(1)])
 
 
 @patch('subprocess.Popen')

@@ -107,7 +107,7 @@ def find_directory(base_dir: str, search_name: str) -> str | None:
             ):  # Compara de forma insensível a maiúsculas/minúsculas
                 return os.path.join(base_dir, dir_name)
 
-    return None  # Retorna None se não encontrar um diretório correspondente
+    return None
 
 
 def convert_s(hex_string: str) -> str:

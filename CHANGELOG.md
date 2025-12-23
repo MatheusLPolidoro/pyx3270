@@ -1,3 +1,12 @@
+Versão 0.1.7 (2025-12-23)
+
+### :bug: CORREÇÕES
+
+- Corrija fechamento seguro em caso de KeyboardInterrupt.
+- Corrija reinicialização em caso de reinicializar record.
+- Corrija set para troca de telas.
+
+
 Versão 0.1.4 (2025-09-18)
 
 ### :bug: CORREÇÕES
