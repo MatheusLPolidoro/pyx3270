@@ -1,3 +1,10 @@
+Versão 0.1.8 (2026-02-06)
+
+### :bug: CORREÇÕES
+
+- Ajuste nivel dos logs para limpeza de tela e envio de string None para debug, para não subir warnings desnecessarios.
+
+
 Versão 0.1.7 (2025-12-23)
 
 ### :bug: CORREÇÕES
