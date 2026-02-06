@@ -198,7 +198,7 @@ class Command(AbstractCommand):
                     return True
                 else:
                     error_msg = f'"erro" esperado, mas recebido: {result}.'
-                    logger.warning(error_msg)
+                    logger.info(error_msg)
                     raise ValueError(error_msg)
             except ValueError:
                 logger.warning(
@@ -427,7 +427,7 @@ class X3270Cmd(AbstractEmulatorCmd):
             if not self.get_full_screen(header=True).strip():
                 logger.info('Tela limpa com sucesso')
                 break
-            logger.warning(
+            logger.debug(
                 f'Tela não foi limpa completamente na tentativa {count + 1}'
             )
             count += 1
@@ -521,7 +521,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         password: bool = False,
     ) -> None:
         if not tosend:
-            logger.warning('tosend não é string, send_string não executado.')
+            logger.debug('tosend não é string, send_string não executado.')
             return
         # Remove caracteres especiais
         original = tosend
