@@ -1,3 +1,10 @@
+Versão 0.1.9 (2026-02-23)
+
+### :bug: CORREÇÕES
+
+- Adicione 0.03s após clear de tela, para garantir a limpeza.
+
+
 Versão 0.1.8 (2026-02-06)
 
 ### :bug: CORREÇÕES
