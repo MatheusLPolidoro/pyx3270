@@ -1,19 +1,19 @@
 [project]
 name = "pyx3270"
-version = "0.1.9"
+version = "0.1.10"
 description = "Uma interface comum utilizada para automações de terminais 3270 da IBM."
 authors = [{name = "MatheusLPolidoro", email = "mattpolidoro4@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.8,<=3.14"
 
 dependencies = [
-    "click==8.1.8",
-    "colorama==0.4.6",
-    "Pygments==2.19.1",
-    "rich==14.0.0",
-    "shellingham==1.5.4",
-    "typer==0.15.3",
-    "typing_extensions==4.13.2",
+    "click>=8.3.1",
+    "colorama>=0.4.6",
+    "Pygments>=2.19.2",
+    "rich>=14.3.3",
+    "shellingham>=1.5.4",
+    "typer>=0.24.1",
+    "typing_extensions>=4.15.0,<5.0"
 ]
 
 [project.scripts]
