@@ -1,3 +1,10 @@
+Versão 0.1.10 (2026-02-26)
+
+### :classical_building: INFRAESTRUTURA
+
+- Ajuste versão de dependencias do typer.
+
+
 Versão 0.1.9 (2026-02-23)
 
 ### :bug: CORREÇÕES
