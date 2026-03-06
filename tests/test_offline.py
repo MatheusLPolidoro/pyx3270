@@ -1,8 +1,7 @@
 import gc
 import subprocess
-import sys
 import weakref
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from pyx3270.offline import PyX3270Manager
 
@@ -56,7 +55,8 @@ def test_pyx3270_manager_exec(mock_logger, mock_popen, x3270_cmd_instance):
     )
     mock_process.stdin.write.assert_called_once_with(f'{command}\n')
     mock_process.stdin.flush.assert_called_once()
-    assert manager.emu.pf.call_count == 2
+    expected_call_count = 2
+    assert manager.emu.pf.call_count == expected_call_count
     manager.emu.pf.assert_has_calls([call(1), call(1)])
 
 

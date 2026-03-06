@@ -1,3 +1,14 @@
+Versão 0.1.10 (2026-03-06)
+
+# :bug: CORREÇÕES
+
+- Ajuste log de send_string incluindo a devida f-string para apresentar o dado nos logs.
+
+# :test_tube: TESTES
+
+- Arrume os testes para validação de limpeza de tela e de troca de diretório em reprodução.
+
+
 Versão 0.1.10 (2026-02-26)
 
 ### :classical_building: INFRAESTRUTURA

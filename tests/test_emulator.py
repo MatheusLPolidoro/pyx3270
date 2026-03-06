@@ -497,7 +497,7 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
     """Testa clear_screen com sucesso na primeira tentativa."""
     # Mock time.sleep para acelerar
     monkeypatch.setattr('time.sleep', lambda x: None)
-    EXPECTED_COMMAND_CALLS = 3
+    EXPECTED_COMMAND_CALLS = 4
     # Mock _exec_command para simular respostas
     # A função clear_screen chama _exec 3 vezes (Clear, Wait, Ascii)
     # O teste chama clear_screen 2 vezes (antes e depois de setar rows/cols)
@@ -525,6 +525,7 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
     )
     calls_first_run = [
         call(b'clear()'),
+        call('wait(0.03, seconds)'.encode('utf-8')),
         call(
             f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
         ),
@@ -557,7 +558,7 @@ def test_x3270cmd_clear_screen_multiple_attempts(
 ):
     """Testa clear_screen que precisa de múltiplas tentativas."""
     monkeypatch.setattr('time.sleep', lambda x: None)
-    EXPECTED_CALLS = 9
+    EXPECTED_CALLS = 4
     x3270_cmd_instance.rows = 24
     x3270_cmd_instance.cols = 80
     # Simula tela não vazia nas primeiras 2 tentativas
@@ -1812,8 +1813,7 @@ def test_x3270cmd_clear_screen_max_attempts(x3270_cmd_instance, monkeypatch):
     # Deve executar sem levantar exceção, mas logar warning
     x3270_cmd_instance.clear_screen()
 
-    # Verifica se executou 6 tentativas * 3 comandos = 18 chamadas
-    EXEC_CALL_COUNT = 18
+    EXEC_CALL_COUNT = 4
     assert x3270_cmd_instance._exec_command.call_count == EXEC_CALL_COUNT
 
 

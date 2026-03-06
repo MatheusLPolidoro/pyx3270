@@ -546,7 +546,7 @@ class X3270Cmd(AbstractEmulatorCmd):
 
         self.string(f'"{tosend}"')
         self.wait(self.time_unlock, 'unlock')
-        logger.debug("String '{tosend_str}' enviada para o emulador.")
+        logger.debug(f"String '{tosend_str}' enviada para o emulador.")
 
     def send_enter(self) -> None:
         logger.info('Enviando tecla ENTER')

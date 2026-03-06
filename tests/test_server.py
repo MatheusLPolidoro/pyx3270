@@ -302,8 +302,8 @@ def test_record_handler_basic_flow(record_mocks):
     ]
 
     # Configura is_screen_tn3270
-    record_mocks.is_screen.side_effect = (
-        lambda data: tn3270.IAC + tn3270.TN_EOR in data
+    record_mocks.is_screen.side_effect = lambda data: (
+        tn3270.IAC + tn3270.TN_EOR in data
     )
 
     server.record_handler(mock_clientsock, mock_emu, 'host:3270', record_dir)
@@ -688,7 +688,7 @@ def test_invalid_handle_change_directory():
     """Testa handle_change_directory com diretório inválido."""
     command = 'change directory /invalid/path'
 
-    with patch('pyx3270.server.logger'):
+    with patch('pyx3270.server.logger'), patch('os.listdir', return_value=[]):
         screens_result, screens_list = server.handle_change_directory(
             command, './screens'
         )
