@@ -764,7 +764,7 @@ class X3270(AbstractEmulator, X3270Cmd):
             logger.error('Erro ao criar aplicativo.')
             raise
 
-    def _exec_command(self, cmdstr: str) -> Command:
+    def _exec_command(self, cmdstr: str, run_raise: bool = False) -> Command:
         logger.debug(f'Executando comando: {cmdstr}')
         if self.is_terminated:
             error_msg = 'Tentativa de executar comando em emulador terminado'
@@ -783,14 +783,16 @@ class X3270(AbstractEmulator, X3270Cmd):
                 logger.error('Emulador não conectado.')
                 raise NotConnectedException
             except KeyboardStateError:
+                if run_raise:
+                    raise NotConnectedException
                 sleep(1)
                 logger.warning(
                     f'Nova tentativa de exec command:'
                     f'{cmdstr} {exec + 1}/{max_loop}'
                 )
-                self.reset()
-                self.wait(self.time_unlock, 'unlock')
-                self.tab()
+                self.reset(run_raise=True)
+                self.wait(self.time_unlock, 'unlock', run_raise=True)
+                self.tab(run_raise=True)
         logger.error(
             f'Erro ao executar {cmdstr} total de tentativas: {max_loop}'
         )

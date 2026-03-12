@@ -23,6 +23,7 @@ def _wrap_method(method):
 
 
 def x3270_command(em, func, *args, **kwargs):
+    run_raise = kwargs.pop('run_raise', False)
     all_args_str = ', '.join(
         list(map(str, args)) + [f'{k}={repr(v)}' for k, v in kwargs.items()]
     )
@@ -43,7 +44,7 @@ def x3270_command(em, func, *args, **kwargs):
             )
             all_args_str = func[-1]
 
-        em._exec_command(f'PF({all_args_str})'.encode('utf8'))
+        em._exec_command(f'PF({all_args_str})'.encode('utf8'), run_raise)
         em.wait(em.time_unlock, 'unlock')
         return
 
@@ -51,7 +52,7 @@ def x3270_command(em, func, *args, **kwargs):
         return em.connect_host(*args, **kwargs)
 
     try:
-        cmd = em._exec_command(f'{func}({all_args_str})'.encode('utf8'))
+        cmd = em._exec_command(f'{func}({all_args_str})'.encode('utf8'), run_raise)
         try:
             text = [text.decode('utf8') for text in cmd.data[0:]]
             result = ' '.join(text)
