@@ -1,3 +1,10 @@
+Versão 0.1.10 (2026-03-12)
+
+### :bug: CORREÇÕES
+
+- Adicione variável run_raise para validação de comandos que não podem ser tratados com KeyboardStateError.
+
+
 Versão 0.1.10 (2026-03-06)
 
 # :bug: CORREÇÕES
