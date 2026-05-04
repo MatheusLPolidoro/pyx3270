@@ -710,10 +710,11 @@ class X3270Cmd(AbstractEmulatorCmd):
 
     def _get_ypos_and_xpos_from_index(self, index):
         logger.debug(f'Convertendo índice {index} para coordenadas (y,x)')
-        ypos = math.ceil(index / self.model_dimensions['columns'])
-        remainder = index % self.model_dimensions['columns']
+        col_dimentions = self.model_dimensions['columns'] + 1
+        ypos = math.ceil(index / col_dimentions)
+        remainder = index % col_dimentions
         if remainder == 0:
-            xpos = self.model_dimensions['columns']
+            xpos = col_dimentions
         else:
             xpos = remainder
         logger.debug(f'Índice {index} convertido para ({ypos},{xpos})')

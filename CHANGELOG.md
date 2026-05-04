@@ -1,3 +1,10 @@
+Versão 0.1.13 (2026-05-04)
+
+### :bug: CORREÇÕES
+
+- Corrija conta para captura de strings da tela na função _get_ypos_and_xpos_from_index.
+
+
 Versão 0.1.10 (2026-03-12)
 
 ### :bug: CORREÇÕES

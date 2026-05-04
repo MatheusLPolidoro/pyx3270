@@ -524,12 +524,13 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
         x3270_cmd_instance._exec_command.call_count == EXPECTED_COMMAND_CALLS
     )
     calls_first_run = [
-        call(b'clear()'),
-        call('wait(0.03, seconds)'.encode('utf-8')),
+        call(b'clear()', False),
+        call(b'wait(0.03, seconds)', False),
         call(
-            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8')
+            f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8'),
+            False,
         ),
-        call(b'ascii()'),
+        call(b'ascii()', False),
     ]
     x3270_cmd_instance._exec_command.assert_has_calls(
         calls_first_run, any_order=False
@@ -583,7 +584,7 @@ def test_x3270cmd_clear_screen_multiple_attempts(
     assert x3270_cmd_instance._exec_command.call_count == EXPECTED_CALLS
     # Verifica a última chamada a Ascii
     assert x3270_cmd_instance._exec_command.call_args_list[-1] == call(
-        b'ascii()'
+        b'ascii()', False
     )
 
 
@@ -597,7 +598,7 @@ def test_x3270cmd_wait_for_field(x3270_cmd_instance):
     x3270_cmd_instance.wait_for_field(timeout=10)
 
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'wait(10, InputField)'
+        b'wait(10, InputField)', False
     )
 
 
@@ -613,7 +614,7 @@ def test_x3270cmd_wait_for_field_timeout(x3270_cmd_instance):
     x3270_cmd_instance.wait_for_field(timeout=1)
 
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'wait(1, InputField)'
+        b'wait(1, InputField)', False
     )
 
 
@@ -628,7 +629,7 @@ def test_x3270cmd_string_found_true(x3270_cmd_instance):
 
     assert result is True
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'ascii(4, 9, 15)'
+        b'ascii(4, 9, 15)', False
     )  # 15 = len('expected string')
 
 
@@ -643,7 +644,7 @@ def test_x3270cmd_string_found_false(x3270_cmd_instance):
 
     assert result is False
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'ascii(0, 0, 8)'
+        b'ascii(0, 0, 8)', False
     )  # 8 = len('expected')
 
 
@@ -742,7 +743,9 @@ def test_x3270cmd_string_found_error(x3270_cmd_instance):
     result = x3270_cmd_instance.string_found(2, 3, 'test')
 
     assert result is False  # A função retorna False em caso de erro
-    x3270_cmd_instance._exec_command.assert_called_once_with(b'ascii(1, 2, 4)')
+    x3270_cmd_instance._exec_command.assert_called_once_with(
+        b'ascii(1, 2, 4)', False
+    )
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -755,7 +758,7 @@ def test_x3270cmd_move_to(x3270_cmd_instance):
     x3270_cmd_instance.move_to(10, 20)
 
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'movecursor1(10, 20)'
+        b'movecursor1(10, 20)', False
     )
 
 
@@ -868,7 +871,7 @@ def test_x3270cmd_send_string_truncate(x3270_cmd_instance):
         x3270_cmd_instance.send_string('long string data')
 
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'string("long string data")'
+        b'string("long string data")', False
     )
 
 
@@ -883,7 +886,7 @@ def test_x3270cmd_get_string(x3270_cmd_instance):
 
     assert result == 'data from screen'
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'ascii(9, 4, 16)'
+        b'ascii(9, 4, 16)', False
     )
 
 
@@ -912,7 +915,7 @@ def test_x3270cmd_get_full_screen(x3270_cmd_instance):
 
     expected_result = ' '.join([f'line {i}' for i in range(24)])
     assert result == expected_result
-    x3270_cmd_instance._exec_command.assert_called_once_with(b'ascii()')
+    x3270_cmd_instance._exec_command.assert_called_once_with(b'ascii()', False)
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -967,7 +970,8 @@ def test_x3270cmd_save_screen(x3270_cmd_instance):
 
     # Verifica se Ascii foi chamado corretamente
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        'printtext(html, file, path_test\\myscreen.html)'.encode('utf-8')
+        'printtext(html, file, path_test\\myscreen.html)'.encode('utf-8'),
+        False,
     )
 
 
@@ -1106,7 +1110,9 @@ def test_x3270cmd_wait_string_found_not_equal(x3270_cmd_instance, monkeypatch):
     assert (
         result is True
     )  # Deve retornar True porque a string encontrada é diferente
-    x3270_cmd_instance._exec_command.assert_called_once_with(b'ascii(2, 2, 6)')
+    x3270_cmd_instance._exec_command.assert_called_once_with(
+        b'ascii(2, 2, 6)', False
+    )
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -1116,7 +1122,7 @@ def test_x3270cmd_delete_field(x3270_cmd_instance):
         status_line=b'ok'
     )
     x3270_cmd_instance.delete_field()
-    x3270_cmd_instance._exec_command.assert_called_once_with(b'deletefield()')
+    x3270_cmd_instance._exec_command.assert_called_once_with(b'deletefield()', False)
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -1164,7 +1170,7 @@ def test_x3270cmd_get_string_area(x3270_cmd_instance):
     assert result == expected_result
     # Verifica o comando Ascii com coordenadas de área
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'ascii(0, 4, 3, 11)'
+        b'ascii(0, 4, 3, 11)', False
     )
 
 
@@ -1220,7 +1226,7 @@ def test_x3270cmd_search_string_found(x3270_cmd_instance):
 
     assert result is True
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'ascii(0, 0, 80)'
+        b'ascii(0, 0, 80)', False
     )
 
 
@@ -1281,9 +1287,9 @@ def test_x3270cmd_search_string_ignore_case(x3270_cmd_instance):
 def test_x3270cmd_get_string_positions(x3270_cmd_instance):
     """Testa get_string_positions."""
     screen_data = [
-        b'abc target 123'.ljust(79),  # row 0
-        b'456 target abc'.ljust(79),  # row 1
-        b'target end.'.ljust(79),  # row 2
+        b'abc target 123'.ljust(80),  # row 0
+        b'456 target abc'.ljust(80),  # row 1
+        b'target end.'.ljust(80),  # row 2
     ]
     x3270_cmd_instance._exec_command.return_value = MagicMock(data=screen_data)
     x3270_cmd_instance.rows = 3
@@ -1292,7 +1298,7 @@ def test_x3270cmd_get_string_positions(x3270_cmd_instance):
     positions = x3270_cmd_instance.get_string_positions('target')
 
     assert positions == [(1, 5), (2, 5), (3, 1)]  # (row, col)
-    x3270_cmd_instance._exec_command.assert_called_once_with(b'ascii()')
+    x3270_cmd_instance._exec_command.assert_called_once_with(b'ascii()', False)
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -1320,16 +1326,16 @@ def test_get_ypos_and_xpos_from_index_remainder_zero(x3270_cmd_instance):
     index = 20  # múltiplo de columns → remainder == 0
     result = x3270_cmd_instance._get_ypos_and_xpos_from_index(index)
 
-    # ypos = ceil(20 / 10) = 2, xpos = columns = 10
-    assert result == (2, 10)
+    # ypos = ceil(20 / 10) = 2, xpos = columns = 9
+    assert result == (2, 9)
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_get_string_positions_ignore_case(x3270_cmd_instance):
     """Testa get_string_positions com ignore_case=True."""
     screen_data = [
-        b'Find Me'.ljust(79),
-        b'find me too'.ljust(79),
+        b'Find Me'.ljust(80),
+        b'find me too'.ljust(80),
     ]  # row 0, row 1
     x3270_cmd_instance._exec_command.return_value = MagicMock(data=screen_data)
     x3270_cmd_instance.rows = 2
@@ -1367,7 +1373,9 @@ def test_x3270_terminate(x3270_emulator_instance):
 
     x3270_emulator_instance.terminate()
     # Verifica se o comando Quit foi executado
-    x3270_emulator_instance._exec_command.assert_called_once_with(b'quit()')
+    x3270_emulator_instance._exec_command.assert_called_once_with(
+        b'quit()', False
+    )
     # Verifica se o app foi fechado
     mock_app.close.assert_called_once()
 
@@ -1478,7 +1486,7 @@ def test_x3270_connect_host(x3270_emulator_instance):
     )
     x3270_emulator_instance.connect_host('myhost', '1234', tls=False)
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(5, 3270mode)'
+        b'wait(5, 3270mode)', False
     )
 
 
@@ -1529,7 +1537,7 @@ def test_x3270_connect_host_tls(x3270_emulator_instance):
     x3270_emulator_instance.connect_host('securehost', '992', tls=True)
     # Verifica se o prefixo L: foi adicionado para TLS
     x3270_emulator_instance._exec_command.assert_called_with(
-        b'wait(5, 3270mode)'
+        b'wait(5, 3270mode)', False
     )
 
 
@@ -1540,7 +1548,7 @@ def test_x3270_reconnect_host_success(x3270_emulator_instance):
         status_line=b'ok'
     )
     x3270_emulator_instance.reconnect_host()
-    x3270_emulator_instance._exec_command.assert_called_with(b'reconnect()')
+    x3270_emulator_instance._exec_command.assert_called_with(b'reconnect()', False)
 
 
 @pytest.mark.usefixtures('x3270_emulator_instance')
@@ -1552,7 +1560,7 @@ def test_x3270_reconnect_host_failure(x3270_emulator_instance):
     with pytest.raises(CommandError, match='Reconnect failed'):
         x3270_emulator_instance._exec_command()
     x3270_emulator_instance.reconnect_host()
-    x3270_emulator_instance._exec_command.assert_called_with(b'quit()')
+    x3270_emulator_instance._exec_command.assert_called_with(b'quit()', False)
 
 
 # Teste para _exec_command (embora simples, para cobertura)
@@ -1826,7 +1834,7 @@ def test_x3270cmd_wait_for_field_command_error(x3270_cmd_instance):
     x3270_cmd_instance.wait_for_field(timeout=10)
 
     x3270_cmd_instance._exec_command.assert_called_once_with(
-        b'wait(10, InputField)'
+        b'wait(10, InputField)', False
     )
 
 

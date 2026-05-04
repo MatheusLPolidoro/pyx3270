@@ -52,7 +52,9 @@ def x3270_command(em, func, *args, **kwargs):
         return em.connect_host(*args, **kwargs)
 
     try:
-        cmd = em._exec_command(f'{func}({all_args_str})'.encode('utf8'), run_raise)
+        cmd = em._exec_command(
+            f'{func}({all_args_str})'.encode('utf8'), run_raise
+        )
         try:
             text = [text.decode('utf8') for text in cmd.data[0:]]
             result = ' '.join(text)
