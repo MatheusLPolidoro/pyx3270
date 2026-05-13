@@ -1,3 +1,10 @@
+Versão 0.1.15 (2026-05-13)
+
+### :bug: CORREÇÕES
+
+- Troque Wait(0.03, 'seconds') por sleep(0.03) em clear_screen.
+
+
 Versão 0.1.13 (2026-05-04)
 
 ### :bug: CORREÇÕES

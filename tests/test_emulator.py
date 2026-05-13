@@ -497,7 +497,7 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
     """Testa clear_screen com sucesso na primeira tentativa."""
     # Mock time.sleep para acelerar
     monkeypatch.setattr('time.sleep', lambda x: None)
-    EXPECTED_COMMAND_CALLS = 4
+    EXPECTED_COMMAND_CALLS = 3
     # Mock _exec_command para simular respostas
     # A função clear_screen chama _exec 3 vezes (Clear, Wait, Ascii)
     # O teste chama clear_screen 2 vezes (antes e depois de setar rows/cols)
@@ -525,7 +525,6 @@ def test_x3270cmd_clear_screen_success(x3270_cmd_instance, monkeypatch):
     )
     calls_first_run = [
         call(b'clear()', False),
-        call(b'wait(0.03, seconds)', False),
         call(
             f'wait({x3270_cmd_instance.time_unlock}, unlock)'.encode('utf-8'),
             False,
@@ -559,7 +558,7 @@ def test_x3270cmd_clear_screen_multiple_attempts(
 ):
     """Testa clear_screen que precisa de múltiplas tentativas."""
     monkeypatch.setattr('time.sleep', lambda x: None)
-    EXPECTED_CALLS = 4
+    EXPECTED_CALLS = 9
     x3270_cmd_instance.rows = 24
     x3270_cmd_instance.cols = 80
     # Simula tela não vazia nas primeiras 2 tentativas
@@ -1122,7 +1121,9 @@ def test_x3270cmd_delete_field(x3270_cmd_instance):
         status_line=b'ok'
     )
     x3270_cmd_instance.delete_field()
-    x3270_cmd_instance._exec_command.assert_called_once_with(b'deletefield()', False)
+    x3270_cmd_instance._exec_command.assert_called_once_with(
+        b'deletefield()', False
+    )
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -1548,7 +1549,9 @@ def test_x3270_reconnect_host_success(x3270_emulator_instance):
         status_line=b'ok'
     )
     x3270_emulator_instance.reconnect_host()
-    x3270_emulator_instance._exec_command.assert_called_with(b'reconnect()', False)
+    x3270_emulator_instance._exec_command.assert_called_with(
+        b'reconnect()', False
+    )
 
 
 @pytest.mark.usefixtures('x3270_emulator_instance')
@@ -1821,7 +1824,7 @@ def test_x3270cmd_clear_screen_max_attempts(x3270_cmd_instance, monkeypatch):
     # Deve executar sem levantar exceção, mas logar warning
     x3270_cmd_instance.clear_screen()
 
-    EXEC_CALL_COUNT = 4
+    EXEC_CALL_COUNT = 18
     assert x3270_cmd_instance._exec_command.call_count == EXEC_CALL_COUNT
 
 

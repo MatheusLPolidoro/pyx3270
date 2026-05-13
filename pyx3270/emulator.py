@@ -423,7 +423,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         while count < max_loop:
             logger.debug(f'Tentativa {count + 1}/{max_loop} de limpar tela')
             self.clear()
-            self.wait(0.03, 'seconds')
+            sleep(0.03)
             self.wait(self.time_unlock, 'unlock')
             if not self.get_full_screen(header=True).strip():
                 logger.info('Tela limpa com sucesso')
