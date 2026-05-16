@@ -1,3 +1,10 @@
+Versão 0.1.16 (2026-05-16)
+
+### :bug: CORREÇÕES
+
+- Inclua a opção de wait\_input\_field em send\_enter para evitar bugs de time e adicione padrão wait\_unlock para aguardar host após 0.03s em todos os métodos que utilizam.
+
+
 Versão 0.1.15 (2026-05-13)
 
 ### :bug: CORREÇÕES
