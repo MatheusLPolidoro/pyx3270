@@ -423,8 +423,7 @@ class X3270Cmd(AbstractEmulatorCmd):
         while count < max_loop:
             logger.debug(f'Tentativa {count + 1}/{max_loop} de limpar tela')
             self.clear()
-            sleep(0.03)
-            self.wait(self.time_unlock, 'unlock')
+            self.wait_unlock()
             if not self.get_full_screen(header=True).strip():
                 logger.info('Tela limpa com sucesso')
                 break
@@ -446,6 +445,19 @@ class X3270Cmd(AbstractEmulatorCmd):
         except CommandError:
             logger.warning(
                 f'Timeout atingido: {timeout}s.campo entrada não encontrado.'
+            )
+
+    def wait_unlock(self) -> None:
+        logger.debug(
+            f'Aguardando desbloqueio do host (timeout={self.time_unlock}s)'
+        )
+        try:
+            sleep(0.03)
+            self.wait(self.time_unlock, 'unlock')
+            logger.debug('Host desbloqueado.')
+        except CommandError:
+            logger.warning(
+                f'Timeout atingido: {self.time_unlock}s.host não desbloqueado.'
             )
 
     def wait_string_found(
@@ -545,19 +557,22 @@ class X3270Cmd(AbstractEmulatorCmd):
             logger.info(f"Enviando string '{tosend_str}' na posição atual.")
 
         self.string(f'"{tosend}"')
-        self.wait(self.time_unlock, 'unlock')
+        self.wait_unlock()
         logger.debug(f"String '{tosend_str}' enviada para o emulador.")
 
-    def send_enter(self) -> None:
+    def send_enter(self, wait_input: bool = False) -> None:
         logger.info('Enviando tecla ENTER')
         self.enter()
-        self.wait(self.time_unlock, 'unlock')
+        if wait_input:
+            self.wait_for_field()
+        else:
+            self.wait_unlock()
         logger.debug('ENTER enviado e tela desbloqueada')
 
     def send_home(self) -> None:
         logger.info('Enviando tecla HOME')
         self.home()
-        self.wait(self.time_unlock, 'unlock')
+        self.wait_unlock()
         logger.debug('HOME enviado e tela desbloqueada')
 
     def get_string(self, ypos: int, xpos: int, length: int) -> str:
