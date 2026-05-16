@@ -1,3 +1,10 @@
+Versão 0.1.17 (2026-05-16)
+
+### :bug: CORREÇÕES
+
+- Ajuste interface de AbstractEmulatorCmd e adicione \*args e \*\*kwargs para comandos next e prev de PyX3270Manager (Offline).
+
+
 Versão 0.1.16 (2026-05-16)
 
 ### :bug: CORREÇÕES

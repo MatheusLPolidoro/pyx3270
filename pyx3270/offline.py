@@ -47,13 +47,15 @@ class PyX3270Manager:
         sleep(0.1)
         self.emu.pf(1)
 
-    def next(self):
+    def next(self, *args, **kwargs):
         """Define a tela específica e aguarda processamento corretamente."""
         self._exec('next')
+        self.emu.wait_unlock()
 
-    def prev(self):
+    def prev(self, *args, **kwargs):
         """Define a tela específica e aguarda processamento corretamente."""
         self._exec('prev')
+        self.emu.wait_unlock()
 
     def clear(self):
         """Define a tela específica e aguarda processamento corretamente."""

@@ -44,6 +44,9 @@ class AbstractEmulatorCmd(ABC, X3270Commands):
     def wait_for_field(self, timeout: float) -> None: ...
 
     @abstractmethod
+    def wait_unlock(self) -> None: ...
+
+    @abstractmethod
     def wait_string_found(
         self, ypos: int, xpos: int, string: str, equal: bool, timeout: float
     ) -> bool: ...
