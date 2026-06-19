@@ -1,3 +1,11 @@
+Versão 0.1.19 (2026-06-19)
+
+### :bug: CORREÇÕES
+
+- Adicione pausa de 0.1 após segundo pf1 de \_exec e após mudança de diretório de reprodução de telas em modulo offline.
+- Adicione raise para casos onde KeyboardStateError permanece consecutivamente.
+
+
 Versão 0.1.17 (2026-05-16)
 
 ### :bug: CORREÇÕES
