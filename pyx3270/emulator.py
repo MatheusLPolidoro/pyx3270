@@ -187,7 +187,7 @@ class Command(AbstractCommand):
     def handle_result(self, result: str) -> bool:
         logger.debug(f'Processando resultado: {result}')
         count = 0
-        max_loop = 5
+        max_loop = 2
         while count < max_loop:
             try:
                 if not result and self.cmdstr == b'Quit':
@@ -786,33 +786,21 @@ class X3270(AbstractEmulator, X3270Cmd):
             error_msg = 'Tentativa de executar comando em emulador terminado'
             logger.error(error_msg)
             raise TerminatedError
-        max_loop = 3
-        for exec in range(max_loop):
-            try:
-                cmd = Command(self.app, cmdstr)
-                cmd.execute()
-                self.status = Status(cmd.status_line)
-                self.last_command_time = time()
-                logger.debug(f'Comando executado, status: {self.status}')
-                return cmd
-            except NotConnectedException:
-                logger.error('Emulador não conectado.')
+        try:
+            cmd = Command(self.app, cmdstr)
+            cmd.execute()
+            self.status = Status(cmd.status_line)
+            self.last_command_time = time()
+            logger.debug(f'Comando executado, status: {self.status}')
+            return cmd
+        except NotConnectedException:
+            logger.error('Emulador não conectado.')
+            raise NotConnectedException
+        except KeyboardStateError:
+            if run_raise:
                 raise NotConnectedException
-            except KeyboardStateError:
-                if run_raise:
-                    raise NotConnectedException
-                sleep(1)
-                logger.warning(
-                    f'Nova tentativa de exec command:'
-                    f'{cmdstr} {exec + 1}/{max_loop}'
-                )
-                self.reset(run_raise=True)
-                self.wait(self.time_unlock, 'unlock', run_raise=True)
-                self.tab(run_raise=True)
-        logger.error(
-            f'Erro ao executar {cmdstr} total de tentativas: {max_loop}'
-        )
-        raise CommandError
+            logger.error(f'KeyboardStateError ao executar {cmdstr}')
+            raise
 
     def terminate(self) -> None:
         logger.info('Terminando emulador')
