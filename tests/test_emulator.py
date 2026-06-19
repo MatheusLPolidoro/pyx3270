@@ -678,58 +678,36 @@ def test_exec_command_not_connected(x3270_real_exec_instance, caplog):
 
 @pytest.mark.usefixtures('x3270_real_exec_instance')
 def test_exec_command_keyboard_state_error(x3270_real_exec_instance, caplog):
-    """Cobre o bloco except KeyboardStateError e as tentativas."""
+    """KeyboardStateError deve ser propagado diretamente sem recovery nem retry."""
     x3270_real_exec_instance.is_terminated = False
-    x3270_real_exec_instance.time_unlock = 0
     cmdstr = 'TESTCMD'
 
-    with patch('pyx3270.emulator.Command') as mock_command, patch.object(
-        x3270_real_exec_instance, 'reset'
-    ) as mock_reset, patch.object(
-        x3270_real_exec_instance, 'wait'
-    ) as mock_wait, patch.object(
-        x3270_real_exec_instance, 'tab'
-    ) as mock_tab, caplog.at_level('WARNING'):
-        # Simula KeyboardStateError em todas as tentativas
+    with patch('pyx3270.emulator.Command') as mock_command, caplog.at_level(
+        'ERROR'
+    ):
         instance = mock_command.return_value
         instance.execute.side_effect = KeyboardStateError
 
-        with pytest.raises(CommandError):
+        with pytest.raises(KeyboardStateError):
             x3270_real_exec_instance._exec_command(cmdstr)
 
-        # Deve ter chamado reset, wait e tab pelo menos uma vez
-        assert mock_reset.called
-        assert mock_wait.called
-        assert mock_tab.called
-        # Verifica logs de warning
         assert any(
-            'Nova tentativa de exec command:' in msg for msg in caplog.messages
+            'KeyboardStateError ao executar' in msg for msg in caplog.messages
         )
 
 
 @pytest.mark.usefixtures('x3270_real_exec_instance')
-def test_exec_command_final_error(x3270_real_exec_instance, caplog):
-    """Cobre o bloco final de erro total de tentativas (CommandError)."""
+def test_exec_command_keyboard_state_error_run_raise(x3270_real_exec_instance):
+    """Com run_raise=True, KeyboardStateError deve levantar NotConnectedException."""
     x3270_real_exec_instance.is_terminated = False
-    x3270_real_exec_instance.time_unlock = 0
     cmdstr = 'TESTCMD'
 
-    with patch('pyx3270.emulator.Command') as mock_command, patch.object(
-        x3270_real_exec_instance, 'reset'
-    ), patch.object(x3270_real_exec_instance, 'wait'), patch.object(
-        x3270_real_exec_instance, 'tab'
-    ), caplog.at_level('ERROR'):
-        # Simula KeyboardStateError em todas as tentativas
+    with patch('pyx3270.emulator.Command') as mock_command:
         instance = mock_command.return_value
         instance.execute.side_effect = KeyboardStateError
 
-        with pytest.raises(CommandError):
-            x3270_real_exec_instance._exec_command(cmdstr)
-
-        assert any(
-            f'Erro ao executar {cmdstr} total de tentativas: 3' in msg
-            for msg in caplog.messages
-        )
+        with pytest.raises(NotConnectedException):
+            x3270_real_exec_instance._exec_command(cmdstr, run_raise=True)
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
