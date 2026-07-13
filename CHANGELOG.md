@@ -1,3 +1,11 @@
+Versão 0.1.20 (2026-07-13)
+
+### :zap: NOVAS FUNCIONALIDADES
+
+- Adicione `get_screen_log` em `X3270Cmd`, que retorna o dump completo da tela (com quebras de linha reais) convertendo cores e destaques de campo do 3270 em sequências ANSI (SGR), formato renderizado nativamente por painéis de logs como o do Grafana/Loki. Campos non-display (ex.: senha) são mascarados por padrão (`mask_hidden=True`).
+- Inclua metodo para log de campos com cor e ajuste demais logs.
+
+
 Versão 0.1.19 (2026-06-19)
 
 ### :bug: CORREÇÕES
