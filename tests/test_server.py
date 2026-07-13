@@ -479,9 +479,11 @@ def test_load_screens_logs_error_and_returns_empty(monkeypatch):
 
     result = server.load_screens(record_dir)
 
-    mock_logger.error.assert_called_once_with(
-        f'Falha ao carregar caminho: {record_dir}'
-    )
+    mock_logger.error.assert_called_once()
+    args, _ = mock_logger.error.call_args
+    assert args[0] == 'Falha ao carregar caminho: %s (%s)'
+    assert args[1] == record_dir
+    assert str(args[2]) == 'fail'
     assert result == {}
 
 
@@ -608,7 +610,7 @@ def test_handle_add_invalid_format(mock_logger):
 
     # Logger deve ter sido chamado com warning
     mock_logger.warning.assert_called_once_with(
-        '[!] Formato inválido ao adicionar tela'
+        '[!] Formato inválido ao adicionar tela: %s', command
     )
 
 

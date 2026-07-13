@@ -31,17 +31,18 @@ class PyX3270Manager:
     def _exec(self, command: str) -> None:
         if self.process.poll() is not None:
             logger.info(
-                '[!] O processo inativo, não é possível enviar comandos.'
+                '[!] O processo inativo, não é possível enviar comandos: %s',
+                command,
             )
             return
 
-        logger.info(f'[+] Enviando comando offline: {command}')
+        logger.info('[+] Enviando comando offline: %s', command)
         try:
             self.process.stdin.write(f'{command}\n')
             self.process.stdin.flush()
             sleep(0.05)
         except Exception as e:
-            logger.error(f'Erro ao enviar comando: {e}')
+            logger.error('Erro ao enviar comando: %s', e)
             return
         self.emu.pf(1)
         sleep(0.1)

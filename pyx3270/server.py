@@ -30,7 +30,7 @@ class ReplayState:
 
 def ensure_dir(path: str | None) -> None:
     if path and not os.path.isdir(path):
-        logger.info(f'[+] Criando diretório: {path}')
+        logger.info('[+] Criando diretório: %s', path)
         os.makedirs(path)
 
 
@@ -85,8 +85,8 @@ def load_screens(record_dir: str) -> dict:
                 key = f.upper().replace('.BIN', '')
                 screens[key] = data
 
-    except Exception:
-        logger.error(f'Falha ao carregar caminho: {record_dir}')
+    except Exception as e:
+        logger.error('Falha ao carregar caminho: %s (%s)', record_dir, e)
 
     return screens
 
@@ -133,7 +133,7 @@ def connect_serversock(
     try:
         serversock = socket.create_connection((host, port), timeout=5)
     except Exception as e:
-        logger.error(f'[!] Proxy -> MF Falha de conexão: {e}')
+        logger.error('[!] Proxy -> MF Falha de conexão: %s', e)
         clientsock.close()
         return
     return serversock
@@ -141,11 +141,14 @@ def connect_serversock(
 
 def record_data(data_block, record_dir: str, counter: int) -> int:
     if not is_screen_tn3270(data_block):
-        logger.warning('[!] Dados recebidos não são uma tela TN3270.')
+        logger.warning(
+            '[!] Dados recebidos não são uma tela TN3270 (%s bytes).',
+            len(data_block),
+        )
         return 0
     fn = os.path.join(record_dir, f'{counter:03}.bin')
     with open(fn, 'wb') as f:
-        logger.info(f'[+] Gravação de tela: {fn}')
+        logger.info('[+] Gravação de tela: %s', fn)
         f.write(data_block)
     return 1
 
@@ -157,11 +160,11 @@ def record_handler(
     record_dir=None,
     delay=0.01,
 ) -> None:
-    logger.info(f'Iniciando gravação para {clientsock.getpeername()}')
+    logger.info('Iniciando gravação para %s', clientsock.getpeername())
     serversock = connect_serversock(clientsock, address)
 
     if not serversock:
-        logger.error('[!] Falha ao conectar ao servidor.')
+        logger.error('[!] Falha ao conectar ao servidor: %s', address)
         return
 
     ensure_dir(record_dir)
@@ -218,8 +221,10 @@ def record_handler(
                 screens.append(buffer)
                 counter += record_data(full_block, record_dir, counter)
 
-    except (ConnectionResetError, OSError, NotConnectedException):
-        logger.info('[!] Conexão encerrada pelo servidor ou erro de rede.')
+    except (ConnectionResetError, OSError, NotConnectedException) as e:
+        logger.info(
+            '[!] Conexão encerrada pelo servidor ou erro de rede: %s', e
+        )
         for sock in socks:
             sock.close()
         server_stop.set()
@@ -249,16 +254,18 @@ def backend_3270(
 
     if aid in {tn3270.PF3, tn3270.PF7} and key_press and emulator:
         current_screen = max(0, current_screen - 1)
-        logger.info('[!] Comando de retorno recebido.')
+        logger.info('[!] Comando de retorno recebido (aid=%s).', aid)
     elif (
         aid in {tn3270.PF4, tn3270.PF8, tn3270.ENTER}
         and key_press
         and emulator
     ):
-        logger.info('[!] Comando de paginação/confirmação recebido.')
+        logger.info(
+            '[!] Comando de paginação/confirmação recebido (aid=%s).', aid
+        )
         current_screen = min(len(screens) - 1, current_screen + 1)
     elif aid == tn3270.CLEAR and key_press and emulator or aid == tn3270.PF12:
-        logger.info('[!] Comando CLEAR recebido.')
+        logger.info('[!] Comando CLEAR recebido (aid=%s).', aid)
         clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
         clear = True
 
@@ -276,7 +283,7 @@ def listen_for_commands(command_queue):
                 break
             command_queue.put(command)
     except (OSError, EOFError) as e:
-        logger.warning(f'[*] stdin para comandos fechado: {e}')
+        logger.warning('[*] stdin para comandos fechado: %s', e)
     finally:
         logger.warning('[*] Encerrando processo de escuta.')
 
@@ -301,7 +308,7 @@ def handle_add(command: str, screens: dict, screens_list: list) -> None:
         screens[screen_name] = final_bytes
         screens_list.append(final_bytes)
     except ValueError:
-        logger.warning('[!] Formato inválido ao adicionar tela')
+        logger.warning('[!] Formato inválido ao adicionar tela: %s', command)
 
 
 def handle_change_directory(
@@ -310,10 +317,10 @@ def handle_change_directory(
     new_dir = find_directory(base_directory, command.split(' ', 2)[2].strip())
     if new_dir and os.path.isdir(new_dir):
         new_screens = load_screens_basic(new_dir)
-        logger.info(f'[+] Mudando para o diretório de telas: {new_dir}')
+        logger.info('[+] Mudando para o diretório de telas: %s', new_dir)
         return new_screens, list(new_screens.values())
     else:
-        logger.info(f'[!] Diretório inválido: {new_dir}')
+        logger.info('[!] Diretório inválido: %s', new_dir)
         return dict(), list()
 
 
@@ -328,7 +335,7 @@ def process_command(
         if not command.startswith('add ')
         else ' '.join(command.split()[:2])
     )
-    logger.info(f'Comando recebido: {command_log}')
+    logger.info('Comando recebido: %s', command_log)
 
     if command.startswith('set '):
         index = handle_set(command, state.screens)
@@ -348,16 +355,16 @@ def process_command(
         state.current_screen = min(
             len(state.screens), state.current_screen + 1
         )
-        logger.info(f"[!] Comando 'next' enviado: {state.current_screen}")
+        logger.info("[!] Comando 'next' enviado: %s", state.current_screen)
 
     elif command == 'prev':
         state.current_screen = max(0, state.current_screen - 1)
-        logger.info(f"[!] Comando 'prev' enviado: {state.current_screen}")
+        logger.info("[!] Comando 'prev' enviado: %s", state.current_screen)
 
     elif command == 'clear':
         state.clear = True
         clientsock.sendall(tn3270.CLEAR_SCREEN_BUFFER)
-        logger.info(f"[!] Comando 'clear' enviado: {state.current_screen}")
+        logger.info("[!] Comando 'clear' enviado: %s", state.current_screen)
 
     elif command == 'q':
         logger.info("[!] Comando 'quit' enviado.")
@@ -399,7 +406,7 @@ def replay_handler(
 
     try:
         peer_name = clientsock.getpeername()
-        logger.info(f'Iniciando replay para {peer_name}')
+        logger.info('Iniciando replay para %s', peer_name)
         clientsock.sendall(b'\xff\xfd\x18\xff\xfb\x18')
 
         while True:
@@ -430,7 +437,7 @@ def replay_handler(
             state.clear = result.get('clear', state.clear)
 
     except Exception as e:
-        logger.error(f'[!] Erro fora do esperado: {str(e)}')
+        logger.error('[!] Erro fora do esperado: %s', e)
         server_stop.set()
     finally:
         clientsock.close()

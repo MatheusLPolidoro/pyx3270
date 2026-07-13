@@ -678,7 +678,9 @@ def test_exec_command_not_connected(x3270_real_exec_instance, caplog):
 
 @pytest.mark.usefixtures('x3270_real_exec_instance')
 def test_exec_command_keyboard_state_error(x3270_real_exec_instance, caplog):
-    """KeyboardStateError deve ser propagado diretamente sem recovery nem retry."""
+    """
+    KeyboardStateError deve ser propagado diretamente sem recovery nem retry.
+    """
     x3270_real_exec_instance.is_terminated = False
     cmdstr = 'TESTCMD'
 
@@ -698,7 +700,9 @@ def test_exec_command_keyboard_state_error(x3270_real_exec_instance, caplog):
 
 @pytest.mark.usefixtures('x3270_real_exec_instance')
 def test_exec_command_keyboard_state_error_run_raise(x3270_real_exec_instance):
-    """Com run_raise=True, KeyboardStateError deve levantar NotConnectedException."""
+    """
+    Com run_raise=True, KeyboardStateError deve levantar NotConnectedException.
+    """
     x3270_real_exec_instance.is_terminated = False
     cmdstr = 'TESTCMD'
 
@@ -980,6 +984,84 @@ def test_x3270cmd_save_screen_error(x3270_cmd_instance, tmp_path, caplog):
 
     # Verifica se o log de erro foi feito
     assert any('Erro ao salvar tela.' in msg for msg in caplog.messages)
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_plain_text(x3270_cmd_instance):
+    """Sem atributos de campo, o dump deve ser texto puro sem ANSI."""
+    mock_data = ['41 42 43'.encode('utf-8'), '44 45 46'.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == 'ABC\nDEF'
+    x3270_cmd_instance._exec_command.assert_called_once_with(
+        b'ReadBuffer(Ascii)', False
+    )
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_applies_color_and_resets(x3270_cmd_instance):
+    """Campo com cor (SF/42=f2 -> vermelho) deve virar ANSI e resetar."""
+    row = 'SF(c0=c0,42=f2) 41 42'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == '\x1b[31m AB\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_applies_highlight_and_bold(x3270_cmd_instance):
+    """SA(41=f8) marca o campo como intensificado (negrito)."""
+    row = 'SF(c0=c0) SA(41=f8) 41'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == ' \x1b[1mA\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_masks_hidden_field_by_default(x3270_cmd_instance):
+    """Campo non-display (c0 com bits 0x0c) deve ser mascarado por padrão."""
+    row = 'SF(c0=cc) 31 32 33'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == ' ***'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_can_disable_masking(x3270_cmd_instance):
+    """mask_hidden=False mantém o conteúdo real do campo non-display."""
+    row = 'SF(c0=cc) 31 32 33'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log(mask_hidden=False)
+
+    assert result == ' 123'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_error_logs_and_raises(x3270_cmd_instance, caplog):
+    """Erros do comando devem ser logados e relançados."""
+    x3270_cmd_instance._exec_command.side_effect = RuntimeError(
+        'falha ao ler buffer'
+    )
+
+    with caplog.at_level('ERROR'):
+        with pytest.raises(RuntimeError, match='falha ao ler buffer'):
+            x3270_cmd_instance.get_screen_log()
+
+    assert any(
+        'Erro ao gerar dump colorido da tela' in msg for msg in caplog.messages
+    )
 
 
 @pytest.mark.usefixtures('mock_subprocess_popen', 'mock_os_name')

@@ -51,7 +51,7 @@ def test_pyx3270_manager_exec(mock_logger, mock_popen, x3270_cmd_instance):
     manager._exec(command)
 
     mock_logger.info.assert_called_with(
-        f'[+] Enviando comando offline: {command}'
+        '[+] Enviando comando offline: %s', command
     )
     mock_process.stdin.write.assert_called_once_with(f'{command}\n')
     mock_process.stdin.flush.assert_called_once()
@@ -76,7 +76,7 @@ def test_pyx3270_manager_exec_inactive_process(
     manager._exec(command)
 
     mock_logger.info.assert_called_with(
-        '[!] O processo inativo, não é possível enviar comandos.'
+        '[!] O processo inativo, não é possível enviar comandos: %s', command
     )
     mock_process.stdin.write.assert_not_called()
 
