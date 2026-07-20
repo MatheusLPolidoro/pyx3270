@@ -845,6 +845,46 @@ def test_x3270cmd_send_string(x3270_cmd_instance):
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
+def test_x3270cmd_send_string_removes_control_characters(
+    x3270_cmd_instance, caplog
+):
+    x3270_cmd_instance._exec_command.return_value = MagicMock(
+        status_line=b'ok'
+    )
+
+    with patch.object(
+        x3270_cmd_instance, '_exec_command'
+    ) as mock_exec, caplog.at_level('WARNING'):
+        x3270_cmd_instance.send_string('test\x1astring')
+
+        string_command = mock_exec.call_args_list[-2][0][0]
+        assert string_command == b'string("teststring")'
+
+    assert any('Caracteres inválidos' in msg for msg in caplog.messages)
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_x3270cmd_send_string_removes_control_characters_password(
+    x3270_cmd_instance, caplog
+):
+    x3270_cmd_instance._exec_command.return_value = MagicMock(
+        status_line=b'ok'
+    )
+
+    with patch.object(
+        x3270_cmd_instance, '_exec_command'
+    ) as mock_exec, caplog.at_level('WARNING'):
+        x3270_cmd_instance.send_string('secret\x1avalue', password=True)
+
+        string_command = mock_exec.call_args_list[-2][0][0]
+        assert string_command == b'string("secretvalue")'
+
+    assert any(
+        'password' in msg and 'secret' not in msg for msg in caplog.messages
+    )
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_send_string_truncate(x3270_cmd_instance):
     # Simula erro retornado pelo comando String
     x3270_cmd_instance._exec_command.side_effect = CommandError(

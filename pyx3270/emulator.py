@@ -781,17 +781,27 @@ class X3270Cmd(AbstractEmulatorCmd):  # noqa: PLR0904
         if not tosend:
             logger.debug('tosend não é string, send_string não executado.')
             return
-        # Remove caracteres especiais
+        # Remove caracteres especiais e caracteres de controle não
+        # suportados pela interface de scripting do emulador (ex: \x1a).
         original = tosend
-        tosend = re.sub(r"[()\"']", '', tosend)
+        tosend = re.sub(r'[()"\'\x00-\x1f\x7f]', '', tosend)
 
         tosend_str = 'password' if password else tosend
 
         if original != tosend:
-            logger.debug(
-                'String modificada para %s (removidos caracteres especiais)',
-                tosend_str,
-            )
+            if password:
+                logger.warning(
+                    'Caracteres inválidos removidos da string enviada '
+                    '(password).'
+                )
+            else:
+                removed = sorted(set(original) - set(tosend))
+                logger.warning(
+                    'Caracteres inválidos %s removidos da string, '
+                    "valor enviado: '%s'",
+                    [hex(ord(c)) for c in removed],
+                    tosend_str,
+                )
 
         if xpos is not None and ypos is not None:
             logger.info(
