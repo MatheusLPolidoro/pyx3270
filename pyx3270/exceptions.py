@@ -20,3 +20,7 @@ class FieldTruncateError(Exception):
 
 class NotConnectedException(Exception):
     """Não foi possivel conectar com o TerminalClient."""
+
+
+class UnsupportedDistroError(Exception):
+    """Distribuição Linux não suportada pelos binários do pyx3270."""

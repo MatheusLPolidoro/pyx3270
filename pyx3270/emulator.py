@@ -19,6 +19,7 @@ from pyx3270.exceptions import (
     KeyboardStateError,
     NotConnectedException,
     TerminatedError,
+    UnsupportedDistroError,
 )
 from pyx3270.iemulator import (
     AbstractCommand,
@@ -46,6 +47,61 @@ def get_binary_path(*parts):
 
 
 BINARY_FOLDER = get_binary_path()
+
+LINUX_OS_RELEASE_PATH = '/etc/os-release'
+# Mapeia o ID da distro (/etc/os-release) para a subpasta de
+# pyx3270/bin/linux/ que contém os binários compilados/testados para ela.
+LINUX_SUPPORTED_DISTROS = {
+    'ubuntu': (),
+    'nobara': ('nobara',),
+}
+
+
+def get_linux_distro_id() -> str:
+    logger.debug(
+        'Identificando distribuição Linux via %s', LINUX_OS_RELEASE_PATH
+    )
+    try:
+        with open(LINUX_OS_RELEASE_PATH, encoding='utf-8') as fh:
+            os_release = fh.read()
+    except OSError as e:
+        error_msg = (
+            f'Não foi possível ler {LINUX_OS_RELEASE_PATH} para identificar '
+            f'a distribuição Linux: {e}'
+        )
+        logger.error(error_msg)
+        raise UnsupportedDistroError(error_msg) from e
+
+    for line in os_release.splitlines():
+        if line.startswith('ID='):
+            distro_id = line.split('=', 1)[1].strip().strip('"\'').lower()
+            logger.debug('Distribuição Linux detectada: %s', distro_id)
+            return distro_id
+
+    error_msg = f"Campo 'ID' não encontrado em {LINUX_OS_RELEASE_PATH}."
+    logger.error(error_msg)
+    raise UnsupportedDistroError(error_msg)
+
+
+def get_linux_binary_path(*parts: str) -> str:
+    distro_id = get_linux_distro_id()
+    distro_subpath = LINUX_SUPPORTED_DISTROS.get(distro_id)
+
+    if distro_subpath is None:
+        supported = ', '.join(sorted(LINUX_SUPPORTED_DISTROS))
+        error_msg = (
+            f"Distribuição Linux '{distro_id}' não é suportada pelo "
+            f'pyx3270 (distribuições suportadas: {supported}). Abra uma '
+            'issue em '
+            'https://github.com/MatheusLPolidoro/pyx3270/issues '
+            'solicitando suporte a essa distribuição.'
+        )
+        logger.error(error_msg)
+        raise UnsupportedDistroError(error_msg)
+
+    return os.path.join(BINARY_FOLDER, 'linux', *distro_subpath, *parts)
+
+
 MODEL_TYPE = Literal['2', '3', '4', '5']
 MODEL_DIMENSIONS = {
     '2': {
@@ -398,9 +454,18 @@ class Ws3270App(ExecutableApp):
         super().__init__(shell=False, model=model)
 
 
-class X3270App(ExecutableApp):
+class LinuxExecutableApp(ExecutableApp):
+    binary_name: str
+
+    def _get_executable_app_args(self, model: MODEL_TYPE) -> list:
+        return [
+            get_linux_binary_path(self.binary_name)
+        ] + super()._get_executable_app_args(model)
+
+
+class X3270App(LinuxExecutableApp):
+    binary_name = 'x3270'
     args = [
-        get_binary_path('linux', 'x3270'),
         '-xrm',
         'x3270.unlockDelay:False',
         '-script',
@@ -411,9 +476,9 @@ class X3270App(ExecutableApp):
         super().__init__(shell=False, model=model)
 
 
-class S3270App(ExecutableApp):
+class S3270App(LinuxExecutableApp):
+    binary_name = 's3270'
     args = [
-        get_binary_path('linux', 's3270'),
         '-xrm',
         's3270.unlockDelay:False',
     ]

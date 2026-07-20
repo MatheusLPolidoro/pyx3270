@@ -108,6 +108,14 @@ def mock_os_name(monkeypatch):
 
 
 @pytest.fixture
+def mock_linux_distro(monkeypatch):
+    """Fixture para mockar a distro Linux detectada como 'ubuntu'."""
+    monkeypatch.setattr(
+        'pyx3270.emulator.get_linux_distro_id', lambda: 'ubuntu'
+    )
+
+
+@pytest.fixture
 def mock_executable_app_instance(mock_subprocess_popen):
     """Fixture para uma instância mockada de ExecutableApp."""
     with patch.object(
