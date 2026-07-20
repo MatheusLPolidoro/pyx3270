@@ -1,3 +1,16 @@
+Versão 0.1.21 (2026-07-20)
+
+### :zap: NOVAS FUNCIONALIDADES
+
+- Detecção automática da distribuição Linux (via `/etc/os-release`) para selecionar o binário correto de `s3270`/`x3270` (Ubuntu em `pyx3270/bin/linux/`, Nobara em `pyx3270/bin/linux/nobara/`). Distribuições não suportadas agora falham com uma mensagem clara (`UnsupportedDistroError`), listando as distros suportadas e orientando a abrir uma issue no GitHub solicitando suporte.
+
+### :bug: CORREÇÕES
+
+- Adicione suporte a diferentes distribuições Linux, atualmente somente ubunto e nobara.
+- Adicione tratativa para envio de caracteres inválidos no método send_string.
+- `send_string` agora remove caracteres de controle (ex: `\x1a`) além dos caracteres especiais já tratados, evitando falhas na interface de scripting do emulador, e registra um aviso (`warning`) no log quando isso ocorre.
+
+
 Versão 0.1.20 (2026-07-13)
 
 ### :zap: NOVAS FUNCIONALIDADES
