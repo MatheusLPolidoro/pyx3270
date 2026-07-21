@@ -53,6 +53,7 @@ LINUX_OS_RELEASE_PATH = '/etc/os-release'
 # pyx3270/bin/linux/ que contém os binários compilados/testados para ela.
 LINUX_SUPPORTED_DISTROS = {
     'ubuntu': (),
+    'debian': (),
     'nobara': ('nobara',),
 }
 
@@ -86,6 +87,14 @@ def get_linux_distro_id() -> str:
 def get_linux_binary_path(*parts: str) -> str:
     distro_id = get_linux_distro_id()
     distro_subpath = LINUX_SUPPORTED_DISTROS.get(distro_id)
+
+    if distro_subpath is None:
+        logger.warning(
+            "Distribuição Linux '%s' não está mapeada explicitamente; "
+            'tentando usar os binários do Debian como fallback.',
+            distro_id,
+        )
+        distro_subpath = LINUX_SUPPORTED_DISTROS.get('debian')
 
     if distro_subpath is None:
         supported = ', '.join(sorted(LINUX_SUPPORTED_DISTROS))

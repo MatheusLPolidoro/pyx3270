@@ -10,7 +10,6 @@ import pytest
 
 from pyx3270.emulator import (
     BINARY_FOLDER,
-    LINUX_SUPPORTED_DISTROS,
     MODEL_DIMENSIONS,
     X3270,
     AbstractEmulator,
@@ -1198,6 +1197,7 @@ def test_get_linux_distro_id_missing_id_field_raises(monkeypatch):
     ('distro_id', 'expected_subpath'),
     [
         ('ubuntu', os.path.join(BINARY_FOLDER, 'linux', 'x3270')),
+        ('debian', os.path.join(BINARY_FOLDER, 'linux', 'x3270')),
         (
             'nobara',
             os.path.join(BINARY_FOLDER, 'linux', 'nobara', 'x3270'),
@@ -1214,15 +1214,30 @@ def test_get_linux_binary_path_supported_distros(
     assert get_linux_binary_path('x3270') == expected_subpath
 
 
-def test_get_linux_binary_path_unsupported_distro_raises(monkeypatch):
+def test_get_linux_binary_path_unknown_distro_falls_back_to_debian(
+    monkeypatch,
+):
     monkeypatch.setattr('pyx3270.emulator.get_linux_distro_id', lambda: 'arch')
+
+    assert get_linux_binary_path('x3270') == os.path.join(
+        BINARY_FOLDER, 'linux', 'x3270'
+    )
+
+
+def test_get_linux_binary_path_raises_when_debian_fallback_unavailable(
+    monkeypatch,
+):
+    monkeypatch.setattr('pyx3270.emulator.get_linux_distro_id', lambda: 'arch')
+    monkeypatch.setattr(
+        'pyx3270.emulator.LINUX_SUPPORTED_DISTROS',
+        {'ubuntu': (), 'nobara': ('nobara',)},
+    )
 
     with pytest.raises(UnsupportedDistroError) as exc_info:
         get_linux_binary_path('x3270')
 
     error_msg = str(exc_info.value)
     assert 'arch' in error_msg
-    assert all(distro in error_msg for distro in LINUX_SUPPORTED_DISTROS)
     assert 'github.com/MatheusLPolidoro/pyx3270/issues' in error_msg
 
 
@@ -1241,8 +1256,24 @@ def test_x3270app_nobara_uses_nobara_binary(
 
 
 @pytest.mark.usefixtures('mock_subprocess_popen', 'mock_os_name')
+def test_x3270app_unknown_distro_falls_back_to_debian_binary(
+    monkeypatch, mock_subprocess_popen
+):
+    monkeypatch.setattr('pyx3270.emulator.get_linux_distro_id', lambda: 'arch')
+
+    X3270App(model='2')
+
+    args, _ = mock_subprocess_popen.call_args
+    assert os.path.join('linux', 'x3270') in args[0][0]
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen', 'mock_os_name')
 def test_x3270app_unsupported_distro_raises(monkeypatch):
     monkeypatch.setattr('pyx3270.emulator.get_linux_distro_id', lambda: 'arch')
+    monkeypatch.setattr(
+        'pyx3270.emulator.LINUX_SUPPORTED_DISTROS',
+        {'ubuntu': (), 'nobara': ('nobara',)},
+    )
 
     with pytest.raises(UnsupportedDistroError):
         X3270App(model='2')
