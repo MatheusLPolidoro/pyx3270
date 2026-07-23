@@ -202,9 +202,10 @@ def record_handler(
                 channel[s].sendall(data)
 
             if emu.tls:
-                buffer = emu.readbuffer('ebcdic')
+                buffer = emu.try_read_screen_buffer_ebcdic()
                 if (
-                    not buffer.replace(' ', '').replace('0', '')
+                    buffer is None
+                    or not buffer.replace(' ', '').replace('0', '')
                     or not save
                     or buffer in screens
                 ):

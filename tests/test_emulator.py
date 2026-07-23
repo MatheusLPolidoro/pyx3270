@@ -2,7 +2,9 @@ import errno
 import os
 import socket
 import subprocess
+import threading
 from itertools import count
+from time import sleep, time
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call, mock_open, patch
 
@@ -188,6 +190,43 @@ def test_executable_app_close_already_terminated(mock_subprocess_popen):
 
     mock_process.terminate.assert_not_called()  # Não deve chamar terminate
     assert return_code == 1
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen')
+def test_executable_app_close_closes_pipes_explicitly(mock_subprocess_popen):
+    """close() deve fechar stdin/stdout/stderr explicitamente -- senão o
+    fechamento fica pendente até o GC coletar o Popen, e um processo
+    morto por fora (ex.: usuário fechando a janela do emulador) vira um
+    'Exception ignored' barulhento quando isso acontece sem controle."""
+    app = ExecutableApp(model='2')
+    mock_process = mock_subprocess_popen.return_value
+    mock_process.poll.return_value = 1
+    mock_process.returncode = 1
+
+    app.close()
+
+    mock_process.stdin.close.assert_called_once()
+    mock_process.stdout.close.assert_called_once()
+    mock_process.stderr.close.assert_called_once()
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen')
+def test_executable_app_close_ignores_broken_pipe_on_stdin_close(
+    mock_subprocess_popen,
+):
+    """Se o processo já morreu (pipe quebrado), fechar o stdin não pode
+    propagar erro -- close() precisa continuar e retornar normalmente."""
+    app = ExecutableApp(model='2')
+    mock_process = mock_subprocess_popen.return_value
+    mock_process.poll.return_value = 1
+    mock_process.returncode = 1
+    mock_process.stdin.close.side_effect = BrokenPipeError('pipe morto')
+
+    return_code = app.close()
+
+    assert return_code == 1
+    mock_process.stdout.close.assert_called_once()
+    mock_process.stderr.close.assert_called_once()
 
 
 @pytest.mark.usefixtures('mock_subprocess_popen')
@@ -717,6 +756,156 @@ def test_exec_command_keyboard_state_error_run_raise(x3270_real_exec_instance):
             x3270_real_exec_instance._exec_command(cmdstr, run_raise=True)
 
 
+@pytest.mark.usefixtures('x3270_real_exec_instance')
+def test_exec_command_serializes_concurrent_calls(x3270_real_exec_instance):
+    """Duas threads chamando _exec_command ao mesmo tempo não podem
+    executar a seção de escrever comando/ler resposta de forma
+    entrelaçada -- caso contrário, a resposta de uma chamada pode ser
+    lida pela outra (ex.: pyx3270 record com duas conexões concorrentes
+    usando a mesma instância de emulador)."""
+    x3270 = x3270_real_exec_instance
+    x3270.is_terminated = False
+    events = []
+
+    def make_execute(name):
+        def execute():
+            events.append(f'{name}-enter')
+            sleep(0.05)
+            events.append(f'{name}-exit')
+            return True
+
+        return execute
+
+    def command_factory(app, cmdstr):
+        name = cmdstr.decode('utf-8')
+        cmd = MagicMock()
+        cmd.execute.side_effect = make_execute(name)
+        cmd.status_line = b''
+        return cmd
+
+    with patch('pyx3270.emulator.Command', side_effect=command_factory):
+        t1 = threading.Thread(target=x3270._exec_command, args=(b'CmdA',))
+        t2 = threading.Thread(target=x3270._exec_command, args=(b'CmdB',))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+
+    # Uma execução tem que terminar completamente antes da outra começar --
+    # nunca entrelaçadas (ex.: ['A-enter', 'B-enter', 'A-exit', 'B-exit']).
+    assert events in (
+        ['CmdA-enter', 'CmdA-exit', 'CmdB-enter', 'CmdB-exit'],
+        ['CmdB-enter', 'CmdB-exit', 'CmdA-enter', 'CmdA-exit'],
+    )
+
+
+@pytest.mark.usefixtures('x3270_real_exec_instance')
+def test_try_read_screen_buffer_ebcdic_skips_when_lock_busy(
+    x3270_real_exec_instance,
+):
+    """Se o pipe do emulador já estiver em uso por OUTRA thread (ex.: um
+    connect_host ainda em andamento), a leitura de buffer da gravação
+    não pode travar esperando -- isso pararia o repasse de bytes do
+    proxy, que é justamente o que a conexão em andamento precisa para
+    terminar de negociar. (RLock é reentrante só na mesma thread, então
+    o lock precisa ser tomado por uma thread diferente para valer.)"""
+    x3270 = x3270_real_exec_instance
+    lock_held = threading.Event()
+    release_lock = threading.Event()
+
+    def hold_lock():
+        with x3270._command_lock:
+            lock_held.set()
+            release_lock.wait(timeout=2)
+
+    t = threading.Thread(target=hold_lock)
+    t.start()
+    lock_held.wait(timeout=2)
+
+    try:
+        with patch.object(X3270, 'readbuffer') as mock_readbuffer:
+            result = x3270.try_read_screen_buffer_ebcdic()
+    finally:
+        release_lock.set()
+        t.join()
+
+    assert result is None
+    mock_readbuffer.assert_not_called()
+
+
+@pytest.mark.usefixtures('x3270_real_exec_instance')
+def test_try_read_screen_buffer_ebcdic_reads_when_lock_free(
+    x3270_real_exec_instance,
+):
+    """Com o pipe livre, delega normalmente para readbuffer('ebcdic')."""
+    x3270 = x3270_real_exec_instance
+    with patch.object(
+        X3270, 'readbuffer', return_value='SCREEN'
+    ) as mock_readbuffer:
+        result = x3270.try_read_screen_buffer_ebcdic()
+
+    assert result == 'SCREEN'
+    mock_readbuffer.assert_called_once_with('ebcdic')
+
+
+@pytest.mark.usefixtures('x3270_real_exec_instance')
+def test_try_read_screen_buffer_ebcdic_reentrant_with_exec_command(
+    x3270_real_exec_instance,
+):
+    """readbuffer() chama _exec_command(), que também adquire o mesmo
+    lock -- precisa ser reentrante (RLock) para não travar na própria
+    thread que já segurou o lock em try_read_screen_buffer_ebcdic."""
+    x3270 = x3270_real_exec_instance
+    x3270.is_terminated = False
+
+    def command_factory(app, cmdstr):
+        cmd = MagicMock()
+        cmd.execute.return_value = True
+        cmd.status_line = b''
+        cmd.data = [b'00 00']
+        return cmd
+
+    with patch('pyx3270.emulator.Command', side_effect=command_factory):
+        result = x3270.try_read_screen_buffer_ebcdic()
+
+    assert result == '00 00'
+
+
+@pytest.mark.usefixtures('x3270_real_exec_instance')
+def test_try_read_screen_buffer_ebcdic_never_blocks_pending_operation(
+    x3270_real_exec_instance,
+):
+    """Enquanto uma operação lenta (ex.: connect_host aguardando
+    negociação) segura o lock em outra thread, o polling de gravação não
+    pode ficar parado esperando -- esse era o bug real: o laço de
+    repasse de bytes do proxy travava, e a própria conexão em andamento
+    nunca recebia os bytes de que precisava para terminar."""
+    x3270 = x3270_real_exec_instance
+    wait_timeout = 2
+    max_non_blocking_elapsed = 0.5
+    slow_op_started = threading.Event()
+    release_slow_op = threading.Event()
+
+    def slow_op():
+        with x3270._command_lock:
+            slow_op_started.set()
+            release_slow_op.wait(timeout=wait_timeout)
+
+    t = threading.Thread(target=slow_op)
+    t.start()
+    slow_op_started.wait(timeout=wait_timeout)
+
+    start = time()
+    result = x3270.try_read_screen_buffer_ebcdic()
+    elapsed = time() - start
+
+    release_slow_op.set()
+    t.join()
+
+    assert result is None
+    assert elapsed < max_non_blocking_elapsed
+
+
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_x3270cmd_string_found_error(x3270_cmd_instance):
     """Testa string_found quando _exec_command falha."""
@@ -1057,14 +1246,15 @@ def test_get_screen_log_applies_color_and_resets(x3270_cmd_instance):
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
 def test_get_screen_log_applies_highlight_and_bold(x3270_cmd_instance):
-    """SA(41=f8) marca o campo como intensificado (negrito)."""
+    """SA(41=f8) marca o campo como intensificado (negrito), mantendo a cor
+    base (verde) derivada do campo não protegido/não intensificado."""
     row = 'SF(c0=c0) SA(41=f8) 41'
     mock_data = [row.encode('utf-8')]
     x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
 
     result = x3270_cmd_instance.get_screen_log()
 
-    assert result == ' \x1b[1mA\x1b[0m'
+    assert result == '\x1b[32m \x1b[1;32mA\x1b[0m'
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -1076,7 +1266,7 @@ def test_get_screen_log_masks_hidden_field_by_default(x3270_cmd_instance):
 
     result = x3270_cmd_instance.get_screen_log()
 
-    assert result == ' ***'
+    assert result == '\x1b[32m ***\x1b[0m'
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -1088,7 +1278,93 @@ def test_get_screen_log_can_disable_masking(x3270_cmd_instance):
 
     result = x3270_cmd_instance.get_screen_log(mask_hidden=False)
 
-    assert result == ' 123'
+    assert result == '\x1b[32m 123\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_default_color_unprotected_normal_is_green(
+    x3270_cmd_instance,
+):
+    """Sem SF/SA 42=fX, campo não protegido e normal vira verde (padrão do
+    x3270 nativo, igual ao export de printtext html)."""
+    row = 'SF(c0=c0) 41'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == '\x1b[32m A\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_default_color_unprotected_intensified_is_red(
+    x3270_cmd_instance,
+):
+    """Campo não protegido e intensificado (bits 0x08 do c0) vira vermelho
+    e negrito, sem precisar de SF/SA 42=fX explícito."""
+    row = 'SF(c0=c8) 41'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == '\x1b[1;31m A\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_default_color_protected_normal_is_blue(
+    x3270_cmd_instance,
+):
+    """Campo protegido (bit 0x20 do c0) e normal vira azul."""
+    row = 'SF(c0=e0) 41'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == '\x1b[34m A\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_default_color_protected_intensified_is_white(
+    x3270_cmd_instance,
+):
+    """Campo protegido e intensificado vira branco e negrito."""
+    row = 'SF(c0=e8) 41'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == '\x1b[1;37m A\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_explicit_color_overrides_default(x3270_cmd_instance):
+    """SF/SA 42=fX explícito continua tendo prioridade sobre a cor base
+    derivada de protegido/intensificado."""
+    row = 'SF(c0=c0,42=f2) 41'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == '\x1b[31m A\x1b[0m'
+
+
+@pytest.mark.usefixtures('x3270_cmd_instance')
+def test_get_screen_log_explicit_neutral_f0_disables_default_color(
+    x3270_cmd_instance,
+):
+    """42=f0 (neutral) é uma escolha explícita de manter a cor padrão do
+    terminal e não deve cair no fallback de cor base."""
+    row = 'SF(c0=c0,42=f0) 41'
+    mock_data = [row.encode('utf-8')]
+    x3270_cmd_instance._exec_command.return_value = MagicMock(data=mock_data)
+
+    result = x3270_cmd_instance.get_screen_log()
+
+    assert result == ' A'
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')
@@ -1641,11 +1917,43 @@ def test_terminate_socket_error_not_econnreset(
     sock_err.errno = errno.EPERM  # qualquer valor != ECONNRESET
     x3270.quit = MagicMock(side_effect=sock_err)
 
+    x3270.app.close = MagicMock()
+
     with caplog.at_level('ERROR'), pytest.raises(ConnectionError):
         x3270.terminate()
 
     # Verifica log de erro
     assert any('Erro de socket ao terminar' in msg for msg in caplog.messages)
+    # Mesmo levantando ConnectionError, o app tem que ser fechado -- não
+    # pode deixar o processo/pipes pendurados.
+    x3270.app.close.assert_called_once()
+
+
+@pytest.mark.usefixtures('x3270_emulator_instance')
+def test_terminate_broken_pipe_on_ignore_still_closes_app(
+    x3270_emulator_instance, caplog
+):
+    """Cenário real: processo já morto por fora (ex.: usuário fechou a
+    janela do emulador) -- tanto quit() quanto o ignore() de recuperação
+    falham com BrokenPipeError. Isso não pode impedir self.app.close()
+    de rodar, senão os pipes ficam pendurados até o GC coletar o Popen e
+    gerar um "Exception ignored" fora do nosso controle."""
+    x3270 = x3270_emulator_instance
+    x3270.is_terminated = False
+    x3270.app.close = MagicMock()
+
+    x3270.quit = MagicMock(side_effect=BrokenPipeError)
+    x3270.ignore = MagicMock(side_effect=BrokenPipeError)
+
+    with caplog.at_level('WARNING'):
+        x3270.terminate()
+
+    assert any(
+        'BrokenPipeError ao enviar ignore, ignorando' in msg
+        for msg in caplog.messages
+    )
+    x3270.app.close.assert_called_once()
+    assert x3270.is_terminated is True
 
 
 @pytest.mark.usefixtures('x3270_emulator_instance')
@@ -1780,6 +2088,22 @@ def test_x3270_reconnect_host_success(x3270_emulator_instance):
 
 
 @pytest.mark.usefixtures('x3270_emulator_instance')
+def test_x3270_reconnect_host_success_does_not_spawn_new_instance(
+    x3270_emulator_instance,
+):
+    """Reconnect nativo bem-sucedido não pode criar um X3270/processo
+    novo -- senão o processo antigo (ainda funcionando) fica órfão."""
+    x3270_emulator_instance._exec_command.return_value = MagicMock(
+        status_line=b'ok'
+    )
+
+    with patch('pyx3270.emulator.X3270') as mock_x3270_class:
+        x3270_emulator_instance.reconnect_host()
+
+        mock_x3270_class.assert_not_called()
+
+
+@pytest.mark.usefixtures('x3270_emulator_instance')
 def test_x3270_reconnect_host_failure(x3270_emulator_instance):
     """Testa reconnect_host com falha."""
     x3270_emulator_instance._exec_command.side_effect = CommandError(
@@ -1789,6 +2113,77 @@ def test_x3270_reconnect_host_failure(x3270_emulator_instance):
         x3270_emulator_instance._exec_command()
     x3270_emulator_instance.reconnect_host()
     x3270_emulator_instance._exec_command.assert_called_with(b'quit()', False)
+
+
+@pytest.mark.usefixtures('x3270_emulator_instance')
+def test_x3270_reconnect_host_failure_terminates_before_new_instance(
+    x3270_emulator_instance,
+):
+    """Quando o reconnect nativo falha, a instância antiga precisa ser
+    encerrada antes de uma nova ser criada (fallback), para não deixar
+    o processo antigo órfão."""
+    x3270_emulator_instance._exec_command.side_effect = CommandError(
+        'Reconnect failed'
+    )
+
+    with patch('pyx3270.emulator.X3270') as mock_x3270_class, patch.object(
+        x3270_emulator_instance, 'terminate'
+    ) as mock_terminate:
+        x3270_emulator_instance.reconnect_host()
+
+        mock_terminate.assert_called_once()
+        mock_x3270_class.assert_called_once()
+
+
+@pytest.mark.usefixtures('x3270_real_exec_instance')
+def test_reconnect_host_blocks_concurrent_buffer_reads_during_transition(
+    x3270_real_exec_instance,
+):
+    """Entre o terminate() da instância antiga e o __dict__.update() com
+    a nova, self fica num estado intermediário (is_terminated=True) --
+    isso não pode vazar para outra thread que compartilha o mesmo emu
+    (ex.: record_handler de uma conexão nova aceita durante a troca).
+    Ela precisa ver 'ocupado' (None) e pular, não estourar
+    TerminatedError -- esse foi o bug real observado em produção."""
+    x3270 = x3270_real_exec_instance
+    x3270.is_terminated = False
+    x3270.host = 'host'
+    x3270.port = 992
+    x3270.tls = True
+    x3270.mode_3270 = True
+
+    reached_new_instance = threading.Event()
+    release_new_instance = threading.Event()
+    wait_timeout = 2
+    fake_new_instance = SimpleNamespace(connect_host=lambda *a, **kw: None)
+
+    def slow_new_x3270(visible, model):
+        reached_new_instance.set()
+        release_new_instance.wait(timeout=wait_timeout)
+        return fake_new_instance
+
+    def command_factory(app, cmdstr):
+        cmd = MagicMock()
+        cmd.execute.side_effect = CommandError('reconnect failed')
+        cmd.status_line = b''
+        return cmd
+
+    with patch('pyx3270.emulator.Command', side_effect=command_factory), patch(
+        'pyx3270.emulator.X3270', side_effect=slow_new_x3270
+    ):
+        t = threading.Thread(target=x3270.reconnect_host)
+        t.start()
+        reached_new_instance.wait(timeout=wait_timeout)
+
+        # Nesse ponto, terminate() já rodou (is_terminated=True) mas a
+        # troca para a instância nova ainda não aconteceu.
+        assert x3270.is_terminated is True
+        result = x3270.try_read_screen_buffer_ebcdic()
+
+        release_new_instance.set()
+        t.join()
+
+    assert result is None
 
 
 # Teste para _exec_command (embora simples, para cobertura)

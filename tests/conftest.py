@@ -189,7 +189,8 @@ def record_dependencies():
 
     # Patches globais dentro da fixture
     with patch('pyx3270.cli.X3270', return_value=deps.x3270), patch(
-        'pyx3270.cli.start_server_thread', return_value=deps.server_thread
+        'pyx3270.cli.start_server_thread',
+        return_value=(deps.server_thread, 3270, MagicMock()),
     ), patch('pyx3270.cli.control_replay', deps.control_replay), patch(
         'rich.print', deps.rich_print
     ):
@@ -229,7 +230,7 @@ def replay_dependencies(tmp_path, monkeypatch):
     def fake_start_server_thread(*args, **kwargs):
         thread = threading.Thread(target=lambda: None, daemon=True)
         thread.start()
-        return thread
+        return thread, port, MagicMock()
 
     monkeypatch.setattr(cli, 'start_server_thread', fake_start_server_thread)
 

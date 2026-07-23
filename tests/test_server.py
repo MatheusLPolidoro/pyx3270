@@ -359,6 +359,38 @@ def test_record_handler_basic_flow(record_mocks):
     mock_serversock.close.assert_called_once()
 
 
+def test_record_handler_tls_uses_non_blocking_buffer_read(record_mocks):
+    """Com TLS, o record_handler tem que usar
+    try_read_screen_buffer_ebcdic() (não bloqueante) em vez de chamar
+    readbuffer() direto -- se o pipe do emulador estiver ocupado por
+    outra operação (ex.: um connect_host ainda em andamento), o laço de
+    repasse de bytes não pode travar esperando; ele só pula a leitura
+    dessa iteração e continua."""
+    mock_clientsock = record_mocks.clientsock
+    mock_serversock = record_mocks.serversock
+    record_mocks.connect_serversock.return_value = mock_serversock
+    mock_emu = MagicMock(spec=X3270)
+    mock_emu.tls = True
+
+    record_mocks.select.side_effect = [
+        ([mock_clientsock], [], []),
+        ([mock_serversock], [], []),
+        ConnectionResetError,
+    ]
+    mock_clientsock.recv.return_value = b'client_req'
+    mock_serversock.recv.return_value = b'server_resp'
+
+    # Primeira iteração: pipe ocupado (ex.: connect_host em andamento).
+    # Segunda: buffer disponível normalmente.
+    mock_emu.try_read_screen_buffer_ebcdic.side_effect = [None, '00 00']
+
+    server.record_handler(mock_clientsock, mock_emu, 'host:3270', '/fake/dir')
+
+    expected_calls = 2
+    assert mock_emu.try_read_screen_buffer_ebcdic.call_count == expected_calls
+    mock_emu.readbuffer.assert_not_called()
+
+
 @patch('pyx3270.server.connect_serversock')
 def test_record_handler_connect_fail(mock_connect_serversock):
     """Testa record_handler quando a conexão inicial falha."""

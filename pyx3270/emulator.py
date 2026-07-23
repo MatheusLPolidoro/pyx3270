@@ -6,6 +6,7 @@ import re
 import socket
 import subprocess
 import sys
+import threading
 from contextlib import closing
 from functools import cache
 from importlib.resources import files
@@ -194,12 +195,32 @@ class ExecutableApp(AbstractExecutableApp):
         if self.subprocess and self.subprocess.poll() is None:
             logger.debug('Terminando processo em execução')
             self.subprocess.terminate()
+        self._close_pipes()
         return_code = self.subprocess.returncode or self.subprocess.poll()
         return_code = return_code if return_code is not None else 0
         logger.info(
             'Aplicativo fechado com código de retorno: %s', return_code
         )
         return return_code
+
+    def _close_pipes(self) -> None:
+        # Fecha os pipes explicitamente aqui, com o erro tratado por nós
+        # (ex.: processo morto por fora, como o usuário fechando a janela
+        # do emulador). Sem isso, o fechamento fica pendente até o GC
+        # coletar o Popen, e um flush de pipe já quebrado nesse momento
+        # vira um "Exception ignored in: <BufferedWriter>" barulhento e
+        # fora do nosso controle.
+        for stream in (
+            self.subprocess.stdin,
+            self.subprocess.stdout,
+            self.subprocess.stderr,
+        ):
+            if stream is None:
+                continue
+            try:
+                stream.close()
+            except (BrokenPipeError, OSError, ValueError) as e:
+                logger.debug('Pipe já estava quebrado ao fechar: %s', e)
 
     def write(self, data: str):
         logger.debug('Escrevendo dados para o processo: %s', data)
@@ -537,32 +558,61 @@ _BASIC_DISPLAY_BITS_MASK = 0x0C
 _BASIC_INTENSIFIED_BITS = 0x08
 _BASIC_NON_DISPLAY_BITS = 0x0C
 
+# Bit de proteção (editável/não-editável) do atributo básico 3270 (c0).
+_BASIC_PROTECTED_BIT = 0x20
+
+# Cor base (usada quando o campo não tem SF/SA 42=fX explícito), derivada da
+# combinação clássica protegido x intensificado do atributo básico do 3270.
+# É o mesmo esquema aplicado pelo renderizador nativo do x3270 (o que aparece
+# na tela do emulador e no export de save_screen/printtext html): campos
+# protegidos (não-editáveis) em azul/branco, editáveis em verde/vermelho.
+_BASE_COLOR_ANSI = {
+    (False, False): 32,  # não protegido, normal -> verde
+    (False, True): 31,  # não protegido, intensificado -> vermelho
+    (True, False): 34,  # protegido, normal -> azul
+    (True, True): 37,  # protegido, intensificado -> branco
+}
+
 
 class _FieldStyle:
     """Estado de estilo do campo 3270 (cor/destaque) durante o dump de tela."""
 
-    __slots__ = ('fg', 'highlight', 'bold', 'hidden')
+    __slots__ = (
+        'fg',
+        'fg_explicit',
+        'highlight',
+        'bold',
+        'hidden',
+        'protected',
+        'basic_intensified',
+        'in_field',
+    )
 
     def __init__(self) -> None:
-        self.fg = None
-        self.highlight = None
-        self.bold = False
-        self.hidden = False
+        self.reset()
 
     def reset(self) -> None:
         self.fg = None
+        self.fg_explicit = False
         self.highlight = None
         self.bold = False
         self.hidden = False
+        self.protected = False
+        self.basic_intensified = False
+        self.in_field = False
 
     def apply(self, attrs: dict) -> None:
         basic = attrs.get('c0')
         if basic is not None:
-            display_bits = int(basic, 16) & _BASIC_DISPLAY_BITS_MASK
-            self.bold = self.bold or display_bits == _BASIC_INTENSIFIED_BITS
+            basic_value = int(basic, 16)
+            display_bits = basic_value & _BASIC_DISPLAY_BITS_MASK
+            self.basic_intensified = display_bits == _BASIC_INTENSIFIED_BITS
+            self.bold = self.bold or self.basic_intensified
             self.hidden = (
                 self.hidden or display_bits == _BASIC_NON_DISPLAY_BITS
             )
+            self.protected = bool(basic_value & _BASIC_PROTECTED_BIT)
+            self.in_field = True
 
         highlight = attrs.get('41')
         if highlight in _FIELD_HIGHLIGHT_ANSI:
@@ -572,9 +622,11 @@ class _FieldStyle:
             else:
                 self.highlight = code
 
-        color = attrs.get('42')
-        if color in _FIELD_COLOR_ANSI:
-            self.fg = _FIELD_COLOR_ANSI[color]
+        if '42' in attrs:
+            self.fg_explicit = True
+            color = attrs['42']
+            if color in _FIELD_COLOR_ANSI:
+                self.fg = _FIELD_COLOR_ANSI[color]
 
     def sgr(self) -> str | None:
         codes = []
@@ -582,8 +634,14 @@ class _FieldStyle:
             codes.append('1')
         if self.highlight:
             codes.append(str(self.highlight))
-        if self.fg is not None:
-            codes.append(str(self.fg))
+        if self.fg_explicit:
+            fg = self.fg
+        elif self.in_field:
+            fg = _BASE_COLOR_ANSI[(self.protected, self.basic_intensified)]
+        else:
+            fg = None
+        if fg is not None:
+            codes.append(str(fg))
         return f'\x1b[{";".join(codes)}m' if codes else None
 
 
@@ -1054,6 +1112,14 @@ class X3270(AbstractEmulator, X3270Cmd):
         self.tls = None
         self.mode_3270 = None
         self.last_command_time = None
+        # Protege a comunicação com o processo do emulador (protocolo de
+        # escrever-comando/ler-resposta sobre um único pipe/socket) contra
+        # chamadas concorrentes de múltiplas threads -- ex.: pyx3270 record
+        # com mais de uma conexão de cliente aceita ao mesmo tempo. RLock
+        # (e não Lock) porque try_read_screen_buffer_ebcdic precisa poder
+        # adquiri-lo e, dentro dele, chamar um método que adquire de novo
+        # na mesma thread.
+        self._command_lock = threading.RLock()
         logger.debug('X3270 inicializado')
 
     def _create_app(self) -> None:
@@ -1083,10 +1149,11 @@ class X3270(AbstractEmulator, X3270Cmd):
             logger.error(error_msg)
             raise TerminatedError
         try:
-            cmd = Command(self.app, cmdstr)
-            cmd.execute()
-            self.status = Status(cmd.status_line)
-            self.last_command_time = time()
+            with self._command_lock:
+                cmd = Command(self.app, cmdstr)
+                cmd.execute()
+                self.status = Status(cmd.status_line)
+                self.last_command_time = time()
             logger.debug('Comando executado, status: %s', self.status)
             return cmd
         except NotConnectedException:
@@ -1100,22 +1167,37 @@ class X3270(AbstractEmulator, X3270Cmd):
 
     def terminate(self) -> None:
         logger.info('Terminando emulador')
-        if not self.is_terminated:
-            try:
-                logger.debug('Enviando comando quit')
-                self.quit()
-            except BrokenPipeError:
-                logger.warning('BrokenPipeError ao enviar quit, ignorando')
-                self.ignore()
-            except socket.error as ex:
-                if ex.errno != errno.ECONNRESET:
-                    logger.error('Erro de socket ao terminar: %s', ex)
-                    raise ConnectionError
-                logger.warning('Erro de conexão resetada: %s', ex)
-
-        logger.debug('Fechando aplicativo')
-        self.app.close()
-        self.is_terminated = True
+        try:
+            if not self.is_terminated:
+                try:
+                    logger.debug('Enviando comando quit')
+                    self.quit()
+                except BrokenPipeError:
+                    logger.warning('BrokenPipeError ao enviar quit, ignorando')
+                    try:
+                        self.ignore()
+                    except BrokenPipeError:
+                        # O pipe já estava quebrado (ex.: processo morto
+                        # por fora, como fechar a janela do emulador) --
+                        # essa segunda tentativa falhar não pode impedir
+                        # o fechamento do app logo abaixo.
+                        logger.warning(
+                            'BrokenPipeError ao enviar ignore, ignorando'
+                        )
+                except socket.error as ex:
+                    if ex.errno != errno.ECONNRESET:
+                        logger.error('Erro de socket ao terminar: %s', ex)
+                        raise ConnectionError
+                    logger.warning('Erro de conexão resetada: %s', ex)
+        finally:
+            # Sempre fecha o app, mesmo se a tentativa de encerrar com
+            # educação (Quit/Ignore) acima tiver falhado -- caso
+            # contrário os pipes do processo ficam pendentes até o GC
+            # coletar o Popen, gerando um "Exception ignored" fora do
+            # nosso controle quando isso acontecer.
+            logger.debug('Fechando aplicativo')
+            self.app.close()
+            self.is_terminated = True
         logger.info('Emulador terminado com sucesso')
 
     def is_connected(self) -> bool:
@@ -1173,18 +1255,65 @@ class X3270(AbstractEmulator, X3270Cmd):
             logger.error('Erro ao conectar: %s', e)
             raise
 
+    def try_read_screen_buffer_ebcdic(self) -> str | None:
+        """Tenta ler o buffer de tela (ReadBuffer(Ebcdic)) sem bloquear.
+
+        Usado pelo polling de gravação (pyx3270 record): se outra
+        operação já estiver usando o pipe do emulador (ex.: um
+        connect_host/reconnect_host ainda em andamento), essa chamada
+        não pode travar esperando -- isso paralisaria o repasse de bytes
+        do proxy, que é justamente o que a conexão em andamento precisa
+        para terminar de negociar. Retorna None se o pipe estiver
+        ocupado ou se a instância estiver momentaneamente terminada
+        (ex.: troca de instância em andamento em reconnect_host); quem
+        chama deve simplesmente tentar de novo na próxima iteração.
+        """
+        if not self._command_lock.acquire(blocking=False):
+            logger.debug(
+                'Pipe do emulador ocupado, pulando leitura de buffer '
+                'desta iteração'
+            )
+            return None
+        try:
+            return self.readbuffer('ebcdic')
+        except TerminatedError:
+            logger.debug(
+                'Instância momentaneamente terminada, pulando leitura '
+                'de buffer desta iteração'
+            )
+            return None
+        finally:
+            self._command_lock.release()
+
     def reconnect_host(self) -> 'X3270':
         logger.info('Tentando reconectar ao host')
-        try:
-            logger.debug('Executando comando reconnect')
-            self.reconnect()
-            logger.info('Reconexão bem-sucedida')
-            return self
-        except Exception as e:
-            logger.warning('Erro durante reconexão: %s', e)
+        # Segura o lock durante toda a operação (não só nos comandos
+        # individuais): entre o terminate() da instância antiga e o
+        # __dict__.update() com a nova, self fica num estado
+        # intermediário (ex.: is_terminated=True) -- se outra thread
+        # (ex.: record_handler de uma conexão nova aceita nesse meio
+        # tempo) tentar usar o mesmo emu compartilhado, precisa ver
+        # "ocupado" e pular, não estourar TerminatedError.
+        with self._command_lock:
+            try:
+                logger.debug('Executando comando reconnect')
+                self.reconnect()
+                logger.info('Reconexão bem-sucedida')
+                return self
+            except Exception as e:
+                logger.warning('Erro durante reconexão: %s', e)
+
+            # Só chega aqui se o reconnect() nativo falhou -- o processo
+            # atual é encerrado (evita deixá-lo órfão) antes de criar
+            # um novo. É melhor esforço: uma falha ao terminar uma
+            # instância que já sabemos estar quebrada não pode impedir
+            # a criação da nova.
             logger.debug('Terminando instância atual')
-            self.terminate()
-        finally:
+            try:
+                self.terminate()
+            except Exception as e:
+                logger.warning('Erro ao terminar instância anterior: %s', e)
+
             logger.info('Criando nova instância para reconexão')
             args = self.host, self.port, self.tls, self.mode_3270
             logger.debug('Argumentos para nova instância: %s', args)
@@ -1195,4 +1324,4 @@ class X3270(AbstractEmulator, X3270Cmd):
             self.__dict__.update(new_instance.__dict__)
 
             logger.debug('Atributos de self atualizados com sucesso')
-            return self
+        return self
