@@ -17,11 +17,14 @@ from pyx3270.emulator import (
     AbstractEmulator,
     AbstractEmulatorCmd,
     AbstractExecutableApp,
+    C3270MacApp,
     Command,
     CommandError,
     ExecutableApp,
     KeyboardStateError,
     S3270App,
+    S3270MacApp,
+    ScriptPortApp,
     Status,
     Wc3270App,
     Ws3270App,
@@ -29,6 +32,7 @@ from pyx3270.emulator import (
     X3270Cmd,
     get_linux_binary_path,
     get_linux_distro_id,
+    get_macos_binary_path,
 )
 from pyx3270.exceptions import (
     FieldTruncateError,
@@ -53,6 +57,11 @@ def test_app_implements_executable_app():
     assert issubclass(Ws3270App, ExecutableApp)
     assert issubclass(X3270App, ExecutableApp)
     assert issubclass(S3270App, ExecutableApp)
+    assert issubclass(S3270MacApp, ExecutableApp)
+    assert issubclass(C3270MacApp, ExecutableApp)
+    # wc3270 (Windows) e c3270 (macOS) compartilham a base de socket
+    assert issubclass(Wc3270App, ScriptPortApp)
+    assert issubclass(C3270MacApp, ScriptPortApp)
 
 
 @pytest.mark.usefixtures('mock_subprocess_popen', 'mock_os_name')
@@ -93,8 +102,9 @@ def test_executable_app_init_spawn_windows(mock_subprocess_popen, monkeypatch):
 @pytest.mark.usefixtures('monkeypatch')
 def test_create_app_linux_visible(monkeypatch):
     """Cobre _create_app para Linux visível (X3270App)."""
-    # Força o OS como posix
+    # Força o OS como posix/Linux (também quando rodando no macOS)
     monkeypatch.setattr('os.name', 'posix')
+    monkeypatch.setattr('sys.platform', 'linux')
 
     with patch(
         'pyx3270.emulator.X3270App', return_value=MagicMock()
@@ -110,6 +120,7 @@ def test_create_app_linux_visible(monkeypatch):
 def test_create_app_linux_non_visible(monkeypatch):
     """Cobre _create_app via __init__ para Linux não visível (S3270App)."""
     monkeypatch.setattr('os.name', 'posix')
+    monkeypatch.setattr('sys.platform', 'linux')
 
     with patch(
         'pyx3270.emulator.S3270App', return_value=MagicMock()
@@ -126,6 +137,7 @@ def test_create_app_linux_non_visible(monkeypatch):
 def test_create_app_exception(monkeypatch, caplog):
     """Cobre o bloco except Exception do _create_app."""
     monkeypatch.setattr('os.name', 'posix')
+    monkeypatch.setattr('sys.platform', 'linux')
 
     # Força S3270App a lançar exceção
     with patch(
@@ -1553,6 +1565,283 @@ def test_x3270app_unsupported_distro_raises(monkeypatch):
 
     with pytest.raises(UnsupportedDistroError):
         X3270App(model='2')
+
+
+# --- macOS -----------------------------------------------------------------
+
+
+@pytest.mark.usefixtures('mock_macos')
+def test_create_app_macos_visible():
+    """Cobre _create_app para macOS visível (C3270MacApp)."""
+    with patch(
+        'pyx3270.emulator.C3270MacApp', return_value=MagicMock()
+    ) as mock_c3270:
+        emulator = X3270(visible=True)
+
+    mock_c3270.assert_called_once_with(emulator.model)
+    assert emulator.app == mock_c3270.return_value
+
+
+@pytest.mark.usefixtures('mock_macos')
+def test_create_app_macos_non_visible():
+    """Cobre _create_app para macOS não visível (S3270MacApp)."""
+    with patch(
+        'pyx3270.emulator.S3270MacApp', return_value=MagicMock()
+    ) as mock_s3270:
+        emulator = X3270(visible=False)
+
+    mock_s3270.assert_called_once_with(emulator.model)
+    assert emulator.app == mock_s3270.return_value
+
+
+@pytest.mark.usefixtures('mock_macos')
+def test_create_app_macos_does_not_read_linux_os_release(monkeypatch):
+    """No macOS não existe /etc/os-release; a detecção de distro Linux
+    não pode nem ser chamada (era o que quebrava antes do suporte)."""
+    monkeypatch.setattr(
+        'pyx3270.emulator.get_linux_distro_id',
+        MagicMock(side_effect=AssertionError('não deveria ser chamado')),
+    )
+    with patch('pyx3270.emulator.S3270MacApp', return_value=MagicMock()):
+        X3270(visible=False)
+    with patch('pyx3270.emulator.C3270MacApp', return_value=MagicMock()):
+        X3270(visible=True)
+
+
+def test_get_macos_binary_path_prefers_bundled_binary(monkeypatch):
+    monkeypatch.setattr('os.path.isfile', lambda path: True)
+    monkeypatch.setattr(
+        'shutil.which',
+        MagicMock(side_effect=AssertionError('não deveria consultar PATH')),
+    )
+
+    assert get_macos_binary_path('s3270') == os.path.join(
+        BINARY_FOLDER, 'macos', 's3270'
+    )
+
+
+def test_get_macos_binary_path_restores_exec_bit(monkeypatch, tmp_path):
+    """Binário embutido sem bit de execução (ex.: commit feito no
+    Windows) ganha chmod 755 antes de ser usado."""
+    fake_bin = tmp_path / 'macos' / 's3270'
+    fake_bin.parent.mkdir()
+    fake_bin.write_bytes(b'#!/bin/sh\n')
+    fake_bin.chmod(0o644)
+    monkeypatch.setattr('pyx3270.emulator.BINARY_FOLDER', str(tmp_path))
+
+    assert get_macos_binary_path('s3270') == str(fake_bin)
+    assert os.access(fake_bin, os.X_OK)
+
+
+@pytest.mark.parametrize(
+    ('mac_release', 'expect_bundled'),
+    [
+        ('26.0.1', True),
+        ('11.0', True),
+        ('10.15.7', False),
+        ('', True),  # mac_ver() vazio (ex.: rodando fora do macOS)
+    ],
+)
+def test_get_macos_binary_path_checks_min_macos_version(
+    monkeypatch, mac_release, expect_bundled
+):
+    monkeypatch.setattr('os.path.isfile', lambda path: True)
+    monkeypatch.setattr(
+        'platform.mac_ver', lambda: (mac_release, ('', '', ''), '')
+    )
+    monkeypatch.setattr('shutil.which', lambda name: '/opt/homebrew/bin/x')
+    monkeypatch.setattr('pyx3270.emulator._ensure_executable', lambda p: None)
+
+    result = get_macos_binary_path('s3270')
+
+    if expect_bundled:
+        assert result == os.path.join(BINARY_FOLDER, 'macos', 's3270')
+    else:
+        assert result == '/opt/homebrew/bin/x'
+
+
+def test_get_macos_binary_path_falls_back_to_path(monkeypatch, caplog):
+    monkeypatch.setattr('os.path.isfile', lambda path: False)
+    monkeypatch.setattr(
+        'shutil.which', lambda name: f'/opt/homebrew/bin/{name}'
+    )
+
+    with caplog.at_level('WARNING'):
+        assert get_macos_binary_path('c3270') == '/opt/homebrew/bin/c3270'
+
+    assert any('binário do sistema' in msg for msg in caplog.messages)
+
+
+def test_get_macos_binary_path_raises_when_missing(monkeypatch):
+    monkeypatch.setattr('os.path.isfile', lambda path: False)
+    monkeypatch.setattr('shutil.which', lambda name: None)
+
+    with pytest.raises(FileNotFoundError) as exc_info:
+        get_macos_binary_path('s3270')
+
+    error_msg = str(exc_info.value)
+    assert "'s3270'" in error_msg
+    assert 'brew install x3270' in error_msg
+
+
+def test_bundled_macos_binaries_are_present():
+    """Os binários universais (arm64 + x86_64) precisam vir no pacote."""
+    for name in ('s3270', 'c3270'):
+        path = os.path.join(BINARY_FOLDER, 'macos', name)
+        assert os.path.isfile(path), path
+        assert os.access(path, os.X_OK), path
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen', 'mock_macos')
+def test_s3270macapp_init(mock_subprocess_popen):
+    """S3270MacApp usa o binário de bin/macos e passa os args de fato
+    (shell=False), inclusive o modelo."""
+    app = S3270MacApp(model='3')
+
+    assert app.shell is False
+    mock_subprocess_popen.assert_called_once()
+    args, kwargs = mock_subprocess_popen.call_args
+    assert args[0][0] == os.path.join(BINARY_FOLDER, 'macos', 's3270')
+    assert args[0][1:] == [
+        '-xrm',
+        's3270.unlockDelay:False',
+        '-xrm',
+        '*model:3',
+        '-utf8',
+    ]
+    assert kwargs['shell'] is False
+    assert kwargs['start_new_session'] is True
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen', 'mock_socket', 'mock_macos')
+def test_c3270macapp_init_does_not_spawn(mock_subprocess_popen):
+    """O c3270 só pode subir com o host na linha de comando, então
+    nada é executado na construção."""
+    SCRIPT_PORT = 12345
+    with patch(
+        'pyx3270.emulator.C3270MacApp._get_free_port',
+        return_value=SCRIPT_PORT,
+    ):
+        app = C3270MacApp(model='4')
+
+    mock_subprocess_popen.assert_not_called()
+    assert app.shell is False
+    assert app.subprocess is None
+    assert app.command_file is None
+    assert app.script_port == SCRIPT_PORT
+    assert app.args[0] == os.path.join(BINARY_FOLDER, 'macos', 'c3270')
+    assert '-xrm' in app.args
+    assert 'c3270.unlockDelay:False' in app.args
+    assert '*model:4' in app.args
+    assert '-utf8' in app.args
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen', 'mock_socket', 'mock_macos')
+def test_c3270macapp_connect(mock_subprocess_popen, mock_socket, tmp_path):
+    """connect gera um .command executável com o c3270 + host, abre
+    no Terminal.app via `open` e conecta o socket na porta de script."""
+    mock_sock_instance = mock_socket.return_value
+    mock_process = mock_subprocess_popen.return_value
+    mock_process.communicate.return_value = (b'', b'')
+    mock_process.returncode = 0
+    SCRIPT_PORT = 12345
+    with patch(
+        'pyx3270.emulator.C3270MacApp._get_free_port',
+        return_value=SCRIPT_PORT,
+    ), patch('tempfile.gettempdir', return_value=str(tmp_path)):
+        app = C3270MacApp(model='2')
+
+        result = app.connect('L:Y:myhost.com:992')
+
+    assert result is True
+    args, _ = mock_subprocess_popen.call_args
+    assert args[0][:3] == ['open', '-a', 'Terminal']
+    command_file = args[0][3]
+    assert command_file == app.command_file
+    assert command_file.endswith('.command')
+    assert os.access(command_file, os.X_OK)
+
+    content = open(command_file, encoding='utf-8').read()
+    assert content.startswith('#!/bin/sh\n')
+    assert 'exec ' in content
+    assert os.path.join('macos', 'c3270') in content
+    assert '-scriptport 12345' in content
+    assert 'L:Y:myhost.com:992' in content
+    assert "'*model:2'" in content  # argumento com glob precisa ser citado
+
+    mock_process.communicate.assert_called_once()
+    mock_socket.assert_called_with(socket.AF_INET, socket.SOCK_STREAM)
+    mock_sock_instance.connect.assert_called_once_with((
+        'localhost',
+        SCRIPT_PORT,
+    ))
+    mock_sock_instance.makefile.assert_called_once_with(mode='rwb')
+
+    app.close()
+    mock_sock_instance.close.assert_called_once()
+    assert not os.path.exists(command_file)
+    assert app.command_file is None
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen', 'mock_socket', 'mock_macos')
+def test_c3270macapp_connect_open_failure_raises(
+    mock_subprocess_popen, mock_socket, tmp_path
+):
+    """Se o `open` falhar (ex.: Terminal.app indisponível), connect
+    levanta NotConnectedException com o stderr, sem tentar o socket."""
+    mock_process = mock_subprocess_popen.return_value
+    mock_process.communicate.return_value = (
+        b'',
+        b'Unable to find application named Terminal\n',
+    )
+    mock_process.returncode = 1
+    with patch(
+        'pyx3270.emulator.C3270MacApp._get_free_port', return_value=12345
+    ), patch('tempfile.gettempdir', return_value=str(tmp_path)):
+        app = C3270MacApp(model='2')
+
+        with pytest.raises(NotConnectedException, match='Terminal'):
+            app.connect('myhost.com')
+
+    mock_socket.return_value.connect.assert_not_called()
+
+
+@pytest.mark.usefixtures('mock_subprocess_popen', 'mock_socket', 'mock_macos')
+def test_c3270macapp_connect_retries_socket_more_than_wc3270(
+    mock_subprocess_popen, mock_socket, monkeypatch, tmp_path
+):
+    """Terminal.app frio demora para subir: mais tentativas de socket."""
+    monkeypatch.setattr('time.sleep', lambda x: None)
+    mock_process = mock_subprocess_popen.return_value
+    mock_process.communicate.return_value = (b'', b'')
+    mock_process.returncode = 0
+    mock_sock_instance = mock_socket.return_value
+    mock_sock_instance.connect.side_effect = socket.error(
+        errno.ECONNREFUSED, 'Connection refused'
+    )
+    with patch(
+        'pyx3270.emulator.C3270MacApp._get_free_port', return_value=12345
+    ), patch('tempfile.gettempdir', return_value=str(tmp_path)):
+        app = C3270MacApp(model='2')
+        app.connect('myhost.com')
+
+    assert (
+        C3270MacApp.socket_connect_attempts > Wc3270App.socket_connect_attempts
+    )
+    assert (
+        mock_sock_instance.connect.call_count
+        == C3270MacApp.socket_connect_attempts
+    )
+
+
+@pytest.mark.usefixtures('mock_socket', 'mock_macos')
+def test_c3270macapp_close_without_connect_does_not_raise():
+    with patch(
+        'pyx3270.emulator.C3270MacApp._get_free_port', return_value=12345
+    ):
+        app = C3270MacApp(model='2')
+
+    app.close()  # sem socket nem .command: não pode estourar
 
 
 @pytest.mark.usefixtures('x3270_cmd_instance')

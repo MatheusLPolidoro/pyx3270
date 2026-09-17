@@ -30,7 +30,9 @@ Changelog gerenciado com `towncrier`: fragmentos em `chanlogs.d/`, categorias ma
 - `ExecutableApp` (em `emulator.py`) faz `subprocess.Popen` do binário certo conforme SO/visibilidade:
   - Windows + visível → `Wc3270App` (fala com o processo via **socket TCP** em porta livre, `-scriptport`)
   - Windows + invisível → `Ws3270App` (fala via **stdin/stdout pipes**)
-  - Linux + visível → `X3270App` / Linux + invisível → `S3270App` (ambos via pipes)
+  - Linux + visível → `X3270App` / Linux + invisível → `S3270App` (ambos via pipes; binário escolhido por distro via `/etc/os-release`, ver `LINUX_SUPPORTED_DISTROS`)
+  - macOS (`sys.platform == 'darwin'`) + visível → `C3270MacApp` (abre o `c3270` em uma janela nova do Terminal.app via `open -a Terminal <arquivo .command>` e fala via **socket TCP**, `-scriptport`, como o wc3270) / macOS + invisível → `S3270MacApp` (pipes). Binários em `pyx3270/bin/macos/`, com fallback para o `PATH` (`brew install x3270`) se o embutido não existir (`get_macos_binary_path`).
+  - `ScriptPortApp` é a base comum de `Wc3270App` e `C3270MacApp` (porta livre, socket com retentativas, `write`/`readline`/`close` via socket).
 - `Command` encapsula o protocolo texto do scripting interface do x3270: escreve `"Comando(args)\n"`, lê linhas `data: ...` até uma linha de status (12 campos, parseada por `Status`), seguida de `ok`/mensagem de erro. Erros com "keyboard locked"/"canceled" viram `KeyboardStateError`; outros viram `CommandError`.
 - `X3270Cmd` usa `__getattr__` para despachar **qualquer** nome de método como um comando nativo do x3270 (`self.algumcomando(...)` → `"AlgumComando(args)"` enviado ao emulador). `x3270_commands.py::x3270_command` é o ponto central desse despacho, com regras especiais para `send_pf`/`pf` (aguarda unlock) e alias descontinuado `send_string_not_log` → `send_string(password=True)`.
 - `X3270` (classe pública principal, exportada em `pyx3270/__init__.py`) junta `AbstractEmulator` + `X3270Cmd`, gerencia ciclo de vida (`connect_host`, `reconnect_host`, `terminate`, `is_connected` — considera desconectado após 600s de inatividade) e helpers de tela (`get_string`, `get_full_screen`, `search_string`, `get_string_positions`, limites de linha/coluna por modelo de terminal em `MODEL_DIMENSIONS`).
@@ -78,3 +80,16 @@ Guardrail de lint: `ruff` inclui a categoria `G` (`flake8-logging-format`), que 
 
 - Binários nativos (`pyx3270/bin/**`) e o hook do PyInstaller (`pyx3270/hook/hook-pyx3270.py`) são incluídos via `package-data` e registrados como plugin `pyinstaller40` (`hook-dirs = "pyx3270.hook:get_hook_dirs"`) — necessário para que aplicações empacotadas com PyInstaller que usam `pyx3270` consigam localizar os binários (`get_binary_path` em `emulator.py` trata o caso `sys._MEIPASS`).
 - Suporta Python `>=3.8,<=3.14`.
+- Binários macOS (`pyx3270/bin/macos/s3270` e `c3270`): universais (arm64 + x86_64), suíte x3270 4.5ga6, TLS via Secure Transport nativo (sem OpenSSL), `-mmacosx-version-min=11.0`, assinados ad-hoc. Receita de rebuild a partir do `suite3270-<versão>-src.tgz` oficial (sourceforge, mesmo tarball da fórmula Homebrew):
+
+  ```bash
+  env -u HOMEBREW ./configure --enable-s3270 --enable-c3270 --disable-x3270 \
+    --disable-tcl3270 --disable-pr3287 --disable-b3270 --disable-x3270if \
+    --disable-playback --disable-mitm --enable-stransport --with-readline=no \
+    CFLAGS="-O2 -arch arm64 -arch x86_64 -mmacosx-version-min=11.0" \
+    LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=11.0"
+  make -j8   # saída em obj/<arch>-apple-darwin*/{s3270,c3270}/
+  strip s3270 c3270 && codesign --force --sign - s3270 c3270
+  ```
+
+  `--with-readline=no` evita dependência do readline do Homebrew (só afeta a edição de linha no prompt interativo do c3270, não usada pelo pyx3270). Conferir com `otool -L` que só há frameworks/libs do sistema.
