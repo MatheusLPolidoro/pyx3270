@@ -1,3 +1,10 @@
+Versão 0.1.24 (2026-09-17)
+
+### :zap: NOVAS FUNCIONALIDADES
+
+- Adicione suporte a macOS (Apple Silicon e Intel). Binários universais `s3270` e `c3270` (suíte x3270 4.5ga6, TLS via Secure Transport nativo, sem dependência de OpenSSL/Homebrew) passam a vir em `pyx3270/bin/macos/`. `X3270(visible=False)` usa o `s3270` via pipes (como no Linux) e `X3270(visible=True)` abre o `c3270` em uma janela nova do Terminal.app, controlado por socket local (`-scriptport`), como o `wc3270` no Windows. Antes, qualquer uso no macOS falhava com `UnsupportedDistroError` ao tentar ler `/etc/os-release`.
+
+
 Versão 0.1.23 (2026-07-23)
 
 ### :bug: CORREÇÕES
