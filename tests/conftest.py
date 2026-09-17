@@ -103,8 +103,16 @@ def mock_socket(autouse=True):
 
 @pytest.fixture
 def mock_os_name(monkeypatch):
-    """Fixture para mockar os.name."""
+    """Fixture para mockar os.name (e sys.platform) como Linux."""
     monkeypatch.setattr('os.name', 'posix')
+    monkeypatch.setattr('sys.platform', 'linux')
+
+
+@pytest.fixture
+def mock_macos(monkeypatch):
+    """Fixture para simular macOS (os.name posix + sys.platform darwin)."""
+    monkeypatch.setattr('os.name', 'posix')
+    monkeypatch.setattr('sys.platform', 'darwin')
 
 
 @pytest.fixture

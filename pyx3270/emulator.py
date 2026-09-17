@@ -2,10 +2,14 @@ import errno
 import logging.config
 import math
 import os
+import platform
 import re
+import shlex
+import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import threading
 from contextlib import closing
 from functools import cache
@@ -110,6 +114,85 @@ def get_linux_binary_path(*parts: str) -> str:
         raise UnsupportedDistroError(error_msg)
 
     return os.path.join(BINARY_FOLDER, 'linux', *distro_subpath, *parts)
+
+
+MACOS_BINARY_SUBFOLDER = 'macos'
+# Versão mínima do macOS com que os binários embutidos foram compilados
+# (-mmacosx-version-min); abaixo disso o sistema se recusa a executá-los.
+MACOS_BUNDLED_MIN_VERSION = (11, 0)
+MACOS_INSTALL_HINT = (
+    "instale a suíte x3270 pelo Homebrew ('brew install x3270') para que "
+    'o binário fique disponível no PATH'
+)
+
+
+def _ensure_executable(path: str) -> None:
+    # O bit de execução pode se perder no caminho até o pacote instalado
+    # (commit feito no Windows, wheel gerado sem preservar o modo etc.);
+    # recuperá-lo é melhor esforço, o Popen acusa se não der.
+    if os.access(path, os.X_OK):
+        return
+    try:
+        os.chmod(path, 0o755)
+        logger.warning('Bit de execução restaurado em %s', path)
+    except OSError as e:
+        logger.warning(
+            'Binário %s sem permissão de execução e não foi possível '
+            'corrigir: %s',
+            path,
+            e,
+        )
+
+
+def _macos_supports_bundled_binary() -> bool:
+    release = platform.mac_ver()[0]
+    try:
+        version = tuple(int(part) for part in release.split('.')[:2])
+    except ValueError:
+        logger.debug('Versão do macOS não reconhecida: %r', release)
+        return True
+    if version < MACOS_BUNDLED_MIN_VERSION:
+        logger.warning(
+            'macOS %s é anterior ao %s.%s exigido pelos binários embutidos',
+            release,
+            *MACOS_BUNDLED_MIN_VERSION,
+        )
+        return False
+    return True
+
+
+def get_macos_binary_path(*parts: str) -> str:
+    """Localiza um binário da suíte x3270 para macOS.
+
+    Prefere o binário universal (arm64 + x86_64) embutido em
+    ``pyx3270/bin/macos/``; se ele não existir no pacote instalado (ou o
+    macOS for antigo demais para executá-lo), cai para um binário de
+    mesmo nome disponível no PATH (ex.: instalado via
+    ``brew install x3270``).
+    """
+    bundled = os.path.join(BINARY_FOLDER, MACOS_BINARY_SUBFOLDER, *parts)
+    if os.path.isfile(bundled) and _macos_supports_bundled_binary():
+        _ensure_executable(bundled)
+        logger.debug('Usando binário macOS embutido: %s', bundled)
+        return bundled
+
+    binary_name = parts[-1]
+    system_binary = shutil.which(binary_name)
+    if system_binary:
+        logger.warning(
+            'Binário macOS embutido %s não encontrado; usando o binário '
+            'do sistema em %s',
+            bundled,
+            system_binary,
+        )
+        return system_binary
+
+    error_msg = (
+        f"Binário '{binary_name}' para macOS não encontrado em {bundled} "
+        f'nem no PATH; {MACOS_INSTALL_HINT}.'
+    )
+    logger.error(error_msg)
+    raise FileNotFoundError(error_msg)
 
 
 MODEL_TYPE = Literal['2', '3', '4', '5']
@@ -355,15 +438,16 @@ class Status:
         return f'Status: {self.status_line}'
 
 
-class Wc3270App(ExecutableApp):
-    args = ['-xrm', '"wc3270.unlockDelay: False"']
+class ScriptPortApp(ExecutableApp):
+    """Base para emuladores controlados por socket TCP local.
 
-    def __init__(self, model: MODEL_TYPE) -> None:
-        logger.info('Inicializando Wc3270App com modelo: %s', model)
-        self.args = self._get_executable_app_args(model)
-        self.script_port = Wc3270App._get_free_port()
-        logger.debug('Porta de script alocada: %s', self.script_port)
-        super().__init__(shell=True, model=model)
+    Usada pelos emuladores que abrem a própria janela (wc3270 no Windows,
+    c3270 no Terminal.app do macOS): em vez de stdin/stdout, o emulador
+    é iniciado com ``-scriptport <porta>`` e a interface de scripting
+    passa a ser um socket em ``localhost:<porta>``.
+    """
+
+    socket_connect_attempts = 5
 
     @staticmethod
     def _get_free_port() -> str:
@@ -387,7 +471,7 @@ class Wc3270App(ExecutableApp):
         self.socket = sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         count = 0
-        max_loop = 5
+        max_loop = self.socket_connect_attempts
         while count < max_loop:
             try:
                 logger.debug(
@@ -410,6 +494,13 @@ class Wc3270App(ExecutableApp):
                 )
                 sleep(1)
                 count += 1
+                # Um socket cujo connect() falhou não pode ser reaproveitado
+                # em sistemas BSD/macOS (a próxima tentativa retorna
+                # EINVAL); cada tentativa usa um socket novo.
+                sock.close()
+                self.socket = sock = socket.socket(
+                    socket.AF_INET, socket.SOCK_STREAM
+                )
                 if count >= max_loop:
                     logger.error(
                         'Falha ao conectar após %s tentativas', max_loop
@@ -417,25 +508,6 @@ class Wc3270App(ExecutableApp):
 
         self.socket_fh = sock.makefile(mode='rwb')
         logger.debug('File handle do socket criado')
-
-    def connect(self, host: str) -> bool:
-        logger.info('Conectando ao host: %s', host)
-        self.args = [
-            'start',
-            '/wait',
-            '""',
-            f'"{get_binary_path("windows", "wc3270")}"',
-        ] + self.args
-        self.args.extend(['-scriptport', str(self.script_port), host])
-        logger.debug('Argumentos completos: %s', self.args)
-
-        try:
-            self._spawn_app(' '.join(self.args))
-            self._make_socket()
-            return True
-        except Exception as e:
-            logger.error('Erro ao conectar ao host %s: %s', host, e)
-            raise
 
     def close(self) -> None:
         logger.info('Fechando conexão de socket')
@@ -470,6 +542,36 @@ class Wc3270App(ExecutableApp):
         except Exception as e:
             logger.error('Erro ao ler do socket: %s', e)
             raise NotConnectedException
+
+
+class Wc3270App(ScriptPortApp):
+    args = ['-xrm', '"wc3270.unlockDelay: False"']
+
+    def __init__(self, model: MODEL_TYPE) -> None:
+        logger.info('Inicializando Wc3270App com modelo: %s', model)
+        self.args = self._get_executable_app_args(model)
+        self.script_port = Wc3270App._get_free_port()
+        logger.debug('Porta de script alocada: %s', self.script_port)
+        super().__init__(shell=True, model=model)
+
+    def connect(self, host: str) -> bool:
+        logger.info('Conectando ao host: %s', host)
+        self.args = [
+            'start',
+            '/wait',
+            '""',
+            f'"{get_binary_path("windows", "wc3270")}"',
+        ] + self.args
+        self.args.extend(['-scriptport', str(self.script_port), host])
+        logger.debug('Argumentos completos: %s', self.args)
+
+        try:
+            self._spawn_app(' '.join(self.args))
+            self._make_socket()
+            return True
+        except Exception as e:
+            logger.error('Erro ao conectar ao host %s: %s', host, e)
+            raise
 
 
 class Ws3270App(ExecutableApp):
@@ -516,6 +618,116 @@ class S3270App(LinuxExecutableApp):
     def __init__(self, model: MODEL_TYPE) -> None:
         logger.info('Inicializando S3270App com modelo: %s', model)
         super().__init__(shell=True, model=model)
+
+
+class MacExecutableApp(ExecutableApp):
+    binary_name: str
+
+    def _get_executable_app_args(self, model: MODEL_TYPE) -> list:
+        return [
+            get_macos_binary_path(self.binary_name)
+        ] + super()._get_executable_app_args(model)
+
+
+class S3270MacApp(MacExecutableApp):
+    binary_name = 's3270'
+    args = [
+        '-xrm',
+        's3270.unlockDelay:False',
+    ]
+
+    def __init__(self, model: MODEL_TYPE) -> None:
+        logger.info('Inicializando S3270MacApp com modelo: %s', model)
+        super().__init__(shell=False, model=model)
+
+
+class C3270MacApp(ScriptPortApp, MacExecutableApp):
+    """Emulador visível no macOS.
+
+    Não existe x3270 (X11) no macOS sem XQuartz, então o modo visível
+    abre o c3270 (versão curses, mesma base do wc3270 do Windows) em uma
+    janela nova do Terminal.app e conversa com ele por socket TCP local
+    (``-scriptport``), exatamente como Wc3270App faz no Windows. O
+    Terminal.app é acionado via ``open -a Terminal <arquivo .command>``,
+    que não exige permissão de Automação (AppleScript) do macOS.
+    """
+
+    binary_name = 'c3270'
+    args = [
+        '-xrm',
+        'c3270.unlockDelay:False',
+    ]
+    # Mais tentativas que o wc3270: se o Terminal.app ainda não estiver
+    # aberto, a primeira janela pode levar alguns segundos para subir.
+    socket_connect_attempts = 20
+    open_timeout = 15
+
+    def __init__(self, model: MODEL_TYPE) -> None:
+        logger.info('Inicializando C3270MacApp com modelo: %s', model)
+        # Não chama ExecutableApp.__init__: ele dispararia o processo já
+        # na construção, mas o c3270 só pode ser aberto quando o host é
+        # conhecido (connect), pois o host vai na linha de comando.
+        self.shell = False
+        self.subprocess = None
+        self.command_file = None
+        self.script_port = self._get_free_port()
+        logger.debug('Porta de script alocada: %s', self.script_port)
+        self.args = self._get_executable_app_args(model)
+
+    @staticmethod
+    def _write_command_file(args: list) -> str:
+        # O Terminal.app executa arquivos .command em uma janela nova;
+        # é a forma de abrir um programa de terminal em janela própria
+        # sem AppleScript.
+        fd, path = tempfile.mkstemp(prefix='pyx3270-c3270-', suffix='.command')
+        with os.fdopen(fd, 'w', encoding='utf-8') as fh:
+            fh.write('#!/bin/sh\n')
+            fh.write(f'exec {shlex.join(args)}\n')
+        os.chmod(path, 0o700)
+        logger.debug('Arquivo .command gerado em %s', path)
+        return path
+
+    def connect(self, host: str) -> bool:
+        logger.info('Conectando ao host: %s', host)
+        self.args.extend(['-scriptport', str(self.script_port), host])
+        logger.debug('Argumentos completos: %s', self.args)
+
+        try:
+            self.command_file = self._write_command_file(self.args)
+            self._spawn_app(['open', '-a', 'Terminal', self.command_file])
+            # `open` só entrega o arquivo ao Terminal.app e termina; o
+            # c3270 em si segue vivo na janela aberta.
+            _, stderr = self.subprocess.communicate(timeout=self.open_timeout)
+            if self.subprocess.returncode != 0:
+                error_msg = (
+                    'Falha ao abrir o c3270 no Terminal.app (open retornou '
+                    f'{self.subprocess.returncode}): '
+                    f'{stderr.decode("utf-8", errors="replace").strip()}'
+                )
+                logger.error(error_msg)
+                raise NotConnectedException(error_msg)
+            self._make_socket()
+            return True
+        except Exception as e:
+            logger.error('Erro ao conectar ao host %s: %s', host, e)
+            raise
+
+    def close(self) -> None:
+        super().close()
+        self._remove_command_file()
+
+    def _remove_command_file(self) -> None:
+        if not self.command_file:
+            return
+        try:
+            os.remove(self.command_file)
+            logger.debug('Arquivo .command removido: %s', self.command_file)
+        except OSError as e:
+            logger.debug(
+                'Não foi possível remover %s: %s', self.command_file, e
+            )
+        finally:
+            self.command_file = None
 
 
 # Mapeamento de cor de campo 3270 (SF/SA aa=42) para código de cor
@@ -1131,6 +1343,13 @@ class X3270(AbstractEmulator, X3270Cmd):
                     return Wc3270App(self.model)
                 logger.debug('Criando Ws3270App (Windows, não visível)')
                 return Ws3270App(self.model)
+
+            if sys.platform == 'darwin':  # macos
+                if self.visible:
+                    logger.debug('Criando C3270MacApp (macOS, visível)')
+                    return C3270MacApp(self.model)
+                logger.debug('Criando S3270MacApp (macOS, não visível)')
+                return S3270MacApp(self.model)
 
             if self.visible:  # linux
                 logger.debug('Criando X3270App (Linux, visível)')

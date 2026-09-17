@@ -432,7 +432,9 @@ def test_record_handler_not_is_screen_tn3270():
         'pyx3270.server.is_screen_tn3270', return_value=False
     ) as mock_is_screen, patch(
         'pyx3270.server.connect_serversock', return_value=fake_server_sock
-    ), patch('select.select', side_effect=fake_select):
+    ), patch('select.select', side_effect=fake_select), patch(
+        'pyx3270.server.ensure_dir'  # '/screens' não é gravável no macOS
+    ):
         emu = MagicMock(spec=X3270)
         emu.tls = False
 
