@@ -1,3 +1,10 @@
+Versão 0.1.25 (2026-10-29)
+
+### :classical_building: INFRAESTRUTURA
+
+- Remova limite de versão do python utilizada de 3.14 para sem limites, para evitar incompatibilidade com novos projetos.
+
+
 Versão 0.1.24 (2026-09-17)
 
 ### :zap: NOVAS FUNCIONALIDADES
